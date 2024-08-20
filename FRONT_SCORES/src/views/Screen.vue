@@ -1,13 +1,17 @@
 <template>
-    <div style="background:#007">
-        <div v-if="showVerse" class="text-center animated v-container">
-            <p 
-                class="scripture " id="scripture"
+    <div id="screen-background">
+        <div class="text-center animated v-container" :class="classOut">
+            <p ref="scriptureText"
+                v-show="showVerse"
+                class="scripture"
+                id="scripture"
                 :class="scripture.reference.length == 0 ? 'breaks' :''">
                 {{scripture.text}}
                 
-                <br>
-                <span v-if="scripture.reference && scripture.reference.length > 0" class="gold" style="font-size:2.5rem">{{scripture.reference}}</span>
+                <template v-if="scripture.reference && scripture.reference.length > 0">
+                    <br>
+                    <span class="gold" style="font-size:2.5rem">{{scripture.reference}}</span>
+                </template>
             </p>
         </div>
     </div>
@@ -15,95 +19,111 @@
 
 <script>
 export default {
-sockets: {
-    connect: function () {
-        console.log('socket connected')
+    sockets: {
+        connect: function () {
+            console.log('socket connected');
+        },
+        text_change: function (data) {
+            this.classOut = "animated-out"
+            setTimeout(() => {            
+                this.showVerse = false;
+                this.classOut = ""
+                let text = data.text.replace("{\\i", '')
+                text = text.replace("}", '')
+                text = text.replace("\\par", '')
+                text = text.replace("\par", '')
+                text = text.replace("\\", '')
+                text = text.replace("{", '')
+                text = text.replace("cf6", '')
+                text = text.replace("{\\cf6", '')
+
+                this.scripture.text = text.trim();
+                this.scripture.reference = data.reference;
+                this.showVerse = true;
+
+                // Ajustar el tamaño de la fuente después de que el DOM se actualice
+                this.$nextTick(() => {
+                    this.adjustFontSize();
+                });
+            }, 300);
+        }
     },
-    text_change: function (data) {
-        this.showVerse=false
-        setTimeout(() => {            
-            let text = data.text.replace("{\\i", '')
-            text = text.replace("}", '')
-            text = text.replace("\\par", '')
-            text = text.replace("\par", '')
-            text = text.replace("\\", '')
-            text = text.replace("{", '')
-            text = text.replace("cf6", '')
-            text = text.replace("{\\cf6", '')
+    data: () => ({
+        scripture: { text: "", reference: "" },
+        showVerse: false,
+        classOut: "",
+    }),
+    methods: {
+        adjustFontSize() {
+            const el = this.$refs.scriptureText;
+            let fontSize = 7; // Tamaño inicial en vw
+            el.style.fontSize = `${fontSize}vw`;
 
-            this.scripture.text = text
-            this.scripture.reference = data.reference
-            this.showVerse=true
-        }, 300);
+            const containerWidth = el.parentElement.clientWidth;
+            const containerHeight = el.parentElement.clientHeight;
 
-        setTimeout(() => {         
-            const w = document.getElementById("scripture").clientWidth
-            const winW = window.innerWidth
-    
-            const percentage = w * 100 / winW
-            console.log(winW)
-            console.log(w)
-            console.log(percentage)
-
-            if (percentage > 95) {
-                console.log("reducing")
-                setTimeout(() => {                    
-                    document.getElementById("scripture").style.fontSize="3vw"
-                }, 300);
+            // Reducir el tamaño de la fuente hasta que el texto no se desborde con margen
+            while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 1) {
+                fontSize -= 0.5;
+                el.style.fontSize = `${fontSize}vw`;
             }
 
-        }, 500);
+            console.log("Final font size: ", fontSize + "vw");
+        }
     }
-},
-data:()=>({
-    scripture:{text:"", reference:""},
-    showVerse:false,
-})
-}
+};
 </script>
+
 <style lang="scss" scoped>
-.body{
-    background: rgb(26, 0, 51);
+.body {
     padding-left: 10%;    
     padding-right: 10%;    
     padding-top: 10%;    
     height: 100vh;
 }
 
-.v-container{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+#screen-background {
+    background: #113;
 }
 
-.scripture{
-    font-family: "Century Gothic";
-    font-weight: bold;    
+.v-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.scripture {
+    font-family: "Arial";    
     color: #ffffff;
-    width: 90vw;
+    width: auto;
     text-shadow: 0px 0px 4px #000;
-
-    font-size: 16px;
-    font-size: 4vw;
+    font-size: 7vw;
+    padding: 0 5%; /* Añadir un margen interno (padding) del 5% */
+    box-sizing: border-box; /* Asegura que el padding esté incluido en el tamaño total */
 }
 
-.reduce1{
-    font-size: 3.5vw;
-}
-
-.breaks{
+.breaks {
     white-space: pre;
 }
 
-
-.animated{    
-    animation-name: example;
-    animation-duration: 600ms;
+.animated {    
+    animation-name: fade-in;
+    animation-duration: 500ms;
 }
 
-@keyframes example {
-    0%   {opacity:0;}        
-    100% {opacity:1;}
+@keyframes fade-in {
+    0% { opacity: 0; }        
+    100% { opacity: 1; }
+}
+
+.animated-out{       
+    animation-name: fade-out;
+    animation-duration: 500ms;
+}
+
+@keyframes fade-out {
+    0% { opacity: 1; }        
+    100% { opacity: 0; }
 }
 </style>
