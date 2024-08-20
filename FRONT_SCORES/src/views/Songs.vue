@@ -46,15 +46,10 @@
             </div>
         </div>
     </div>
-
-    <div class="row mt-2 mb-3">
-        <div class="col-12">
-            <h1 class="white text-center">Lyrics & Scores</h1>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4" style="max-height:85vh; overflow:auto; ">
+    
+    <div class="row mt-2">
+        <div class="col-4 mb-4" style="max-height:96vh; overflow:auto; ">
+            <!-- SEARCH - ADD NEW -->
             <div class="row">
                 <div class="col-12">
                     <h6 class="white text-center mb-4">TODOS LOS CANTOS</h6>                    
@@ -76,40 +71,56 @@
                     <button class="btn btn-outline-warning" data-toggle="modal" data-target="#addNewModal">+ Agregar Nuevo</button>                
                 </div>
             </div>
-
+            
             <!-- First List "all songs" -->
+            <h1 data-toggle="modal" data-target="#modifyModal" id="triggerModal" ref="triggerModal"></h1>
+            <div class="row mt-3">
+                <div class="col-lg-4 col-md-6 col-sm-12" v-for="(song, i) in filteredSongs" style="padding: 8px;">
+                    <SongItem @selected="addSong(song)" :type="'gold'"
+                              @edit="showSongDetails(song.id)" :showEdit="true"                            
+                              :key="song.id" :song="song"/>
+                    
+                </div>               
+            </div>
 
-            <div v-for="(song) in filteredSongs" :key="song.id"                 
+
+            <!-- <div v-for="(song) in filteredSongs" :key="song.id"                 
                 class="mt-3 mb-2 p-2 bg-gold white zoom" style="cursor:pointer">
                 <div class="row">
-                    <div class="col">                        
+                    <div class="col" >                        
                         <img src="@/assets/pen.png" alt="belen" class="mt-1" style="cursor:pointer;" height="15"
                             @click="showSongDetails(song.id)" data-toggle="modal" data-target="#modifyModal">                        
-                        
-                        <!-- <img src="@/assets/trash.png" alt="belen" class="mt-3" style="cursor:pointer;" height="15"
-                            @click=""> -->
                     </div>
                     <div class="col-8" @click="addSong(song)">
-                        <h5 class="text-uppercase" style="text-shadow:0px 0px 8px #000">{{ song.title }}</h5> 
-                        <!-- <p style="white-space: nowrap; width: 100%; overflow: hidden; text-overflow: ellipsis;" 
-                            v-if="song.lyrics && song.lyrics.indexOf('*')>-1">
-                            {{song.lyrics.split('*')[0]}}
-                        </p> -->
+                        <h5 class="text-uppercase" style="text-shadow:0px 0px 8px #000">{{ song.title }}</h5>                         
                     </div>
                     <div class="col">
                         <img src="@/assets/arrow.png" alt="belen" class="mt-3 img-fluid" style="cursor:pointer;"
                             @click="addSong(song)"> <br>                        
                     </div>
                 </div>
-            </div>
+            </div> -->
 
         </div>
 
-        <div class="col-md-4" style="max-height:85vh; overflow:auto; ">
+        <div class="col-4" style="max-height:96vh; overflow:auto; ">
             <div class="col-12">
                 <h6 class="white text-center mb-4">LISTADO</h6>                    
             </div>
-            <div v-for="(song,i) in worshipList" :key="song.id"            
+
+            <div class="row mt-3">
+                <div class="col-md-4" v-for="(song, i) in worshipList"  style="position: relative;">
+                    <SongItem @selected="inputSong=song.lyrics; songTitle=song.title" 
+                              @remove="removeFromList(i)" @edit="showSongDetails(song.id)" 
+                              :showEdit="true" :showDelete="true"
+                              :type="'dark'" :key="song.id" :song="song"/>
+                </div>               
+                
+                <button id="clear-btn" @click="cleanScreen()">Limpiar</button>
+            </div>
+
+            
+            <!-- <div v-for="(song,i) in worshipList" :key="song.id"            
                 class="mt-3 mb-2 p-2 bg-darker white animated zoom">
                 <div class="row">
                     <div class="col">
@@ -128,22 +139,20 @@
                         @click="inputSong=song.lyrics; songTitle=song.title">
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
-        <div class="col-md-4" style="max-height:85vh; overflow:auto; ">
+        <div class="col-4" style="max-height:96vh; overflow:auto; ">
              <div class="col-12">
                 <h6 class="white text-center mb-4">TRANSMISIÓN</h6>                    
             </div>
-
-            <div>
-                <div class="border p-3 m-3 rounded border border-warning white zoom" v-for="(verse, i) in verses" :key="verse.id"
-                    :class="selectedVerse == i+1 ? 'active' : ''"  style="cursor:pointer"
-                    @click="showVerse(verse,i)">
-                    <strong>ESTROFA #{{i+1}}</strong> <br>
-                    {{verse}}
-                </div>
-            </div>
+            
+            <div class="border p-3 m-3 rounded border border-warning white zoom paragraph" v-for="(verse, i) in verses" :key="verse.id"
+                :class="selectedVerse == i+1 ? 'active' : ''"  style="cursor:pointer"
+                @click="showVerse(verse,i)">
+                <strong>ESTROFA #{{i+1}}</strong> <br>
+                {{verse}}
+            </div>            
         </div>
     </div>
   </div>
@@ -152,8 +161,10 @@
 <script>
 
 import SongsData from "@/assets/songs.json" 
+import SongItem from "../components/SongItem.vue";
 
 export default {
+    components: { SongItem},
     data:()=>({
         inputSong:"",
         allSongs:[],
@@ -235,6 +246,7 @@ export default {
                 const url = this.url + "song/" + id                 
                 const req = await fetch(url,)
                 this.selectedSong = await req.json()                
+                this.$refs["triggerModal"].click()
             } catch (error) {
                 alert(error)
             }
@@ -288,8 +300,8 @@ export default {
             }
         },
 
-        async addSong(song){
-            const found = this.worshipList.findIndex(s=> s.id == song.id)
+        async addSong(song){            
+            const found = this.worshipList.findIndex(s=> s.id == song.id)            
             if (found > -1){
                 this.worshipList[found] = song
                 return
@@ -301,6 +313,15 @@ export default {
             const opts = {method:"POST", headers: {'Content-Type': 'application/json'}, body: JSON.stringify(song)}
             await fetch(url, opts)
                 
+        },
+
+        async cleanScreen(){
+            this.selectedVerse = 0
+            let data = {}
+            data.text = ""
+            data.reference = ""
+            data.title = ""
+            this.$socket.emit("song_change", data)
         }
     }
 }
@@ -327,5 +348,24 @@ export default {
     @keyframes example {
         0%   {top:100px;}        
         100% {top:0px;}
+    }
+
+    .paragraph {
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; 
+    }
+
+    #clear-btn{
+        position: fixed;
+        bottom: .5rem;        
+        width: auto;   
+        left: 45%;
+        padding:  8px 32px;
+        border: none;
+        border-radius: 32px;
+        background-color: #4f5360;        
+        color:#fff;
+        
     }
 </style>

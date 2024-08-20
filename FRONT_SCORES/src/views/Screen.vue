@@ -83,7 +83,8 @@ export default {
 }
 
 #screen-background {
-    background: #113;
+    background: linear-gradient(45deg, #001, #113);
+    // background: #113;
 }
 
 .v-container {
