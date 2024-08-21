@@ -31,7 +31,7 @@ export default {
                 let text = data.text.replace("{\\i", '')
                 text = text.replace("}", '')
                 text = text.replace("\\par", '')
-                text = text.replace("\par", '')
+                // text = text.replace("\par", '')
                 text = text.replace("\\", '')
                 text = text.replace("{", '')
                 text = text.replace("cf6", '')
