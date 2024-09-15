@@ -63,7 +63,7 @@ export default {
             const containerHeight = el.parentElement.clientHeight;
 
             // Reducir el tamaño de la fuente hasta que el texto no se desborde con margen
-            while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 1) {
+            while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 3) {
                 fontSize -= 0.5;
                 el.style.fontSize = `${fontSize}vw`;
             }

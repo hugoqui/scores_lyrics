@@ -74,4 +74,17 @@ body, html{
 .btn:hover, .btn:focus {
   color: lighten($color: $gold, $amount: 10);
 }
+
+#clear-btn{
+    position: fixed;
+    bottom: .5rem;        
+    width: auto;   
+    left: 45%;
+    padding:  8px 32px;
+    border: none;
+    border-radius: 32px;
+    background-color: #4f5360;        
+    color:#fff;
+    z-index: 999;
+}
 </style>

@@ -3,13 +3,14 @@
       
     <div class="row">
       <div class="col">
+        <button id="clear-btn" @click="cleanScreen()">Limpiar</button>
         <!-- <input type="text" v-model="searchedBook" placeholder="Libro" list="books" autocomplete="on">
         <datalist id="books">
           <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{book.likeName}}</option>
         </datalist> -->
       </div>
 
-      <form  @submit.prevent="searchVerse()" class="col-3">
+      <form  @submit.prevent="searchVerse()" class="col-md-6">
         <div class="input-group">
           <input v-model="searchedText" type="text" class="form-control" placeholder="buscar... " >
           <div class="input-group-append">
@@ -29,6 +30,7 @@
     </div>
 
     <div class="row mt-3">
+      <!-- LIBROS -->
       <div class="col-4" style="height:72vh; overflow-y:auto">
         <div class="row">
           <div class="col-4" v-for="book in books" :key="book.id" 
@@ -41,8 +43,9 @@
         </div>
       </div>
       
+      <!-- CAPITULOS -->
       <div class="col">
-        <div style="height:72vh; overflow-y:auto; border-left:1px solid #FFCD30; border-right:1px solid #FFCD30;" class="row">
+        <div style="max-height:72vh; overflow-y:auto; border-left:1px solid #FFCD30; border-right:1px solid #FFCD30;" class="row">
           <div class="col-4" v-for="chapter in chapters" :key="chapter.id" >
             <div class="p-3  text-center h4  " style="cursor:pointer"
                 :class="selectedChapter == chapter.chapter ? 'bg-gold dark' : 'bg-darker white'" 
@@ -54,7 +57,7 @@
       </div>
       
       <div class="col">
-        <div style="height:72vh; overflow-y:auto" class="row">
+        <div style="max-height:72vh; overflow-y:auto" class="row">
           <div class="col-4" v-for="verse in verses" :key="verse.id" >            
             <div class="p-3 text-center h4" style="cursor:pointer"
                 :class="selectedVerse == verse.verse ? 'bg-gold dark' : 'bg-darker white'" 
@@ -195,6 +198,15 @@ export default {
         console.log("prev...")
         this.showVerse(this.selectedVerse-1)        
       }
+    },
+
+    async cleanScreen(){
+        this.selectedVerse = 0
+        let data = {}
+        data.text = ""
+        data.reference = ""
+        data.title = ""
+        this.$socket.emit("song_change", data)
     }
   }
 }

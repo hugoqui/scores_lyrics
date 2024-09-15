@@ -17,8 +17,8 @@
                 <textarea type="text" class="form-control m-1" v-model="newSong.lyrics" rows="10" placeholder="Separe las estrofas con *"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" @click="createSong()" data-dismiss="modal">Guardar</button>
+                <button type="button" class="btn btn-secondary" @click="modalVisible=false;" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" @click="modalVisible=false;createSong()" data-dismiss="modal">Guardar</button>
             </div>
             </div>
         </div>
@@ -40,14 +40,18 @@
                 <textarea type="text" class="form-control m-1" v-model="selectedSong.lyrics" rows="10" placeholder="Separe las estrofas con *"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" @click="saveChanges()" data-dismiss="modal">Guardar</button>
+                <button type="button" class="btn btn-secondary" @click="modalVisible=false;" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" @click="modalVisible=false;saveChanges()" data-dismiss="modal">Guardar</button>
             </div>
             </div>
         </div>
     </div>
     
     <div class="row mt-2">
+        <div class="col-12">
+            <div class="text-white">A!!! {{ selectedVerse }}</div>
+        </div>        
+
         <div class="col-4 mb-4" style="max-height:96vh; overflow:auto; ">
             <!-- SEARCH - ADD NEW -->
             <div class="row">
@@ -68,7 +72,7 @@
 
             <div class="row">
                 <div class="col-6">
-                    <button class="btn btn-outline-warning" data-toggle="modal" data-target="#addNewModal">+ Agregar Nuevo</button>                
+                    <button @clikc="modalVisible=true" class="btn btn-outline-warning" data-toggle="modal" data-target="#addNewModal">+ Agregar Nuevo</button>                
                 </div>
             </div>
             
@@ -183,6 +187,7 @@ export default {
         selectedSong:{},
 
         songTitle: "",
+        modalVisible:false
 
     }),
     watch:{
@@ -226,6 +231,7 @@ export default {
             data.text = verse
             data.reference = ""
             data.title = this.songTitle
+            console.log("enviando a socket ... ", data )
             this.$socket.emit("song_change", data)
         },
 
@@ -290,7 +296,10 @@ export default {
         },
 
         nextItem(event){
-            const i = this.selectedVerse
+            console.log(this.verses)
+           if (this.modalVisible) return
+
+           const i = this.selectedVerse
            if (event.keyCode ===40) {
                 console.log("next...")
                 this.showVerse(this.verses[i], i )
@@ -354,18 +363,5 @@ export default {
         -webkit-user-select: none; /* Safari */
         -ms-user-select: none; /* IE 10 and IE 11 */
         user-select: none; 
-    }
-
-    #clear-btn{
-        position: fixed;
-        bottom: .5rem;        
-        width: auto;   
-        left: 45%;
-        padding:  8px 32px;
-        border: none;
-        border-radius: 32px;
-        background-color: #4f5360;        
-        color:#fff;
-        
     }
 </style>
