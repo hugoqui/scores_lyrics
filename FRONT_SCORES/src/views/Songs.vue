@@ -109,7 +109,7 @@
             </div>
 
             <div class="row mt-3">
-                <div class="col-md-4" v-for="(song, i) in worshipList"  style="position: relative;">
+                <div class="col-lg-4 col-md-6 col-sm-12" v-for="(song, i) in worshipList"  style="position: relative;">
                     <SongItem @selected="inputSong=song.lyrics; songTitle=song.title" 
                               @remove="removeFromList(i)" @edit="showSongDetails(song.id)" 
                               :showEdit="true" :showDelete="true"
