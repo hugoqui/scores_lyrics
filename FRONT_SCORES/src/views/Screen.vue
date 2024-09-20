@@ -107,7 +107,7 @@ export default {
 }
 
 .scripture {
-    font-family: "Arial";    
+    font-family: "Montserrat";    
     color: #ffffff;
     width: auto;
     text-shadow: 0px 0px 4px #000;
@@ -115,6 +115,7 @@ export default {
     padding: 0.5rem 5%; /* Añadir un margen interno (padding) del 5% */
     box-sizing: border-box; /* Asegura que el padding esté incluido en el tamaño total */    
     text-shadow: 4px 4px 8px rgba($color: #000, $alpha: 0.9);
+    font-weight: bold;
 }
 
 .breaks {
