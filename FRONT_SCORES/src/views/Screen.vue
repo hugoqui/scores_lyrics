@@ -59,22 +59,11 @@ export default {
             const el = this.$refs.scriptureText;
             let fontSize = 7; // Tamaño inicial en vw
             el.style.fontSize = `${fontSize}vw`;
-
-            const containerWidth = el.parentElement.clientWidth;
             const containerHeight = el.parentElement.clientHeight;
-
-            // console.log("containerWidth", containerWidth)
-            // console.log("el.scrollWidth", el.scrollWidth)
-
-            // console.log("containerHeight", containerHeight)
-            // console.log("el.scrollHeight", el.scrollHeight)
-
-            
-
             // Reducir el tamaño de la fuente hasta que el texto no se desborde con margen
             // while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 3) {
-            while ((el.scrollHeight > containerHeight) && fontSize > 3) {
-                fontSize -= 0.5;
+            while ((el.scrollHeight > containerHeight) && fontSize > 2) {
+                fontSize -= 0.25;
                 el.style.fontSize = `${fontSize}vw`;
             }
 
@@ -95,7 +84,9 @@ export default {
 }
 
 #screen-background {
-    background: linear-gradient(180deg, rgb(20, 20, 54), rgb(21, 26, 37));
+    background: rgb(13,81,161);
+    background: radial-gradient(circle, rgba(13,81,161,1) 33%, rgba(2,0,36,1) 100%);
+    // background: linear-gradient(180deg, rgb(20, 20, 54), rgb(21, 26, 37));
     // background: #113;
 }
 
