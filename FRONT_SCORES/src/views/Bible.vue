@@ -1,70 +1,75 @@
 <template>
-  <div class="container-fluid mt-2 mb-5">
+  <div class="container-fluid mt-5 mb-5 rounded shadow-lg" style="max-width: 1200px; background-color: rgba(0,0,0,0.1);">  
       
     <div class="row">
       <div class="col">
         <button id="clear-btn" @click="cleanScreen()">Limpiar</button>
       </div>
-
-      <form  @submit.prevent="searchVerse()" class="col-md-6">
-        <div class="input-group">
-          <input v-model="searchedText" type="text" class="form-control" placeholder="buscar... " >
-          <div class="input-group-append">
-            <button type="submit" class="btn bg-darker gold">buscar</button>
-          </div>
+    </div>
+     
+    <div class="row my-4">
+      <div class="col-12">
+        <h1 class="gold text-center mb-4 font-weight-bold">Biblia - RV60</h1>
+      </div>
+      <!-- BUSCAR VERSO -->
+      <div class="col-md-6 p-3">        
+        <div class="shadow-lg p-4">
+          <strong class="gold mb-4">Seleccionar Verso</strong> <br>
+  
+          <input class="input-search mt-2" type="text" v-model="searchedBook" placeholder="Libro" list="books" autocomplete="on" @change="findBook(searchedBook)">
+          <datalist id="books">
+            <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{book.likeName}}</option>
+          </datalist>
+          
+          <input class="input-search" type="text" v-model="searchedChapterNumber" placeholder="Cap" 
+                 list="chapters" autocomplete="on" @change="getVerses(searchedChapterNumber)"
+                 style="width: 80px;">
+          <datalist id="chapters">
+            <option v-for="chapter in chapters" :key="chapter.chapter">{{chapter.chapter}}</option>
+          </datalist>
+          
+          <input class="input-search" type="text" v-model="searchedVerseNumber" placeholder="Verso" 
+                 list="verses" autocomplete="on" @change="showVerse(searchedVerseNumber)"
+                 style="width: 80px;">
+          <datalist id="verses">
+            <option v-for="verse in verses" :key="verse.verse">{{verse.verse}}</option>
+          </datalist>
+          
+          
+          <section class="text-left gold p-2 pt-3" >
+            <p style="font-size:16px">{{previousScripture.text}}</p>
+            <b class="text-white">{{previousScripture.reference}} </b>          
+          </section>        
+          
+          <section class="text-left gold p-2 pt-3" style="background-color:rgba(0,0,0,0.2)" >
+            <p style="font-size:16px">{{scripture.text}}</p>
+            <b class="text-white">{{scripture.reference}} </b>          
+          </section>
+        
+          <section class="text-left gold p-2 pt-3" >
+            <p style="font-size:16px">{{followingScripture.text}}</p>
+            <b class="text-white">{{followingScripture.reference}} </b>          
+          </section>        
         </div>
+      </div>
 
-      </form>
-    </div>
-
-    <div class="row" v-if="searchedVerses.length > 0">
-      <div class="col-md-4">
-        <div @click="selectVerse(verse)" v-for="verse in searchedVerses" :key="verse.reference" class="border p-2 gold my-1" style="cursor:pointer">
-          {{verse.text}}
-          <i> {{verse.reference }} </i>
+      <div class="col-md-6 p-3">   
+        <div class="shadow-lg p-4">
+          <form @submit.prevent="searchVerse()" >
+            <div class="input-group">
+              <input v-model="searchedText" type="text" class="form-control" placeholder="buscar... " >
+              <div class="input-group-append">
+                <button type="submit" class="btn bg-darker gold">buscar</button>
+              </div>
+            </div>
+          </form> 
+          
+          <section v-if="searchedVerses.length > 0" style="max-height: 360px; overflow-y: scroll;" class="mt-2">
+            <div @click="selectVerse(verse)" v-for="verse in searchedVerses" :key="verse.reference" class="p-2 gold my-1" style="cursor:pointer; background-color: rgba(0,0,0,0.1);">
+              {{verse.text}} <b class="text-secondary">{{verse.reference}}</b>
+            </div>          
+          </section>
         </div>
-      </div>
-    </div>
-
-
-    <div class="row">
-      <div class="col">
-        
-        <input type="text" v-model="searchedBook" placeholder="Libro" list="books" autocomplete="on" @change="findBook(searchedBook)">
-        <datalist id="books">
-          <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{book.likeName}}</option>
-        </datalist>
-        
-        <input type="text" v-model="searchedChapterNumber" placeholder="Capitulo" list="chapters" autocomplete="on" @change="getVerses(searchedChapterNumber)">
-        <datalist id="chapters">
-          <option v-for="chapter in chapters" :key="chapter.chapter">{{chapter.chapter}}</option>
-        </datalist>
-        
-        <input type="text" v-model="searchedVerseNumber" placeholder="Verso" list="verses" autocomplete="on" @change="showVerse(searchedVerseNumber)">
-        <datalist id="verses">
-          <option v-for="verse in verses" :key="verse.verse">{{verse.verse}}</option>
-        </datalist>
-      </div>
-    </div>
-
-    <div class="row mt-2" style="height:10vh">
-      <div class="col-4">
-        <section class="text-center gold p-2 pt-3" >
-          <p style="font-size:1.25rem">{{previousScripture.text}}</p>
-          <span>{{previousScripture.reference}} </span>          
-        </section>
-      </div>
-      <div class="col-4">
-        <section class="text-center gold p-2 pt-3" style="background-color:rgba(0,0,0,0.2)" >
-          <p style="font-size:1.25rem">{{scripture.text}}</p>
-          <span>{{scripture.reference}} </span>          
-        </section>
-      </div>
-      <div class="col-4">
-        <section class="text-center gold p-2 pt-3" >
-          <p style="font-size:1.25rem">{{followingScripture.text}}</p>
-          <span>{{followingScripture.reference}} </span>          
-        </section>
       </div>
     </div>
 
@@ -148,13 +153,13 @@ export default {
       
       if (verse < this.verses.length) {
         scripture = this.completeBible.find(v=> v.idBook == this.selectedBook && v.chapter == this.selectedChapter &&  v.verse == Number(verse)+1)      
-        scripture.reference = `${this.searchedBook} ${this.selectedChapter}:${verse}`
+        scripture.reference = `${this.searchedBook} ${this.selectedChapter}:${Number(verse)+1}`
         this.followingScripture = {...scripture}        
       }
       
       if (verse > 1) {
         scripture = this.completeBible.find(v=> v.idBook == this.selectedBook && v.chapter == this.selectedChapter &&  v.verse == Number(verse)-1)      
-        scripture.reference = `${this.searchedBook} ${this.selectedChapter}:${verse}`
+        scripture.reference = `${this.searchedBook} ${this.selectedChapter}:${Number(verse)-1}`
         this.previousScripture = {...scripture}        
       }
                      
@@ -223,3 +228,13 @@ export default {
   }
 }
 </script>
+
+
+<style>
+.input-search{
+  border:none;
+  padding: 8px;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+</style>

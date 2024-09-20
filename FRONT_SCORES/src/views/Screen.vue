@@ -1,5 +1,5 @@
 <template>
-    <div id="screen-background">
+    <div id="screen-background" @click="fullscreen()"> 
         <div class="text-center animated v-container" :class="classOut">
             <p ref="scriptureText"
                 v-show="showVerse"
@@ -80,12 +80,22 @@ export default {
             this.fontSize = fontSize
 
             console.log("Final font size: ", fontSize + "vw");
-        }
+        },
+
+        fullscreen(){            
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        },
     }
 };
 </script>
 
 <style lang="scss" scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 .body {
     padding-left: 10%;    
     padding-right: 10%;    
