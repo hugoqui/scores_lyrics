@@ -10,7 +10,7 @@
                 
                 <template v-if="scripture.reference && scripture.reference.length > 0">
                     <br>
-                    <span class="gold" style="font-size:2.5rem">{{scripture.reference}}</span>
+                    <span class="gold " :style="`font-size:${fontSize * 0.7}vw; font-weight: bold;`">{{scripture.reference}}</span>
                 </template>
             </p>
         </div>
@@ -52,6 +52,7 @@ export default {
         scripture: { text: "", reference: "" },
         showVerse: false,
         classOut: "",
+        fontSize: 7
     }),
     methods: {
         adjustFontSize() {
@@ -62,11 +63,22 @@ export default {
             const containerWidth = el.parentElement.clientWidth;
             const containerHeight = el.parentElement.clientHeight;
 
+            // console.log("containerWidth", containerWidth)
+            // console.log("el.scrollWidth", el.scrollWidth)
+
+            // console.log("containerHeight", containerHeight)
+            // console.log("el.scrollHeight", el.scrollHeight)
+
+            
+
             // Reducir el tamaño de la fuente hasta que el texto no se desborde con margen
-            while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 3) {
+            // while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 3) {
+            while ((el.scrollHeight > containerHeight) && fontSize > 3) {
                 fontSize -= 0.5;
                 el.style.fontSize = `${fontSize}vw`;
             }
+
+            this.fontSize = fontSize
 
             console.log("Final font size: ", fontSize + "vw");
         }
@@ -83,7 +95,7 @@ export default {
 }
 
 #screen-background {
-    background: linear-gradient(45deg, #001, #113);
+    background: linear-gradient(180deg, rgb(20, 20, 54), rgb(21, 26, 37));
     // background: #113;
 }
 
@@ -100,8 +112,9 @@ export default {
     width: auto;
     text-shadow: 0px 0px 4px #000;
     font-size: 7vw;
-    padding: 0 5%; /* Añadir un margen interno (padding) del 5% */
-    box-sizing: border-box; /* Asegura que el padding esté incluido en el tamaño total */
+    padding: 0.5rem 5%; /* Añadir un margen interno (padding) del 5% */
+    box-sizing: border-box; /* Asegura que el padding esté incluido en el tamaño total */    
+    text-shadow: 4px 4px 8px rgba($color: #000, $alpha: 0.9);
 }
 
 .breaks {

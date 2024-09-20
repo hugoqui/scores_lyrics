@@ -4,6 +4,10 @@
     <div class="row">
       <div class="col">
         <button id="clear-btn" @click="cleanScreen()">Limpiar</button>
+        <!-- <input type="text" v-model="searchedBook" placeholder="Libro" list="books" autocomplete="on">
+        <datalist id="books">
+          <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{book.likeName}}</option>
+        </datalist> -->
       </div>
 
       <form  @submit.prevent="searchVerse()" class="col-md-6">
@@ -13,7 +17,6 @@
             <button type="submit" class="btn bg-darker gold">buscar</button>
           </div>
         </div>
-
       </form>
     </div>
 
@@ -26,27 +29,46 @@
       </div>
     </div>
 
-
-    <div class="row">
-      <div class="col">
-        
-        <input type="text" v-model="searchedBook" placeholder="Libro" list="books" autocomplete="on" @change="findBook(searchedBook)">
-        <datalist id="books">
-          <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{book.likeName}}</option>
-        </datalist>
-        
-        <input type="text" v-model="searchedChapterNumber" placeholder="Capitulo" list="chapters" autocomplete="on" @change="getVerses(searchedChapterNumber)">
-        <datalist id="chapters">
-          <option v-for="chapter in chapters" :key="chapter.chapter">{{chapter.chapter}}</option>
-        </datalist>
-        
-        <input type="text" v-model="searchedVerseNumber" placeholder="Verso" list="verses" autocomplete="on" @change="showVerse(searchedVerseNumber)">
-        <datalist id="verses">
-          <option v-for="verse in verses" :key="verse.verse">{{verse.verse}}</option>
-        </datalist>
+    <div class="row mt-3">
+      <!-- LIBROS -->
+      <div class="col-4" style="height:72vh; overflow-y:auto">
+        <div class="row">
+          <div class="col-4" v-for="book in books" :key="book.id" 
+                style="cursor:pointer;" @click="getChapters(book.idBook)">
+              <div class="p-1 mt-2 text-center " style="height:5rem; display:flex;" 
+                    :class="selectedBook == book.idBook ? 'bg-gold dark' : 'bg-darker white'">
+                <div style="margin: auto;" class="h5"> {{book.reference}}</div> 
+              </div>
+          </div>
+        </div>
       </div>
-    </div>
+      
+      <!-- CAPITULOS -->
+      <div class="col">
+        <div style="max-height:72vh; overflow-y:auto; border-left:1px solid #FFCD30; border-right:1px solid #FFCD30;" class="row">
+          <div class="col-4" v-for="chapter in chapters" :key="chapter.id" >
+            <div class="p-3  text-center h4  " style="cursor:pointer"
+                :class="selectedChapter == chapter.chapter ? 'bg-gold dark' : 'bg-darker white'" 
+                @click="getVerses(chapter.chapter)">
+              {{chapter.chapter}}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col">
+        <div style="max-height:72vh; overflow-y:auto" class="row">
+          <div class="col-4" v-for="verse in verses" :key="verse.id" >            
+            <div class="p-3 text-center h4" style="cursor:pointer"
+                :class="selectedVerse == verse.verse ? 'bg-gold dark' : 'bg-darker white'" 
+                @click="showVerse(verse.verse)">
+              {{verse.verse}}
+            </div>
+          </div>
+        </div>
+      </div>
 
+    </div>
     <div class="row mt-2" style="height:10vh">
       <div class="col-4">
         <section class="text-center gold p-2 pt-3" >
@@ -73,8 +95,6 @@
 
 <script>
 
-import bible from '../../../BACK_SCORES/src/controllers/bible';
-
 export default {
 
   data: ()=>({
@@ -96,15 +116,12 @@ export default {
 
     followingScripture:{},
     previousScripture:{},
-
-    completeBible: [],
   }),
   async mounted(){
     document.addEventListener("keydown", this.nextVerse)
     this.url = this.$store.state.url
     await this.getBooks()
-    await this.getChapters(1)
-    this.getCompleteBible()
+    await this.getChapters(1)    
   },
   methods:{
     async getBooks(){
@@ -144,29 +161,22 @@ export default {
     },
 
     async showVerse(verse){
-      let scripture
       
-      if (verse < this.verses.length) {
-        scripture = this.completeBible.find(v=> v.idBook == this.selectedBook && v.chapter == this.selectedChapter &&  v.verse == Number(verse)+1)      
-        scripture.reference = `${this.searchedBook} ${this.selectedChapter}:${verse}`
-        this.followingScripture = {...scripture}        
-      }
+      let url = this.url + "verse/" + this.selectedBook + "/" + this.selectedChapter + "/" + (verse+1)           
+      let req = await fetch(url)
+      this.followingScripture = await req.json()
       
-      if (verse > 1) {
-        scripture = this.completeBible.find(v=> v.idBook == this.selectedBook && v.chapter == this.selectedChapter &&  v.verse == Number(verse)-1)      
-        scripture.reference = `${this.searchedBook} ${this.selectedChapter}:${verse}`
-        this.previousScripture = {...scripture}        
-      }
-                     
-      this.selectedVerse = Number(verse)
-      scripture = this.completeBible.find(v=> v.idBook == this.selectedBook && v.chapter == this.selectedChapter &&  v.verse == verse)      
-      scripture.reference = `${this.searchedBook} ${this.selectedChapter}:${verse}`
-      this.scripture = {...scripture}
-
+      url = this.url + "verse/" + this.selectedBook + "/" + this.selectedChapter + "/" + (verse-1)           
+      req = await fetch(url)
+      this.previousScripture = await req.json()
+      
+      this.selectedVerse = verse
+      url = this.url + "verse/" + this.selectedBook + "/" + this.selectedChapter + "/" + verse  + "/true"         
+      req = await fetch(url)
+      this.scripture = await req.json()
       this.searchedVerses = []
-      this.$socket.emit("text_change", this.scripture)
+
     },
-    
 
     selectVerse(verse){
       this.selectedBook = verse.idBook
@@ -196,30 +206,8 @@ export default {
         data.text = ""
         data.reference = ""
         data.title = ""
-        this.$socket.emit("text_change", data)
-    },
-
-    async getCompleteBible(){
-      console.log("descargando biblia completa...")
-      const req = await fetch(this.url + "completeBible")
-      this.completeBible = await req.json()
-      console.log("biblia completa descargada")
-
-      console.log(this.completeBible[0])
-    },
-
-    //autocomplete
-    findBook(id){
-      const book = this.books.find(b=> b.idBook == id)
-      if (book) {
-        this.getChapters(id)
-        this.searchedBook = book.name
-        return
-      }
-
-      this.searchedBook = ""
+        this.$socket.emit("song_change", data)
     }
-
   }
 }
 </script>

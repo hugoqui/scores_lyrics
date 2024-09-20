@@ -52,6 +52,11 @@ io.on('connection', (socket) => {
         })
     })
 
+    socket.on("text_change", data => {
+        console.log("verse changed... ", data)
+        io.emit("text_change", data)
+    })
+
     socket.on("streamActionToServer", data => {
         console.log("stream action on server... ", data)
         io.emit("stream_action_to_client", data)

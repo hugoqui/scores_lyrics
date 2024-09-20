@@ -8,6 +8,7 @@ module.exports = app => {
     app.get('/api/verses/:bookId/:chapter', bible.getVerses)
     app.get('/api/verse/:bookId/:chapter/:verse/:show?', bible.getVerse)
     app.get('/api/search/:text', bible.search)
+    app.get('/api/completeBible', bible.getCompleteBible)
     
     //songs
     app.get('/api/songs/', songs.getAll)

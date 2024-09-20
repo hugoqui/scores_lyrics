@@ -64,4 +64,19 @@ module.exports = {
             res.status(500).json(error)
         }
     },    
+    
+    getCompleteBible: async (req, res) => {
+        try {
+            const str =`
+            SELECT  V.*, B.name
+            FROM bible_verses V 
+            JOIN bible_books B ON V.idBook = B.idBook
+            `
+            const query = await controller.customQuery(str)            
+            res.status(200).json(query)
+        } catch (error) {
+            res.status(500).json(error)
+        }
+    },    
+
 }   
