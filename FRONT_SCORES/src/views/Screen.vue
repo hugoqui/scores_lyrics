@@ -60,11 +60,21 @@ export default {
             let fontSize = 7; // Tamaño inicial en vw
             el.style.fontSize = `${fontSize}vw`;
             const containerHeight = el.parentElement.clientHeight;
+            const containerWidth = el.parentElement.clientWidth;
             // Reducir el tamaño de la fuente hasta que el texto no se desborde con margen
-            // while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 3) {
-            while ((el.scrollHeight > containerHeight) && fontSize > 2) {
-                fontSize -= 0.25;
-                el.style.fontSize = `${fontSize}vw`;
+
+            if (this.scripture.reference) {
+                while ((el.scrollHeight > containerHeight) && fontSize > 2) {
+                    fontSize -= 0.25;
+                    el.style.fontSize = `${fontSize}vw`;
+                }
+            }
+
+            if (!this.scripture.reference) {
+                while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 3) {
+                    fontSize -= 0.25;
+                    el.style.fontSize = `${fontSize}vw`;
+                }                
             }
 
             this.fontSize = fontSize
