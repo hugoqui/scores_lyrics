@@ -73,7 +73,7 @@ methods:{
                 text = text.replace(`\\`, '')                                
             }
 
-            this.scripture.text = text
+            this.scripture.text = text.trim();
             this.scripture.reference = data.reference
             this.showVerse=true
         }, 300);

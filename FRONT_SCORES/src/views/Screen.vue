@@ -71,7 +71,7 @@ export default {
             }
 
             if (!this.scripture.reference) {
-                while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 3) {
+                while ((el.scrollHeight > containerHeight || el.scrollWidth + 20 > containerWidth) && fontSize > 2.5) {
                     fontSize -= 0.25;
                     el.style.fontSize = `${fontSize}vw`;
                 }                
@@ -94,8 +94,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
 .body {
     padding-left: 10%;    
     padding-right: 10%;    
@@ -105,7 +103,7 @@ export default {
 
 #screen-background {
     background: rgb(13,81,161);
-    background: radial-gradient(circle, rgba(13,81,161,1) 33%, rgba(2,0,36,1) 100%);
+    background: radial-gradient(circle, rgb(9, 65, 130) 33%, rgba(2,0,36,1) 100%);
     // background: linear-gradient(180deg, rgb(20, 20, 54), rgb(21, 26, 37));
     // background: #113;
 }
@@ -118,7 +116,7 @@ export default {
 }
 
 .scripture {
-    font-family: "Montserrat";    
+    font-family: "Arial";    
     color: #ffffff;
     width: auto;
     text-shadow: 0px 0px 4px #000;

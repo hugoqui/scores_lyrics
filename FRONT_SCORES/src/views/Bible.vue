@@ -36,17 +36,17 @@
           </datalist>
           
           
-          <section class="text-left gold p-2 pt-3" >
+          <section class="text-left gold p-2 pt-3" @click="showVerse(Number(selectedVerse)-1)">
             <p style="font-size:16px">{{previousScripture.text}}</p>
             <b class="text-white">{{previousScripture.reference}} </b>          
           </section>        
           
-          <section class="text-left gold p-2 pt-3" style="background-color:rgba(0,0,0,0.2)" >
+          <section class="text-left gold p-2 pt-3" style="background-color:rgba(0,0,0,0.2)" @click="showVerse(Number(selectedVerse))">
             <p style="font-size:16px">{{scripture.text}}</p>
             <b class="text-white">{{scripture.reference}} </b>          
           </section>
         
-          <section class="text-left gold p-2 pt-3" >
+          <section class="text-left gold p-2 pt-3" @click="showVerse(Number(selectedVerse)+1)"></section>>
             <p style="font-size:16px">{{followingScripture.text}}</p>
             <b class="text-white">{{followingScripture.reference}} </b>          
           </section>        
