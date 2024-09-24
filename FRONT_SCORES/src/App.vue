@@ -88,4 +88,21 @@ body, html{
     color:#fff;
     z-index: 999;
 }
+
+.zoom{
+  cursor: pointer;
+  /* animation: zoom 300ms; */
+  transition: all 300ms;
+}
+
+.zoom:hover{
+  transform: scale(1.04);
+}
+
+.no-selectable{
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 </style>

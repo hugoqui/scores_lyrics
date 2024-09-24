@@ -10,7 +10,7 @@
                 
                 <template v-if="scripture.reference && scripture.reference.length > 0">
                     <br>
-                    <span class="gold " :style="`font-size:${fontSize * 0.7}vw; font-weight: bold;`">{{scripture.reference}}</span>
+                    <span class="gold " :style="`font-size:${fontSize * 0.7}px; font-weight: bold;`">{{scripture.reference}}</span>
                 </template>
             </p>
         </div>
@@ -57,8 +57,8 @@ export default {
     methods: {
         adjustFontSize() {
             const el = this.$refs.scriptureText;
-            let fontSize = 7; // Tamaño inicial en vw
-            el.style.fontSize = `${fontSize}vw`;
+            let fontSize = 100; // Tamaño inicial en vw
+            el.style.fontSize = `${fontSize}px`;
             const containerHeight = el.parentElement.clientHeight;
             const containerWidth = el.parentElement.clientWidth;
             // Reducir el tamaño de la fuente hasta que el texto no se desborde con margen
@@ -66,20 +66,20 @@ export default {
             if (this.scripture.reference) {
                 while ((el.scrollHeight > containerHeight) && fontSize > 2) {
                     fontSize -= 0.25;
-                    el.style.fontSize = `${fontSize}vw`;
+                    el.style.fontSize = `${fontSize}px`;
                 }
             }
 
             if (!this.scripture.reference) {
-                while ((el.scrollHeight > containerHeight || el.scrollWidth + 20 > containerWidth) && fontSize > 2.5) {
-                    fontSize -= 0.25;
-                    el.style.fontSize = `${fontSize}vw`;
+                while ((el.scrollHeight > containerHeight || el.scrollWidth + 20 > containerWidth) && fontSize > 32) {
+                    fontSize -= 5;
+                    el.style.fontSize = `${fontSize}px`;
                 }                
             }
 
             this.fontSize = fontSize
 
-            console.log("Final font size: ", fontSize + "vw");
+            console.log("Final font size: ", fontSize + "px");
         },
 
         fullscreen(){            
@@ -94,33 +94,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.body {
-    padding-left: 10%;    
-    padding-right: 10%;    
-    padding-top: 10%;    
-    height: 100vh;
-}
 
-#screen-background {
-    background: rgb(13,81,161);
-    background: radial-gradient(circle, rgb(9, 65, 130) 33%, rgba(2,0,36,1) 100%);
-    // background: linear-gradient(180deg, rgb(20, 20, 54), rgb(21, 26, 37));
-    // background: #113;
+#screen-background {    
+    background: radial-gradient(circle, #182668 33%, rgba(2,0,36,1) 100%) !important;   
+    height: 100vh;
+    position: relative;
+    padding: 3rem;
 }
 
 .v-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 100%;    
 }
 
 .scripture {
-    font-family: "Arial";    
+    font-family: 'Century Gothic', Arial, Helvetica, sans-serif;
     color: #ffffff;
+    line-height: normal;
     width: auto;
     text-shadow: 0px 0px 4px #000;
-    font-size: 7vw;
+    font-size: 100px;
     padding: 0.5rem 5%; /* Añadir un margen interno (padding) del 5% */
     box-sizing: border-box; /* Asegura que el padding esté incluido en el tamaño total */    
     text-shadow: 4px 4px 8px rgba($color: #000, $alpha: 0.9);

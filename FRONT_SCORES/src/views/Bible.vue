@@ -1,8 +1,7 @@
 <template>
-  <div class="container-fluid my-3 mb-5 rounded shadow-lg"
+  <div class="container-fluid my-3 mb-5 rounded shadow-lg no-selectable"
        style="max-width: 1400px; background-color: rgba(0,0,0,0.1);">
-    <button id="clear-btn" @click="cleanScreen()">Limpiar</button>
-
+    
     <div class="row my-4">
       <!-- BUSCAR POR CONTENIDO -->
       <div class="col-md-4 ">
@@ -29,36 +28,31 @@
       <!-- ESCRIBIR PASAJE -->
       <div class="col-md-4 ">
         <div class="shadow-lg p-4 mt-5">
+          <button class="btn btn-dark float-right px-4 " style="border-radius: 3rem; background-color: rgba(0,0,0,0.4);" @click="cleanScreen()">Limpiar</button>
+          <br>
           <strong class="gold mb-4">Seleccionar Verso</strong> <br>
 
-          <input class="input-search mt-2" type="text" v-model="searchedBook" placeholder="Libro" list="books"
-            autocomplete="on" @change="findBook(searchedBook)">
+          <input class="input-search mt-2" type="text" v-model="selectedBook" placeholder="Libro" list="books"
+            autocomplete="on" @change="findBook(selectedBook)">
           <datalist id="books">
             <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{ book.likeName }}</option>
           </datalist>
 
-          <input ref="chapterBox" class="input-search" type="text" v-model="searchedChapterNumber" placeholder="Cap" list="chapters"
-            autocomplete="on" @change="getVerses(searchedChapterNumber)" style="width: 80px;">
-          <datalist id="chapters">
-            <option v-for="chapter in chapters" :key="chapter.chapter">{{ chapter.chapter }}</option>
-          </datalist>
+          <input ref="chapterBox" class="input-search" type="number" v-model.lazy="selectedChapter" placeholder="Cap" 
+             @change="getChapterVerses(selectedChapter)" style="width: 80px;">
 
-          <input ref="verseBox" class="input-search" type="text" v-model="searchedVerseNumber" placeholder="Verso" list="verses"
-            autocomplete="on" @change="showVerse(searchedVerseNumber)" style="width: 80px;">
-          <datalist id="verses">
-            <option v-for="verse in verses" :key="verse.verse">{{ verse.verse }}</option>
-          </datalist> 
+          <input ref="verseBox" class="input-search" type="number" v-model="preSelectedVerse" placeholder="Verso" 
+             @change="showVerse(preSelectedVerse)" style="width: 80px;">          
 
           <div class="mt-3 text-center" v-if="scripture">
             <button class="shadow btn bg-dark gold" @click="changeVerse('up')">< Anterior</button>
             <button class="shadow btn bg-dark gold ml-3" @click="changeVerse('down')">Siguiente ></button>
           </div>
 
-          <section class="text-left gold p-2 pt-3 mt-4" style="background-color:rgba(0,0,0,0.2)" @click="showVerse(Number(selectedVerse))">
+          <section class="text-left gold p-2 pt-3 mt-4 zoom" style="background-color:rgba(0,0,0,0.2)" @click="showVerse(selectedVerse)">
             <p style="font-size:16px">{{scripture.text}}</p>
             <b class="text-white">{{scripture.reference}} </b>          
           </section>
-
 
         </div>
 
@@ -69,13 +63,15 @@
         <div ref="verseContainer"
              class="shadow-lg m-2 p-4 gold" style="height: 90vh; overflow-y: auto;">
 
-          <section v-for="verse in chapterVerses" class="my-1 shadow rounded py-2"
-                  :ref="'verse_' + verse.verse" 
+          <section v-for="verse in chapterVerses" class="my-2 shadow rounded p-2 zoom "
+                  :ref="'verse_' + verse.verse" @click="showVerse(verse.verse)"
+                  style="background-color:rgba(250,250,250,0.05)"
                   :class="selectedVerse== verse.verse ? 'bg-warning text-dark' : ''">
             {{ verse.text }}
             <label class="text-white" :class="selectedVerse== verse.verse ? 'font-weight-bold text-dark' : ''">
               {{ verse.name }} {{ verse.chapter }}:{{ verse.verse }}
             </label>
+            
           </section>
         </div>
 
@@ -97,15 +93,14 @@ export default {
     searchedText: "",
     searchedVerses: [],
     scripture: "",
-
-    selectedBook: 1,
-    selectedChapter: 1,
-    selectedVerse: null,
+        
     url: "",
 
-    searchedBook: "",
-    searchedChapterNumber: "",
-    searchedVerseNumber: "",
+    selectedBook: null,
+    selectedId: null,
+    selectedChapter: null,
+    preSelectedVerse: null, 
+    selectedVerse: null,
 
     followingScripture: {},
     previousScripture: {},
@@ -117,8 +112,7 @@ export default {
   async mounted() {    
     document.body.style.overflowY = 'hidden'
     this.url = this.$store.state.url
-    await this.getBooks()
-    await this.getChapters(1)
+    await this.getBooks()    
     this.getCompleteBible()
   },
 
@@ -127,10 +121,13 @@ export default {
   },
 
   watch: {
-    searchedBook: function (val) {
+    selectedBook: function (val) {
       if (val == "") {
         this.chapterVerses = []
+        this.selectedChapter = null
         this.selectedVerse = null
+        this.preSelectedVerse = null
+        this.scripture = {}
         return
       }      
       this.selectedChapter = ""      
@@ -159,23 +156,30 @@ export default {
       this.selectedBook = bookId
       const url = this.url + "chapters/" + bookId
       const req = await fetch(url)
-      this.chapters = await req.json()
-      this.selectedChapter = 1      
+      this.chapters = await req.json()      
     },
 
-    async getVerses(chapter) {
+    async getChapterVerses(chapter) {
       if (this.selectedBook == "") {
         this.selectedChapter = ""
+        this.selectedVerse = ""
+        this.preSelectedVerse = ""
+        this.scripture = {}
         return
       }      
-      this.chapterVerses = this.completeBible.filter(b => b.idBook == this.selectedBook && b.chapter == chapter)
+
+      this.chapterVerses = this.completeBible.filter(b => b.idBook == this.selectedBookId && b.chapter == chapter)
       this.$refs["verseBox"].focus()
     },
 
     async showVerse(verse) {
       this.selectedVerse = verse
-      let scripture = this.completeBible.find(v => v.idBook == this.selectedBook && v.chapter == this.searchedChapterNumber && v.verse == verse)
-      scripture.reference = `${this.searchedBook} ${this.searchedChapterNumber}:${verse}`
+      let scripture = this.completeBible
+        .find(v => v.idBook == this.selectedBookId 
+                  && v.chapter == this.selectedChapter 
+                  && v.verse == verse)
+
+      scripture.reference = `${this.selectedBook} ${this.selectedChapter}:${verse}`
       this.scripture = { ...scripture }
 
       this.searchedVerses = []
@@ -192,15 +196,26 @@ export default {
 
 
     selectVerse(verse) {
-      this.selectedBook = verse.idBook      
-      this.selectedChapter = verse.chapter                  
-      this.showVerse(verse.verse)
+      this.selectedBookId = verse.idBook      
+      setTimeout(() => {        
+        this.selectedChapter = verse.chapter     
+        this.preSelectedVerse = verse.verse                 
+        this.showVerse(verse.verse)
+      }, 300);
     },
 
     async searchVerse() {
       const url = this.url + "search/" + this.searchedText
       const req = await fetch(url)
       this.searchedVerses = await req.json()
+    },
+
+    showSearchedVerse(verse){     
+      const {name} = this.books.find(b=> b.idBook == verse.idBook)
+      this.selectedBook = name      
+      
+      this.selectVerse(verse)
+      this.getChapterVerses(verse.chapter)
     },
 
     changeVerse(event) {
@@ -212,8 +227,6 @@ export default {
     },
 
     async cleanScreen() {
-      this.selectedVerse = 0
-
       let data = {}
       data.text = ""
       data.reference = ""
@@ -228,28 +241,22 @@ export default {
 
     //autocomplete
     findBook(id) {
-      this.searchedVerseNumber =null
-      this.searchedChapterNumber =null
+      this.selectedBookId = id
+      this.selectedVerse =null
+      this.selectedChapter =null
 
       const book = this.books.find(b => b.idBook == id)
       if (book) {
         this.getChapters(id)
-        this.searchedBook = book.name
+        this.selectedBook = book.name
         this.$refs["chapterBox"].focus()
         return
       }
 
-      this.searchedBook = ""
+      this.selectedBook = ""
     },
 
-    showSearchedVerse(verse){
-      console.log(verse)
-      this.searchedChapterNumber = verse.chapter
-      this.searchedVerseNumber = verse.verse      
-      const {name} = this.books.find(b=> b.idBook == verse.idBook)
-      this.searchedBook = name      
-      this.selectVerse(verse)
-    }
+
 
   }
 }

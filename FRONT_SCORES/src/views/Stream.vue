@@ -97,20 +97,5 @@ export default {
 </script>
 
 <style >
-.zoom{
-  cursor: pointer;
-  /* animation: zoom 300ms; */
-  transition: all 300ms;
-}
 
-.zoom:hover{
-  transform: scale(1.04);
-}
-
-.no-selectable{
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
 </style>
