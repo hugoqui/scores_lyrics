@@ -1,5 +1,6 @@
 const bible = require('../controllers/bible')
 const songs = require('../controllers/songs')
+const stream = require('../controllers/stream')
 
 module.exports = app => {
     //bible
@@ -22,6 +23,6 @@ module.exports = app => {
     
     //last song
     app.get('/api/lastSong/', songs.getLast)
-
+    app.get('/api/config', stream.getConfig)
         
 }

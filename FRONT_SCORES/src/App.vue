@@ -6,6 +6,13 @@
 
 <script>
 export default {
+  async mounted(){
+    const url = this.$store.state.url + "config"
+    const req = await fetch(url)
+    const res = await req.json()
+    console.log("config...", res)
+    this.$store.commit("setConfig", res)
+  },
   beforeCreate(){
     let host = this.$store.state.url
     

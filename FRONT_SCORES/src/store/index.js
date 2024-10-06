@@ -12,6 +12,7 @@ export default new Vuex.Store({
     isPrompterScreen: false,
     isServer:false,
     isControl:false,
+    config:[],
   },
   mutations: {
     setHost(state, data){
@@ -29,6 +30,9 @@ export default new Vuex.Store({
     setControl(state, data){
       state.isControl = data
     },
+    setConfig(state, data){
+      state.config = data
+    }
   },
   actions: {
   },

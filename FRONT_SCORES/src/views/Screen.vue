@@ -1,5 +1,5 @@
 <template>
-    <div id="screen-background" @click="fullscreen()"> 
+    <div id="screen-background" @click="fullscreen()" :style="getStyle()"> 
         <div class="text-center animated v-container" :class="classOut">
             <p ref="scriptureText"
                 v-show="showVerse"
@@ -27,17 +27,8 @@ export default {
             this.classOut = "animated-out"
             setTimeout(() => {            
                 this.showVerse = false;
-                this.classOut = ""
-                let text = data.text.replace("{\\i", '')
-                text = text.replace("}", '')
-                text = text.replace("\\par", '')
-                // text = text.replace("\par", '')
-                text = text.replace("\\", '')
-                text = text.replace("{", '')
-                text = text.replace("cf6", '')
-                text = text.replace("{\\cf6", '')
-
-                this.scripture.text = text.trim();
+                this.classOut = ""            
+                this.scripture.text = data.text.trim();
                 this.scripture.reference = data.reference;
                 this.showVerse = true;
 
@@ -55,6 +46,15 @@ export default {
         fontSize: 7
     }),
     methods: {
+        getStyle(){
+            const config = this.$store.state.config.filter(c=> c.module=="screen")
+            let result = {}            
+            config.forEach(element => {
+                result[element.name] = element.value
+            });
+            console.log("El config de script...", result)
+            return result
+        },
         adjustFontSize() {
             const el = this.$refs.scriptureText;
             let fontSize = 100; // Tamaño inicial en vw
@@ -64,15 +64,15 @@ export default {
             // Reducir el tamaño de la fuente hasta que el texto no se desborde con margen
 
             if (this.scripture.reference) {
-                while ((el.scrollHeight > containerHeight) && fontSize > 2) {
-                    fontSize -= 0.25;
+                while ((el.scrollHeight > containerHeight) && fontSize > 32) {
+                    fontSize -= 1;
                     el.style.fontSize = `${fontSize}px`;
                 }
             }
 
             if (!this.scripture.reference) {
-                while ((el.scrollHeight > containerHeight || el.scrollWidth + 20 > containerWidth) && fontSize > 32) {
-                    fontSize -= 5;
+                while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 32) {
+                    fontSize -= 1;
                     el.style.fontSize = `${fontSize}px`;
                 }                
             }
@@ -99,7 +99,7 @@ export default {
     background: radial-gradient(circle, #182668 33%, rgba(2,0,36,1) 100%) !important;   
     height: 100vh;
     position: relative;
-    padding: 3rem;
+    // padding: 3rem;
 }
 
 .v-container {
@@ -116,7 +116,8 @@ export default {
     width: auto;
     text-shadow: 0px 0px 4px #000;
     font-size: 100px;
-    padding: 0.5rem 5%; /* Añadir un margen interno (padding) del 5% */
+    // padding: 0.5rem 5%; /* Añadir un margen interno (padding) del 5% */
+    padding: 0.5rem 20px; /* Añadir un margen interno (padding) del 5% */
     box-sizing: border-box; /* Asegura que el padding esté incluido en el tamaño total */    
     text-shadow: 4px 4px 8px rgba($color: #000, $alpha: 0.9);
     font-weight: bold;
