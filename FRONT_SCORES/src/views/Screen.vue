@@ -1,5 +1,5 @@
 <template>
-    <div id="screen-background" @click="fullscreen()" :style="getStyle()"> 
+    <div id="screen-background" @click="fullscreen()" > 
         <div class="text-center animated v-container" :class="classOut">
             <p ref="scriptureText"
                 v-show="showVerse"
@@ -110,14 +110,14 @@ export default {
 }
 
 .scripture {
-    font-family: 'Century Gothic', Arial, Helvetica, sans-serif;
+    font-family:  Arial, Helvetica, sans-serif;
     color: #ffffff;
     line-height: normal;
     width: auto;
     text-shadow: 0px 0px 4px #000;
     font-size: 100px;
-    // padding: 0.5rem 5%; /* Añadir un margen interno (padding) del 5% */
-    padding: 0.5rem 20px; /* Añadir un margen interno (padding) del 5% */
+    padding: 0.5rem 5%; /* Añadir un margen interno (padding) del 5% */
+    //padding: 0.5rem 20px; /* Añadir un margen interno (padding) del 5% */
     box-sizing: border-box; /* Asegura que el padding esté incluido en el tamaño total */    
     text-shadow: 4px 4px 8px rgba($color: #000, $alpha: 0.9);
     font-weight: bold;
