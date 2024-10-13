@@ -43,7 +43,7 @@ export default {
         scripture: { text: "", reference: "" },
         showVerse: false,
         classOut: "",
-        fontSize: 7
+        fontSize: 175
     }),
     methods: {
         getStyle(){
@@ -57,7 +57,7 @@ export default {
         },
         adjustFontSize() {
             const el = this.$refs.scriptureText;
-            let fontSize = 100; // Tamaño inicial en vw
+            let fontSize = 175; // Tamaño inicial en vw
             el.style.fontSize = `${fontSize}px`;
             const containerHeight = el.parentElement.clientHeight;
             const containerWidth = el.parentElement.clientWidth;
@@ -96,10 +96,11 @@ export default {
 <style lang="scss" scoped>
 
 #screen-background {    
-    background: radial-gradient(circle, #182668 33%, rgba(2,0,36,1) 100%) !important;   
+    background: radial-gradient(circle, #26293a 33%, rgb(11, 10, 21) 90%) !important;   
+    // background-color: #151719;
     height: 100vh;
     position: relative;
-    // padding: 3rem;
+    padding: 4rem 0;
 }
 
 .v-container {
@@ -110,15 +111,14 @@ export default {
 }
 
 .scripture {
-    font-family:  Arial, Helvetica, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     color: #ffffff;
     line-height: normal;
     width: auto;
     text-shadow: 0px 0px 4px #000;
-    font-size: 100px;
-    padding: 0.5rem 5%; /* Añadir un margen interno (padding) del 5% */
-    //padding: 0.5rem 20px; /* Añadir un margen interno (padding) del 5% */
-    box-sizing: border-box; /* Asegura que el padding esté incluido en el tamaño total */    
+    font-size: 175px;
+    padding: 0.5rem 5%;
+    box-sizing: border-box;
     text-shadow: 4px 4px 8px rgba($color: #000, $alpha: 0.9);
     font-weight: bold;
 }

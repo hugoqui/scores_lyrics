@@ -1,0 +1,45 @@
+﻿<Window x:Class="ProyectorDesktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProyectorDesktop"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        
+        Title="Iglesia Belén" Height="473" Width="769" Background="#FF333333" Icon="/screen.png" >
+    <Grid>
+        <Grid.Effect>
+            <DropShadowEffect/>
+        </Grid.Effect>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <wv2:WebView2 Name="webView"  Grid.ColumnSpan="2"/>
+
+        <Button x:Name="proyectorButton" 
+            Content="PROYECTOR" 
+            Click="proyectorButton_Click"
+            Grid.Row="1" 
+            Grid.Column="1" 
+            Margin="10"
+            Padding="8"
+            HorizontalAlignment="Center" Width="125">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border CornerRadius="10" Background="#FFFFFF">
+                        <Border.Effect>
+                            <DropShadowEffect ShadowDepth="5" Direction="315" Opacity="0.3" BlurRadius="16"/>
+                        </Border.Effect>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+    </Grid>
+</Window>

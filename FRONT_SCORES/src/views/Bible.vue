@@ -33,7 +33,7 @@
           <strong class="gold mb-4">Seleccionar Verso</strong> <br>
 
           <input class="input-search mt-2" type="text" v-model="selectedBook" placeholder="Libro" list="books"
-            autocomplete="on" @change="findBook(selectedBook)">
+            autocomplete="on" @input="onInputChange"  @focus="selectAllText" @change="findBook(selectedBook)">
           <datalist id="books">
             <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{ book.likeName }}</option>
           </datalist>
@@ -249,14 +249,23 @@ export default {
       if (book) {
         this.getChapters(id)
         this.selectedBook = book.name
-        this.$refs["chapterBox"].focus()
+        setTimeout(() => {
+          this.$refs["chapterBox"].focus()          
+        }, 300);
+        
         return
       }
 
       this.selectedBook = ""
     },
 
+    onInputChange() {      
+      this.selectedBookId = null;
+    },
 
+    selectAllText(event) {
+      event.target.select(); // Selecciona todo el texto en el input
+    },
 
   }
 }

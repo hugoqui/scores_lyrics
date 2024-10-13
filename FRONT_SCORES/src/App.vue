@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <button class="btn gold shadow" @click="$router.go(-1)" v-if="$route.path !== '/screen'"
+            style="border-radius: 30%; width: 40px; height: 40px; position: fixed; z-index: 9;
+                   left: 10px; top:10px; background-color: #111;"><</button>
     <router-view/>
   </div>
 </template>

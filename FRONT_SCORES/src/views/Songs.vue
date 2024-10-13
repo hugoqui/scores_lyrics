@@ -48,14 +48,11 @@
     </div>
     
     <div class="row mt-2">
-        <div class="col-12">
-            <div class="text-white">A!!! {{ selectedVerse }}</div>
-        </div>        
-
+        
         <div class="col-4 mb-4" style="max-height:96vh; overflow:auto; ">
             <!-- SEARCH - ADD NEW -->
             <div class="row">
-                <div class="col-12">
+                <div class="col-12">                    
                     <h6 class="white text-center mb-4">TODOS LOS CANTOS</h6>                    
                 </div>
                 <div class="col-12">

@@ -1,0 +1,14 @@
+## Visual Studio files
+*.vs/
+*.suo
+*.user
+
+## WPF files
+bin/
+obj/
+Debug/
+Release/
+
+## Other files
+# App.config
+# packages.config
