@@ -9,6 +9,10 @@ export default {
     props:["instrument"],
     sockets: {
         text_change: function (data) {
+            if (data.text && data.text =="") {
+                return
+            }
+            
             this.displaySong(data)
         }
     },

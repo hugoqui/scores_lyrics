@@ -39,10 +39,10 @@
           </datalist>
 
           <input ref="chapterBox" class="input-search" type="number" v-model.lazy="selectedChapter" placeholder="Cap" 
-             @change="getChapterVerses(selectedChapter)" style="width: 80px;">
+              @focus="selectAllText" @change="getChapterVerses(selectedChapter)" style="width: 80px;">
 
           <input ref="verseBox" class="input-search" type="number" v-model="preSelectedVerse" placeholder="Verso" 
-             @change="showVerse(preSelectedVerse)" style="width: 80px;">          
+              @focus="selectAllText" @change="showVerse(preSelectedVerse)" style="width: 80px;">          
 
           <div class="mt-3 text-center" v-if="scripture">
             <button class="shadow btn bg-dark gold" @click="changeVerse('up')">< Anterior</button>
