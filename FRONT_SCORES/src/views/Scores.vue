@@ -9,7 +9,7 @@ export default {
     props:["instrument"],
     sockets: {
         text_change: function (data) {
-            if (data.text && data.text =="") {
+            if (!data.text) {
                 return
             }
             
