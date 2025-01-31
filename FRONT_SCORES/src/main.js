@@ -7,9 +7,13 @@ import store from './store'
 Vue.config.productionTip = false
 
 
+console.log("####################")
+console.log("window.location",window.location)
+
+
 let host = localStorage.getItem("host")
 if (!host) {
-  host = "http://192.168.0.181:3014/"
+  host = `http://${window.location.hostname}:3014/`
 }
 store.commit("setHost",host)
 
