@@ -32,17 +32,20 @@
           <br>
           <strong class="gold mb-4">Seleccionar Verso</strong> <br>
 
-          <input class="input-search mt-2" type="text" v-model="selectedBook" placeholder="Libro" list="books"
-            autocomplete="on" @input="onInputChange"  @focus="selectAllText" @change="findBook(selectedBook)">
-          <datalist id="books">
-            <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{ book.likeName }}</option>
-          </datalist>
+          <div style="display: flex;" class="mt-2">
+            <input class="input-search " type="text" v-model="selectedBook" placeholder="Libro" list="books"
+              autocomplete="on" @input="onInputChange"  @focus="selectAllText" @change="findBook(selectedBook)">
+            <datalist id="books">
+              <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{ book.likeName }}</option>
+            </datalist>
+  
+            <input ref="chapterBox" class="input-search" type="number" v-model.lazy="selectedChapter" placeholder="Cap" 
+                @focus="selectAllText" @change="getChapterVerses(selectedChapter)" style="width: 80px;">
+  
+            <input ref="verseBox" class="input-search" type="number" v-model="preSelectedVerse" placeholder="Verso" 
+                @focus="selectAllText" @keyup.enter="showVerse(preSelectedVerse)" style="width: 80px;">          
+          </div>
 
-          <input ref="chapterBox" class="input-search" type="number" v-model.lazy="selectedChapter" placeholder="Cap" 
-              @focus="selectAllText" @change="getChapterVerses(selectedChapter)" style="width: 80px;">
-
-          <input ref="verseBox" class="input-search" type="number" v-model="preSelectedVerse" placeholder="Verso" 
-              @focus="selectAllText" @change="showVerse(preSelectedVerse)" style="width: 80px;">          
 
           <div class="mt-3 text-center" v-if="scripture">
             <button class="shadow btn bg-dark gold" @click="changeVerse('up')">< Anterior</button>
