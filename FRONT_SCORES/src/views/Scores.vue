@@ -1,10 +1,10 @@
 <template>
-    <div id="fullscreen">
-        <!-- <h5>{{ finalUrl }}</h5> -->
-        <button class="btn shadow btn-dark" id="toggleScore" @click="showArragement = !showArragement">
+    <div id="fullscreen"> 
+        <!-- <h5>{{ count }}</h5> -->
+        <button class="btn shadow btn-dark" id="toggleScore" @click="showArragement = !showArragement; getFinalUrl()">
             {{ showArragement ? 'Arreglo' : 'Melodía' }}
         </button>
-        <img :src="`${finalUrl}`" class="img-fluid" :alt="title"
+        <img :src="`${finalUrl}`" class="img-fluid" :alt="title" v-if="finalUrl"
             style="max-height:100%; max-width:100%" @error="imageLoadError()" @click="setFullscreen()">
     </div>
 </template>
@@ -30,26 +30,12 @@ export default {
             extension: ".png",
             count: 0,
             showArragement: false,
+            finalUrl: null,
         }
     },
     mounted() {
         this.getLast()
     },
-
-    computed: {
-        finalUrl() {
-            let host = localStorage.getItem("host") || "";
-            host = host.replace(/:\d+\/$/, "");
-            
-            if (this.showArragement && this.count) {
-                const instrument = this.instrument.replace(/\/$/, "");
-                return host + this.url  + "_" + instrument + this.extension
-            }
-
-            return host + this.url  + this.extension
-        }
-    },
-
     methods: {
         setFullscreen() {
             if (this.isFullScreen) {
@@ -61,14 +47,34 @@ export default {
         },
 
         imageLoadError() {
-
+            console.log("al parecer no existe.. ", this.url)
             if (this.count > 1) {
                 return false
             }
 
             this.count++
-
+            this.getFinalUrl()
         },
+
+        getFinalUrl() {
+            console.log("getting final url...")
+
+            let host = localStorage.getItem("host") || "";
+            host = host.replace(/:\d+\/$/, "");
+            
+            if (this.showArragement && this.count == 1) {
+                console.log("a ver... con arreglo?")
+                const instrument = this.instrument.replace(/\/$/, "");
+                this.finalUrl = host + this.url  + "_" + instrument + this.extension
+                return
+            }
+                        
+            console.log("pos sin arreglo")            
+            console.log("url... ", this.url)
+            this.finalUrl = host + this.url  + this.extension
+            return
+        },
+
         displaySong(data) {
             const lowertext = data.title.toLowerCase()
             const words = lowertext.split(" ")
@@ -78,12 +84,15 @@ export default {
             })
             title = title.substring(0, title.length - 1)
             this.title = title
-            this.url = '/panel/img/scores/' + this.instrument + '/' + title
+            if (this.url.indexOf("panel") == -1)  {this.url += "/panel"}
 
-            if (this.showArragement)
-                this.url += "_" + this.instrument
+            this.url = '/img/scores/' + this.instrument + '/' + title
 
+            // if (this.showArragement)
+            //     this.url += "_" + this.instrument
+            
             this.count = 1
+            this.getFinalUrl()
         },
         async getLast() {
             try {
@@ -119,8 +128,8 @@ export default {
 #toggleScore {
     position: fixed;
     z-index: 9999;
-    right: 12px;
     padding: 16px 42px;
-    bottom: 10px;
+    top: 4px;
+    right: 4px;
 }
 </style>
