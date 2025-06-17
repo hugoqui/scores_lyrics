@@ -32,7 +32,7 @@ const server = express()
 //socket
 const socketIO = require('socket.io')
 
-// setInterval(() => io.emit('time', new Date().toTimeString()), 1000)
+setInterval(() => io.emit('time', new Date().toTimeString()), 1000)
 global.io = socketIO(server)
 io.on('connection', (socket) => { 
 
