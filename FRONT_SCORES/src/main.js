@@ -5,11 +5,6 @@ import store from './store'
 
 Vue.config.productionTip = false
 
-
-console.log("####################")
-console.log("window.location",window.location)
-
-
 let host = localStorage.getItem("host")
 if (!host) {
   host = `http://${window.location.hostname}:3014/`
@@ -28,7 +23,7 @@ store.commit("setControl", !!isControl)
 
 import VueSocketIO from 'vue-socket.io'
 Vue.use(new VueSocketIO({
-  debug: true,
+  debug: false,
   connection: store.state.socketUrl,
   vuex: {
     store,

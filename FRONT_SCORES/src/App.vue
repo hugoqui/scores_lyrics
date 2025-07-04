@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <button class="btn gold shadow d-none d-md-block" @click="$router.go(-1)" v-if="$route.path !== '/screen' "
+    <button class="btn gold shadow d-none d-md-block" @click="$router.go(-1)" v-if="$route.path !== '/screen' && $route.path !== '/' "
             style="border-radius: 30%; width: 40px; height: 40px; position: fixed; z-index: 9;
                    left: 10px; top:10px; background-color: #111;"><</button>
     <router-view/>
@@ -9,6 +9,11 @@
 
 <script>
 export default {
+  data() {
+    return {
+      showBack: false,
+    }
+  },
   async mounted(){
     const url = this.$store.state.url + "config"
     const req = await fetch(url)
@@ -16,18 +21,11 @@ export default {
     console.log("config...", res)
     this.$store.commit("setConfig", res)
   },
-  beforeCreate(){
-    let host = this.$store.state.url
-    
-    console.log("el url del host... ", host)
-  }
 }
 </script>
 
 
 <style lang="scss">
-// @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-
 *{
   font-family: "Open Sans", sans-serif;
   font-optical-sizing: auto;
@@ -41,7 +39,6 @@ $white: #fff;
 
 body, html{
   background: $dark;
-  // scroll-behavior: smooth;
 }
 
 .white{color: $white;}

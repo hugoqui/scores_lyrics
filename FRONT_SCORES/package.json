@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "serve": "set NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "build": "set NODE_OPTIONS=--openssl-legacy-provider &&vue-cli-service build"
+    "serve-ios": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
+    "build": "set NODE_OPTIONS=--openssl-legacy-provider &&vue-cli-service build",
+    "build-ios": "export NODE_OPTIONS=--openssl-legacy-provider &&vue-cli-service build"
   },
   "dependencies": {
     "core-js": "^3.6.5",
