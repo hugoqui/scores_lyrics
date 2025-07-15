@@ -71,7 +71,10 @@ export default {
                         
             console.log("pos sin arreglo")            
             console.log("url... ", this.url)
-            this.finalUrl = host + this.url  + this.extension
+
+            const appName = this.url.indexOf("panel") != -1 ? "" : "/panel/" 
+
+            this.finalUrl = host + appName + this.url  + this.extension
             return
         },
 
