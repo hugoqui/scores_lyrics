@@ -25,6 +25,11 @@ import VueSocketIO from 'vue-socket.io'
 Vue.use(new VueSocketIO({
   debug: false,
   connection: store.state.socketUrl,
+  options: {
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000, 
+  },
   vuex: {
     store,
     actionPrefix: 'SOCKET_',

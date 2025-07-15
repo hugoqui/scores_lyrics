@@ -30,10 +30,20 @@ const server = express()
     .listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
 //socket
-const socketIO = require('socket.io')
+// const socketIO = require('socket.io')
+const io = require('socket.io')(server, {
+  pingInterval: 10000,   // cada 10 segundos
+  pingTimeout: 5000,     // desconecta si no responde en 5s
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
 
+// global.io = socketIO(server)
+global.io = io;
 setInterval(() => io.emit('time', new Date().toTimeString()), 1000)
-global.io = socketIO(server)
+
 io.on('connection', (socket) => { 
 
     console.log('Client connected....');
