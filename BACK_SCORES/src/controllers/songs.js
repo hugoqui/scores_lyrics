@@ -98,4 +98,15 @@ module.exports = {
         }
     },
 
+    setNewSong: async (req, res)=> {
+        try {
+            const data = req.body        
+            console.log("new song... ", data)
+            io.emit("text_change", data)
+            res.status(200)            
+        } catch (error) {
+            console.log("new son error> ", error)
+        }
+    }
+
 }

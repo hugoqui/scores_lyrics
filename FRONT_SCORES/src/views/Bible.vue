@@ -186,7 +186,8 @@ export default {
       this.scripture = { ...scripture }
 
       this.searchedVerses = []
-      this.$socket.emit("text_change", this.scripture)
+      this.$store.dispatch("showVerse", this.scripture)
+      // this.$socket.emit("text_change", this.scripture)
 
       const verseElement = this.$refs[`verse_${verse}`];
      

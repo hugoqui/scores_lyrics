@@ -83,25 +83,6 @@
 
                 </div>
             </div>
-
-
-            <!-- <div v-for="(song) in filteredSongs" :key="song.id"
-                class="mt-3 mb-2 p-2 bg-gold white zoom" style="cursor:pointer">
-                <div class="row">
-                    <div class="col" >
-                        <img src="@/assets/pen.png" alt="belen" class="mt-1" style="cursor:pointer;" height="15"
-                            @click="showSongDetails(song.id)" data-toggle="modal" data-target="#modifyModal">
-                    </div>
-                    <div class="col-8" @click="addSong(song)">
-                        <h5 class="text-uppercase" style="text-shadow:0px 0px 8px #000">{{ song.title }}</h5>
-                    </div>
-                    <div class="col">
-                        <img src="@/assets/arrow.png" alt="belen" class="mt-3 img-fluid" style="cursor:pointer;"
-                            @click="addSong(song)"> <br>
-                    </div>
-                </div>
-            </div> -->
-
         </div>
 
         <div class="col-4" style="max-height:96vh; overflow:auto; ">
@@ -197,8 +178,8 @@ export default {
             data.text = verse
             data.reference = ""
             data.title = this.songTitle
-            console.log("enviando a socket ... ", data )
-            this.$socket.emit("song_change", data)
+
+            this.$store.dispatch("showVerse", data)
         },
 
         async createSong(){

@@ -20,6 +20,7 @@ module.exports = app => {
     app.get('/api/songList', songs.getList)
     app.post('/api/songList', songs.addToList)
     app.delete('/api/songList/:id', songs.removeFromList)
+    app.post('/api/setNewSong', songs.setNewSong)
     
     //last song
     app.get('/api/lastSong/', songs.getLast)
