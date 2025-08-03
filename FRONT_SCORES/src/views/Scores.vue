@@ -1,6 +1,6 @@
 <template>
     <div id="fullscreen"> 
-        <h5>{{ connectionStatus }}</h5>
+        <h5>{{ connectionStatus }} / {{ this.title }}</h5>
         <button class="btn shadow btn-dark" id="toggleScore" @click="showArragement = !showArragement; getFinalUrl()">
             {{ showArragement ? 'Arreglo' : 'Melodía' }}
         </button>

@@ -103,7 +103,7 @@ module.exports = {
             const data = req.body        
             console.log("new song... ", data)
             io.emit("text_change", data)
-            res.status(200)            
+            res.status(200).json({message: "ok"})
         } catch (error) {
             console.log("new son error> ", error)
         }

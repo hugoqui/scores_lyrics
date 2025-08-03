@@ -105,14 +105,16 @@
         <div class="col-4" style="max-height:96vh; overflow:auto; ">
              <div class="col-12">
                 <h6 class="white text-center mb-4">TRANSMISIÓN</h6>
+                
             </div>
-
+            
             <div class="border p-3 m-3 rounded border border-warning white zoom paragraph" v-for="(verse, i) in verses" :key="verse.id"
                 :class="selectedVerse == i+1 ? 'active' : ''"  style="cursor:pointer"
                 @click="showVerse(verse,i)">
                 <strong>ESTROFA #{{i+1}}</strong> <br>
                 {{verse}}
             </div>
+        <h6 class="text-white">{{ connectionStatus }}</h6>
         </div>
     </div>
   </div>
@@ -124,6 +126,31 @@ import SongItem from "../components/SongItem.vue";
 
 export default {
     components: { SongItem},
+    sockets: {
+        connect() {
+            this.connectionStatus = "ok"
+            console.log("✅ Conectado al servidor");
+        },
+        disconnect(reason) {
+            this.connectionStatus = 'offline';
+            console.warn("⚠️ Desconectado del servidor:", reason);
+        },
+        reconnectAttempt() {
+            this.connectionStatus = 'reconectting...';
+            console.log("🔁 Intentando reconectar...");
+        },
+        reconnect() {
+            this.connectionStatus = 'ok [reconnected]';
+            console.log("✅ Reconectado exitosamente");
+        },
+        reconnect_error(err) {
+            this.connectionStatus = 'faild reconnection';
+            console.error("❌ Error al reconectar:", err);
+        },
+        reconnect_failed() {
+            console.error("❌ Falló la reconexión");
+        },
+    },
     data:()=>({
         inputSong:"",
         allSongs:[],
@@ -139,7 +166,8 @@ export default {
         selectedSong:{},
 
         songTitle: "",
-        modalVisible:false
+        modalVisible:false,
+        connectionStatus: "--",
 
     }),
     watch:{

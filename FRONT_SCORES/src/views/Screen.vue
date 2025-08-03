@@ -20,8 +20,28 @@
 <script>
 export default {
     sockets: {
-        connect: function () {
-            console.log('socket connected');
+        connect() {
+            this.connectionStatus = "ok"
+            console.log("✅ Conectado al servidor");
+        },
+        disconnect(reason) {
+            this.connectionStatus = 'offline';
+            console.warn("⚠️ Desconectado del servidor:", reason);
+        },
+        reconnectAttempt() {
+            this.connectionStatus = 'reconectting...';
+            console.log("🔁 Intentando reconectar...");
+        },
+        reconnect() {
+            this.connectionStatus = 'ok [reconnected]';
+            console.log("✅ Reconectado exitosamente");
+        },
+        reconnect_error(err) {
+            this.connectionStatus = 'faild reconnection';
+            console.error("❌ Error al reconectar:", err);
+        },
+        reconnect_failed() {
+            console.error("❌ Falló la reconexión");
         },
         text_change: function (data) {
             this.classOut = "animated-out"
@@ -43,7 +63,8 @@ export default {
         scripture: { text: "", reference: "" },
         showVerse: false,
         classOut: "",
-        fontSize: 175
+        fontSize: 175,
+        connectionStatus: "--"
     }),
     methods: {
         getStyle(){

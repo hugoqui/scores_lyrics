@@ -3,10 +3,10 @@
         <div v-if="showVerse" class="text-center animated" 
              style="position:fixed; bottom:1rem; width:100%;"
              >
-            <h1 class="scripture"  style="margin-bottom:1rem; width:100%;  text-shadow: 0px 0px 10px #000; font-size:4.5rem;"
+            <h1 class="scripture"  style="margin-bottom:1rem; width:100%;  
+                text-shadow: 0px 0px 10px #000; font-size:4.5rem;"
                 :class="scripture.reference.length == 0 ? 'breaks' :''"
                 >
-                <!-- :style="scripture.text.length > 160 ? 'font-size:3rem;' : 'font-size:4.5rem;'" -->
                 {{scripture.text}}
             </h1>
             
