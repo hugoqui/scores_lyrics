@@ -1,6 +1,6 @@
 <template>
     <div id="fullscreen"> 
-        <!-- <h5>{{ count }}</h5> -->
+        <h5>{{ connectionStatus }}</h5>
         <button class="btn shadow btn-dark" id="toggleScore" @click="showArragement = !showArragement; getFinalUrl()">
             {{ showArragement ? 'Arreglo' : 'Melodía' }}
         </button>
@@ -13,6 +13,30 @@
 export default {
     props: ["instrument"],
     sockets: {
+        connect() {
+            this.connectionStatus = "ok"
+            console.log("✅ Conectado al servidor");
+        },
+        disconnect(reason) {
+            this.connectionStatus = 'offline';
+            console.warn("⚠️ Desconectado del servidor:", reason);
+        },
+        reconnectAttempt() {
+            this.connectionStatus = 'reconectting...';
+            console.log("🔁 Intentando reconectar...");
+        },
+        reconnect() {
+            this.connectionStatus = 'ok [reconnected]';
+            console.log("✅ Reconectado exitosamente");
+        },
+        reconnect_error(err) {
+            this.connectionStatus = 'faild reconnection';
+            console.error("❌ Error al reconectar:", err);
+        },
+        reconnect_failed() {
+            console.error("❌ Falló la reconexión");
+        },
+
         text_change: function (data) {
             console.log("caambiar, el text... ", data.text, !data.text)
             if (!data.text) {
@@ -31,6 +55,7 @@ export default {
             count: 0,
             showArragement: false,
             finalUrl: null,
+            connectionStatus: "online",
         }
     },
     mounted() {

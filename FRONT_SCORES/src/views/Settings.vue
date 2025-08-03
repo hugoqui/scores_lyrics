@@ -15,7 +15,7 @@
             <div class="row">
                   <div class="col">
                     <b class="gold">Ruta de Servidor Secundario</b> 
-                    <input type="text" class="form-control bg-darker text-warning"  v-model="host">
+                    <input type="text" class="form-control bg-darker text-warning"  v-model="secondHost">
                     <button style="width:10rem" class="p-3 mt-1 btn btn-outline-warning" @click="setSecondHost()">Guardar Host</button>
                 </div>
             </div>

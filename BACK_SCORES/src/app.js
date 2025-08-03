@@ -23,14 +23,12 @@ app.use(cors)
 
 
 let PORT = process.env.PORT || 3014
-//let PORT =  3014
+const http = require('http')
+const server = http.createServer(app)
 
-const server = express()
-    .use(app)
-    .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+server.listen(PORT, () => console.log(`Listening on ${PORT}`))
 
-//socket
-// const socketIO = require('socket.io')
+
 const io = require('socket.io')(server, {
   pingInterval: 10000,   // cada 10 segundos
   pingTimeout: 5000,     // desconecta si no responde en 5s
@@ -40,14 +38,13 @@ const io = require('socket.io')(server, {
   }
 });
 
-// global.io = socketIO(server)
 global.io = io;
 setInterval(() => io.emit('time', new Date().toTimeString()), 1000)
 
 io.on('connection', (socket) => { 
 
     console.log('Client connected....');
-    socket.on('disconnect', () => console.log('Client disconnected'))
+    socket.on('disconnect', (reason) =>   console.log(`Client disconnected. Reason: ${reason}`))
     
     socket.on("song_change", data => {
         console.log("song changed.... ", data)
