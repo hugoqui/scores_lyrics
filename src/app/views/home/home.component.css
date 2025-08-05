@@ -1,0 +1,15 @@
+.button{
+    border-width: 1;
+    border-color: #333;
+    padding: 32;
+    border-radius: 8;
+    vertical-align: middle;
+    min-height: 100;
+    text-align: center;
+    background-color: #eee;
+}
+
+.button *{
+    horizontal-alignment:center;
+    padding: 8;    
+}

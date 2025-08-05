@@ -1,9 +1,16 @@
 import { Routes } from '@angular/router';
-import { ItemsComponent } from './item/items.component';
-import { ItemDetailComponent } from './item/item-detail.component';
+import { ItemsComponent } from './components/item/items.component';
+import { HomeComponent } from './views/home/home.component';
+import { MenuComponent } from './views/menu/menu.component';
+import { ScoreComponent } from './views/score/score.component';
+import { ItemDetailComponent } from './components/item/item-detail.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/items', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: 'home', component:  HomeComponent },
+  { path: 'menu', component:  MenuComponent },
+  { path: 'score/:id', component:  ScoreComponent },
+  
   { path: 'items', component: ItemsComponent },
   { path: 'item/:id', component: ItemDetailComponent },
 ];

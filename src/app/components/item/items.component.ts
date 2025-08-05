@@ -1,6 +1,6 @@
 import { Component, NO_ERRORS_SCHEMA, inject } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
-import { Page } from '@nativescript/core'
+import { Page, Label } from '@nativescript/core'
 import { ItemService } from './item.service'
 
 @Component({

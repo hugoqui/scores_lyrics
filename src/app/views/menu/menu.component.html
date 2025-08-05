@@ -1,0 +1,11 @@
+<ActionBar title="Symphony / Menú"> </ActionBar>
+<GridLayout>
+    <ListView [items]="instrumentsService.instrumetns()">
+        <ng-template let-item>
+            <StackLayout [nsRouterLink]="['/score', item.id]">
+                <Label [text]="item.label" class="instrument-item text-gray-500"></Label>                
+            </StackLayout>
+        </ng-template>
+
+    </ListView>
+</GridLayout>
