@@ -1,6 +1,6 @@
-<ActionBar title="Symphony" hidden> </ActionBar>
+<ActionBar [title]="'Partituras ' + instrument()?.label">
+</ActionBar>
 
-<GridLayout>
-    <Label [text]="`Partituras ${instrument()?.label}`" textWrap="true" ></Label>
-    
-</GridLayout>
+<StackLayout (tap)="toggleVisibilityNav()">
+    <Image src="~/app/assets/scores/a_cristo_coronad.png" stretch="aspectFit" />
+</StackLayout>
