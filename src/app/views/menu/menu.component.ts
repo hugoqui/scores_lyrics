@@ -15,7 +15,7 @@ export class MenuComponent {
   }
 
   ngOnInit() {
-    console.log(this.instrumentsService.instrumetns());
+    // console.log(this.instrumentsService.instrumetns());
   }
 
 }

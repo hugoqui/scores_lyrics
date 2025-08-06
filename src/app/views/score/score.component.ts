@@ -6,8 +6,10 @@ import { Instrument } from '../../models/instrument';
 import { ActivatedRoute } from '@angular/router';
 import { Page } from '@nativescript/core';
 import { InstrumentsService } from '~/app/services/instruments.service';
+import { SocketService } from '~/app/services/socket.service';
 
 import { SnackBar } from '@nativescript-community/ui-material-snackbar';
+import { effect } from '@angular/core';
 
 @Component({
   moduleId: module.id,
@@ -19,21 +21,38 @@ import { SnackBar } from '@nativescript-community/ui-material-snackbar';
 })
 export class ScoreComponent {
   constructor(
-    public instrumentsService: InstrumentsService, 
-    private route: ActivatedRoute, 
-    private page: Page
+    public instrumentsService: InstrumentsService,
+    private route: ActivatedRoute,
+    private page: Page,
+    private socketService: SocketService
   ) {
-
+    effect(() => {
+        const estado = this.socketService.connectionStatus();
+        console.log("📡 Estado de conexión:", estado);
+        this.showToast(estado);
+      });
   }
 
   instrument = signal<Instrument>(null)
-  
-  ngOnInit(): void {    
+
+  ngOnInit(): void {
     const id = +this.route.snapshot.params.id
-    this.instrument.set(this.instrumentsService.getInstrument(id))    
+    this.instrument.set(this.instrumentsService.getInstrument(id))
+
   }
 
-  toggleVisibilityNav(){
+  ngAfterViewInit(): void {
+    try {
+      const host = appSettings.getString('host', 'http://192.168.5.1:3014');
+      this.socketService.connect(host);
+      
+    } catch (error) {
+      console.log('error after init... ', error)
+    }
+  }
+
+
+  toggleVisibilityNav() {
     const newStatus = this.page.actionBar.visibility === 'visible' ? 'hidden' : 'visible'
     this.page.actionBar.visibility = newStatus
   }

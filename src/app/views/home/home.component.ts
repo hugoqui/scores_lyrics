@@ -30,8 +30,8 @@ export class HomeComponent {
     try {
       console.log('setting host...')
       let host = appSettings.getString('host', 'http://192.168.5.1:8080');
-      this.router.navigate(['/menu']);
-      return
+      // this.router.navigate(['/menu']);
+      // return
 
       const newHost = await prompt({
         title: 'Servidor',
