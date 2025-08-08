@@ -19,30 +19,33 @@ app.use(bodyParser.json())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
-// app.use(cors)
+app.use(cors)
 
 let PORT = process.env.PORT || 3014
 const http = require('http')
 const server = http.createServer(app)
 
 server.listen(PORT, () => console.log(`Listening on ${PORT}`))
+// process.env.DEBUG = 'socket.io*';
+
 const io = require('socket.io')(server, {
-  pingInterval: 10000,
-  pingTimeout: 5000,
+  pingInterval: 25000,
+  pingTimeout: 30000,
   cors: {
-    origin: ['http://localhost:8080', 'http://192.168.1.19:3014'],
+    origin: '*',
     methods: ['GET', 'POST'],
-    credentials: true
+    credentials: true,
   },
-  transports: ['websocket']
 });
 
+
+
 global.io = io;
-setInterval(() => io.emit('time', new Date().toTimeString()), 1000)
+// setInterval(() => io.emit('time',  `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}` ), 30 * 1000)
 
 io.on('connection', (socket) => { 
 
-    console.log('Client connected....');
+    console.log('🥳🥳🥳🥳🥳 Client connected....');
     socket.on('disconnect', (reason) =>   console.log(`Client disconnected. Reason: ${reason}`))
     
     socket.on("song_change", data => {
