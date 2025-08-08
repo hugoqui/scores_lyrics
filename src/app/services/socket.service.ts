@@ -1,63 +1,67 @@
 import { Injectable, signal } from '@angular/core';
-// import { io, Socket } from 'socket.io-client';
-import { io, Socket } from 'socket.io-client/dist/socket.io.js';
+import { SocketIO } from '@triniwiz/nativescript-socketio';
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
-  private socket!: Socket;
-
+  private socketIO: any;
+  private url: string;
   connectionStatus = signal<'offline' | 'ok' | 'reconnecting' | 'fail'>('offline');
 
+  constructor() {
+
+  }
+
   connect(url: string): void {
-    if (this.socket) {
-      this.socket.disconnect();
+    this.url = url;
+
+    if (!this.socketIO) {
+      // this.socketIO = new SocketIO(this.url)
+      this.socketIO = new SocketIO(this.url, {
+        reconnect: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
+        transports: ['websocket'],
+      });
+
+      this.registerListeners();
     }
-    console.log("🌐 Conectando a Socket.IO en:", url);
 
-    this.socket = io(url, {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      forceNew: true // Asegura una nueva conexión
-    });
+    if (!this.socketIO.connected) {
+      this.socketIO.connect();
+      console.log('Intentando conectar socket:', this.url);
+    }
+  }
 
-    this.socket.on('connect', () => {
+  private registerListeners() {
+    this.socketIO.on('connect', () => {
+      console.log('✅ Connected');
       this.connectionStatus.set('ok');
-      console.log('✅ Conectado al servidor');
     });
 
-    this.socket.on('disconnect', (reason) => {
+    this.socketIO.on('disconnect', (reason: string) => {
+      console.log('⚠️ Disconnected:', reason);
       this.connectionStatus.set('offline');
-      console.warn('⚠️ Desconectado del servidor:', reason);
     });
 
-    this.socket.on('reconnect_attempt', () => {
-      this.connectionStatus.set('reconnecting');
-      console.log('🔁 Intentando reconectar...');
-    });
-
-    this.socket.on('reconnect', () => {
-      this.connectionStatus.set('ok');
-      console.log('✅ Reconectado exitosamente');
-    });
-
-    this.socket.on('reconnect_error', (err) => {
+    this.socketIO.on('error', (error: any) => {
+      console.error('❌ Socket error:', error);
       this.connectionStatus.set('fail');
-      console.error('❌ Error al reconectar:', err);
     });
 
-    this.socket.on('reconnect_failed', () => {
-      console.error('❌ Falló la reconexión');
+    this.socketIO.on('connect_error', (error: any) => {
+      console.error('❌ Connect error:', error);
     });
 
-    this.socket.on('text_change', (data) => {
-      console.log('📩 Texto recibido:', data);
-      if (!data.text) return;
+    this.socketIO.on('reconnect_attempt', () => {
+      console.log('🔁 Reconnecting...');
+      this.connectionStatus.set('reconnecting');
+    });
 
+    this.socketIO.on('text_change', (data: any) => {
+      console.log('Texto recibido:', data);
       this.handleTextChange(data);
     });
   }
@@ -67,6 +71,11 @@ export class SocketService {
   }
 
   send(event: string, payload: any) {
-    this.socket?.emit(event, payload);
+    this.socketIO.emit(event, payload);
+  }
+
+  disconnect() {
+    this.socketIO.disconnect();
+    console.log('🚪 Disconnected socket');
   }
 }

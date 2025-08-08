@@ -1,7 +1,6 @@
 import { Component, NO_ERRORS_SCHEMA, inject, signal } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
 import * as appSettings from '@nativescript/core/application-settings';
-
 import { Instrument } from '../../models/instrument';
 import { ActivatedRoute } from '@angular/router';
 import { Page } from '@nativescript/core';
@@ -40,13 +39,10 @@ export class ScoreComponent {
     this.instrument.set(this.instrumentsService.getInstrument(id))
   }
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit() {
     try {
-      // const host = appSettings.getString('host');
-      const host = 'http://192.168.1.19:3014';
-      console.log('trying to connect to...', host)
+      const host = appSettings.getString('host');      
       this.socketService.connect(host);
-      this.getSong(host)      
     } catch (error) {
       console.log('error after init... ', error)
     }
@@ -58,15 +54,9 @@ export class ScoreComponent {
   }
 
   showToast(message: string) {
+    console.log("🗨️ Mensaje de estado:", message);
     const snackbar = new SnackBar();
     snackbar.simple(message);
-  }
-
-  async getSong(url: string){
-    const req = await fetch(url + '/api/songs')
-    const res = await req.json()
-    console.log("primer canto...")
-    console.log(res[0])
   }
 
 }

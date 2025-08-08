@@ -14,10 +14,8 @@
     "@angular/router": "~20.0.0",
     "@nativescript-community/ui-material-snackbar": "^7.2.71",
     "@nativescript/angular": "^20.0.0",
-    "@nativescript/core": "~8.9.0",
-    "engine.io-client": "6.2.1",
+    "@nativescript/core": "~8.9.0",    
     "rxjs": "~7.8.0",
-    "socket.io-client": "4.7.2",
     "zone.js": "~0.15.0"
   },
   "overrides": {
@@ -32,6 +30,7 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "~20.0.0",
     "@angular/compiler-cli": "~20.0.0",
+    "@nativescript/android": "8.8.6",
     "@nativescript/ios": "8.9.2",
     "@nativescript/tailwind": "^2.1.0",
     "@nativescript/types": "~8.9.0",
