@@ -38,19 +38,19 @@ export class ScoreComponent {
   ngOnInit(): void {
     const id = +this.route.snapshot.params.id
     this.instrument.set(this.instrumentsService.getInstrument(id))
-
   }
 
   ngAfterViewInit(): void {
     try {
-      const host = appSettings.getString('host', 'http://192.168.5.1:3014');
+      // const host = appSettings.getString('host');
+      const host = 'http://192.168.1.19:3014';
+      console.log('trying to connect to...', host)
       this.socketService.connect(host);
-      
+      this.getSong(host)      
     } catch (error) {
       console.log('error after init... ', error)
     }
   }
-
 
   toggleVisibilityNav() {
     const newStatus = this.page.actionBar.visibility === 'visible' ? 'hidden' : 'visible'
@@ -60,6 +60,13 @@ export class ScoreComponent {
   showToast(message: string) {
     const snackbar = new SnackBar();
     snackbar.simple(message);
+  }
+
+  async getSong(url: string){
+    const req = await fetch(url + '/api/songs')
+    const res = await req.json()
+    console.log("primer canto...")
+    console.log(res[0])
   }
 
 }

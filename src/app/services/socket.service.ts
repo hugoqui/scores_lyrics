@@ -15,12 +15,14 @@ export class SocketService {
     if (this.socket) {
       this.socket.disconnect();
     }
+    console.log("🌐 Conectando a Socket.IO en:", url);
 
     this.socket = io(url, {
+      transports: ['websocket'],
       reconnection: true,
-      transports: ['websocket'], 
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      forceNew: true // Asegura una nueva conexión
     });
 
     this.socket.on('connect', () => {
