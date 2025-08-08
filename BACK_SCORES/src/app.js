@@ -7,35 +7,34 @@ const bodyParser = require('body-parser')
 
 //cors
 const cors = (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
-    res.header('Access-Control-Allow-Headers', 'Content-Type')
-    next()
-}
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+};
 
 app.use(morgan('dev'))
 app.use(bodyParser.json())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
-app.use(cors)
-
-
+// app.use(cors)
 
 let PORT = process.env.PORT || 3014
 const http = require('http')
 const server = http.createServer(app)
 
 server.listen(PORT, () => console.log(`Listening on ${PORT}`))
-
-
 const io = require('socket.io')(server, {
-  pingInterval: 10000,   // cada 10 segundos
-  pingTimeout: 5000,     // desconecta si no responde en 5s
+  pingInterval: 10000,
+  pingTimeout: 5000,
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
+    origin: ['http://localhost:8080', 'http://192.168.1.19:3014'],
+    methods: ['GET', 'POST'],
+    credentials: true
+  },
+  transports: ['websocket']
 });
 
 global.io = io;
@@ -49,9 +48,7 @@ io.on('connection', (socket) => {
     socket.on("song_change", data => {
         console.log("song changed.... ", data)
         io.emit("text_change", data)
-
-        var fs = require('fs')
-        
+        var fs = require('fs')        
         fs.writeFile('src/songid.txt', data.title, function (err) {
             if (err) {
                 console.log(err)
@@ -114,5 +111,5 @@ require('./routes/routes.js')(app)
 let mysql = require("mysql")
 let config = require('./config/config')
 global.pool = mysql.createPool(config)
-console.log('conectado...')
+console.log('base de datos conectada...')
 global.fetch = require("node-fetch");

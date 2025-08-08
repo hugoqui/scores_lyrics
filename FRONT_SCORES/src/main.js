@@ -26,9 +26,11 @@ Vue.use(new VueSocketIO({
   debug: false,
   connection: store.state.socketUrl,
   options: {
+    transports: ['websocket'],
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000, 
+    forceNew: true
   },
   vuex: {
     store,
