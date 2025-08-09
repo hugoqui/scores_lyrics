@@ -3,7 +3,7 @@ import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescrip
 import * as appSettings from '@nativescript/core/application-settings';
 import { Instrument } from '../../models/instrument';
 import { ActivatedRoute } from '@angular/router';
-import { Page } from '@nativescript/core';
+import { knownFolders, Page, path } from '@nativescript/core';
 import { InstrumentsService } from '~/app/services/instruments.service';
 import { SocketService } from '~/app/services/socket.service';
 
@@ -22,6 +22,7 @@ export class ScoreComponent implements AfterViewInit, OnDestroy{
   instrument = signal<Instrument>(null)
   status = signal<'offline' | 'ok' | 'reconnecting' | 'fail'>('offline')
   currentSong = signal<string>('')
+  scorePath = signal<string>('')
 
   constructor(
     public instrumentsService: InstrumentsService,
@@ -32,6 +33,13 @@ export class ScoreComponent implements AfterViewInit, OnDestroy{
     effect(() => {
       this.status.set(this.socketService.connectionStatus());
       this.currentSong.set(this.socketService.currentSong());
+
+
+      const documents = knownFolders.documents();
+      const instrumentFolder = documents.getFolder(this.instrument().path);
+      const filePath = path.join(instrumentFolder.path, this.currentSong() + '.png');
+      const normalizedPath = `file://${filePath}`;
+      this.scorePath.set(normalizedPath);
     });
   }
   ngOnDestroy(): void {
@@ -47,6 +55,7 @@ export class ScoreComponent implements AfterViewInit, OnDestroy{
     try {
       const host = appSettings.getString('host');      
       this.socketService.connect(host);
+      
     } catch (error) {
       console.log('error after init... ', error)
     }

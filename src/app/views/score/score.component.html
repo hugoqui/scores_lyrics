@@ -2,5 +2,5 @@
 </ActionBar>
 
 <StackLayout (tap)="toggleVisibilityNav()">
-    <Image [src]="`~/app/assets/scores/${currentSong()}.png`" stretch="aspectFit" />
+    <Image [src]="scorePath()" stretch="aspectFit" />
 </StackLayout>
