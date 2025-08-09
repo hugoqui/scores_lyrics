@@ -1,16 +1,14 @@
 <template>
-    <div id="screen-background" @click="fullscreen()" > 
+    <div id="screen-background" @click="fullscreen()">
         <div class="text-center animated v-container" :class="classOut">
-            <p ref="scriptureText"
-                v-show="showVerse"
-                class="scripture"
-                id="scripture"
-                :class="scripture.reference.length == 0 ? 'breaks' :''">
-                {{scripture.text}}
-                
+            <p ref="scriptureText" v-show="showVerse" class="scripture" id="scripture"
+                :class="scripture.reference.length == 0 ? 'breaks' : ''">
+                {{ scripture.text }}
+
                 <template v-if="scripture.reference && scripture.reference.length > 0">
                     <br>
-                    <span class="gold " :style="`font-size:${fontSize * 0.7}px; font-weight: bold;`">{{scripture.reference}}</span>
+                    <span class="gold "
+                        :style="`font-size:${fontSize * 0.7}px; font-weight: bold;`">{{ scripture.reference }}</span>
                 </template>
             </p>
         </div>
@@ -18,47 +16,26 @@
 </template>
 
 <script>
-export default {
-    sockets: {
-        connect() {
-            this.connectionStatus = "ok"
-            console.log("✅ Conectado al servidor");
-        },
-        disconnect(reason) {
-            this.connectionStatus = 'offline';
-            console.warn("⚠️ Desconectado del servidor:", reason);
-        },
-        reconnectAttempt() {
-            this.connectionStatus = 'reconectting...';
-            console.log("🔁 Intentando reconectar...");
-        },
-        reconnect() {
-            this.connectionStatus = 'ok [reconnected]';
-            console.log("✅ Reconectado exitosamente");
-        },
-        reconnect_error(err) {
-            this.connectionStatus = 'faild reconnection';
-            console.error("❌ Error al reconectar:", err);
-        },
-        reconnect_failed() {
-            console.error("❌ Falló la reconexión");
-        },
-        text_change: function (data) {
-            this.classOut = "animated-out"
-            setTimeout(() => {            
+export default {    
+    mounted() {
+        this.$socket.on('text_change', (data) => {
+            this.classOut = "animated-out";
+            setTimeout(() => {
                 this.showVerse = false;
-                this.classOut = ""            
+                this.classOut = "";
                 this.scripture.text = data.text.trim();
                 this.scripture.reference = data.reference;
                 this.showVerse = true;
-
-                // Ajustar el tamaño de la fuente después de que el DOM se actualice
                 this.$nextTick(() => {
                     this.adjustFontSize();
                 });
             }, 300);
-        }
+        });
     },
+    beforeDestroy() {
+        this.$socket.off('text_change');
+    },
+
     data: () => ({
         scripture: { text: "", reference: "" },
         showVerse: false,
@@ -67,9 +44,9 @@ export default {
         connectionStatus: "--"
     }),
     methods: {
-        getStyle(){
-            const config = this.$store.state.config.filter(c=> c.module=="screen")
-            let result = {}            
+        getStyle() {
+            const config = this.$store.state.config.filter(c => c.module == "screen")
+            let result = {}
             config.forEach(element => {
                 result[element.name] = element.value
             });
@@ -95,7 +72,7 @@ export default {
                 while ((el.scrollHeight > containerHeight || el.scrollWidth > containerWidth) && fontSize > 32) {
                     fontSize -= 1;
                     el.style.fontSize = `${fontSize}px`;
-                }                
+                }
             }
 
             this.fontSize = fontSize
@@ -103,7 +80,7 @@ export default {
             console.log("Final font size: ", fontSize + "px");
         },
 
-        fullscreen(){            
+        fullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
             } else if (document.exitFullscreen) {
@@ -115,9 +92,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-#screen-background {    
-    background: radial-gradient(circle, #26293a 33%, rgb(11, 10, 21) 90%) !important;   
+#screen-background {
+    background: radial-gradient(circle, #26293a 33%, rgb(11, 10, 21) 90%) !important;
     // background-color: #151719;
     height: 100vh;
     position: relative;
@@ -128,7 +104,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;    
+    height: 100%;
 }
 
 .scripture {
@@ -148,23 +124,33 @@ export default {
     white-space: pre;
 }
 
-.animated {    
+.animated {
     animation-name: fade-in;
     animation-duration: 500ms;
 }
 
 @keyframes fade-in {
-    0% { opacity: 0; }        
-    100% { opacity: 1; }
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
-.animated-out{       
+.animated-out {
     animation-name: fade-out;
     animation-duration: 500ms;
 }
 
 @keyframes fade-out {
-    0% { opacity: 1; }        
-    100% { opacity: 0; }
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
 </style>

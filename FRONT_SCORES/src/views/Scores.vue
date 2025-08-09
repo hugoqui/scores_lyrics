@@ -1,51 +1,17 @@
 <template>
-    <div id="fullscreen"> 
-        <h5>{{ connectionStatus }} / {{ this.title }}</h5>
+    <div id="fullscreen">
+        <!-- <h5>{{ count }}</h5> -->
         <button class="btn shadow btn-dark" id="toggleScore" @click="showArragement = !showArragement; getFinalUrl()">
             {{ showArragement ? 'Arreglo' : 'Melodía' }}
         </button>
-        <img :src="`${finalUrl}`" class="img-fluid" :alt="title" v-if="finalUrl"
-            style="max-height:100%; max-width:100%" @error="imageLoadError()" @click="setFullscreen()">
+        <img :src="`${finalUrl}`" class="img-fluid" :alt="title" v-if="finalUrl" style="max-height:100%; max-width:100%"
+            @error="imageLoadError()" @click="setFullscreen()">
     </div>
 </template>
 
 <script>
 export default {
     props: ["instrument"],
-    sockets: {
-        connect() {
-            this.connectionStatus = "ok"
-            console.log("✅ Conectado al servidor");
-        },
-        disconnect(reason) {
-            this.connectionStatus = 'offline';
-            console.warn("⚠️ Desconectado del servidor:", reason);
-        },
-        reconnectAttempt() {
-            this.connectionStatus = 'reconectting...';
-            console.log("🔁 Intentando reconectar...");
-        },
-        reconnect() {
-            this.connectionStatus = 'ok [reconnected]';
-            console.log("✅ Reconectado exitosamente");
-        },
-        reconnect_error(err) {
-            this.connectionStatus = 'faild reconnection';
-            console.error("❌ Error al reconectar:", err);
-        },
-        reconnect_failed() {
-            console.error("❌ Falló la reconexión");
-        },
-
-        text_change: function (data) {
-            console.log("caambiar, el text... ", data.text, !data.text)
-            if (!data.text) {
-                return
-            }
-
-            this.displaySong(data)
-        }
-    },
     data() {
         return {
             url: "",
@@ -60,7 +26,19 @@ export default {
     },
     mounted() {
         this.getLast()
+        this.$socket.on('text_change', (data) => {
+            console.log("cambiar el text... ", data.text, !data.text);
+            if (!data.text) {
+                return;
+            }
+            this.displaySong(data);
+        });
+
     },
+    beforeDestroy() {
+        this.$socket.off('text_change'); // evitar memory leaks
+    },
+
     methods: {
         setFullscreen() {
             if (this.isFullScreen) {
@@ -86,20 +64,20 @@ export default {
 
             let host = localStorage.getItem("host") || "";
             host = host.replace(/:\d+\/$/, "");
-            
+
             if (this.showArragement && this.count == 1) {
                 console.log("a ver... con arreglo?")
                 const instrument = this.instrument.replace(/\/$/, "");
-                this.finalUrl = host + this.url  + "_" + instrument + this.extension
+                this.finalUrl = host + this.url + "_" + instrument + this.extension
                 return
             }
-                        
-            console.log("pos sin arreglo")            
+
+            console.log("pos sin arreglo")
             console.log("url... ", this.url)
 
-            const appName = this.url.indexOf("panel") != -1 ? "" : "/panel/" 
+            const appName = this.url.indexOf("panel") != -1 ? "" : "/panel/"
 
-            this.finalUrl = host + appName + this.url  + this.extension
+            this.finalUrl = host + appName + this.url + this.extension
             return
         },
 
@@ -112,13 +90,13 @@ export default {
             })
             title = title.substring(0, title.length - 1)
             this.title = title
-            if (this.url.indexOf("panel") == -1)  {this.url += "/panel"}
+            if (this.url.indexOf("panel") == -1) { this.url += "/panel" }
 
             this.url = '/img/scores/' + this.instrument + '/' + title
 
             // if (this.showArragement)
             //     this.url += "_" + this.instrument
-            
+
             this.count = 1
             this.getFinalUrl()
         },
