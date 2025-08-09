@@ -9,29 +9,26 @@ export class SocketService {
   private socketIO: any;
   private url: string;
   connectionStatus = signal<'offline' | 'ok' | 'reconnecting' | 'fail'>('offline');
+  currentSong = signal<string>('');
 
-  constructor() {
-
-  }
+  constructor() {}
 
   connect(url: string): void {
     this.url = url;
 
-    if (!this.socketIO) {
-      // this.socketIO = new SocketIO(this.url)
+    if (!this.socketIO) {      
       this.socketIO = new SocketIO(this.url, {
         reconnect: true,
         reconnectionAttempts: 5,
-        reconnectionDelay: 2000,
-        transports: ['websocket'],
+        reconnectionDelay: 2000,        
       });
 
       this.registerListeners();
     }
 
     if (!this.socketIO.connected) {
-      this.socketIO.connect();
       console.log('Intentando conectar socket:', this.url);
+      this.socketIO.connect();
     }
   }
 
@@ -61,18 +58,23 @@ export class SocketService {
     });
 
     this.socketIO.on('text_change', (data: any) => {
-      console.log('Texto recibido:', data);
       this.handleTextChange(data);
     });
   }
 
-  private handleTextChange(data: any) {
-    console.log("Cambiar el texto a:", data.text);
+  private handleTextChange(data: any) {    
+    const id = this.getIdFromTitle(data.title);    
+    this.currentSong.set(id);
+    console.log("#####:", id);
+  }
+
+  getIdFromTitle(title: string): string{
+    return title.replace(/ /g, '_').toLowerCase();
   }
 
   send(event: string, payload: any) {
     this.socketIO.emit(event, payload);
-  }
+  }  
 
   disconnect() {
     this.socketIO.disconnect();

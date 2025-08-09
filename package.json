@@ -14,7 +14,9 @@
     "@angular/router": "~20.0.0",
     "@nativescript-community/ui-material-snackbar": "^7.2.71",
     "@nativescript/angular": "^20.0.0",
-    "@nativescript/core": "~8.9.0",    
+    "@nativescript/core": "~8.9.0",
+    "@triniwiz/nativescript-socketio": "^6.0.0",
+    "nativescript-background-http": "^4.2.1",
     "rxjs": "~7.8.0",
     "zone.js": "~0.15.0"
   },

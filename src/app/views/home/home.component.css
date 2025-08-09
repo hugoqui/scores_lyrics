@@ -7,6 +7,8 @@
     min-height: 100;
     text-align: center;
     background-color: #eee;
+    width: 350;
+    margin: 16;
 }
 
 .button *{

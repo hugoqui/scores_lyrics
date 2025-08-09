@@ -1,9 +1,14 @@
 <ActionBar title="Symphony"> </ActionBar>
 
-<GridLayout>
-    <GridLayout (tap)="setHost()" rows="auto,auto" columns="" horizontalAlignment="center" verticalAlignment="middle" class="button">
-        <Image src="~/app/assets/live.png" stretch="none" row="0" />        
+<GridLayout columns="*,auto, auto,*">
+    <GridLayout (tap)="setHost()" rows="60,auto" col="1"  horizontalAlignment="center" verticalAlignment="middle" class="button">
+        <Image src="~/app/assets/live.png" stretch="aspectFit" row="0"/>
         <Label text="conectarse a transmisón" textWrap="true" row="1"></Label>
+    </GridLayout>    
+    
+    <GridLayout (tap)="goToSettings()" rows="60,auto" col="2" horizontalAlignment="center" verticalAlignment="middle" class="button">
+        <Image src="~/app/assets/config.png" stretch="aspectFit" row="0" />        
+        <Label text="configuración" textWrap="true" row="1"></Label>
     </GridLayout>    
 
 </GridLayout>

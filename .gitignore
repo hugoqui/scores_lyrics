@@ -59,10 +59,12 @@ build/
 !default.pbxproj
 
 # Webpack cache
-webpack.config.js
-webpack.config.ts
-webpack.config.*
-webpack/
+# webpack.config.js
+# webpack.config.ts
+# webpack.config.*
+# webpack/
 
 # Optional: Git ignore git-ignored file list backups
 .gitignore~
+
+scores

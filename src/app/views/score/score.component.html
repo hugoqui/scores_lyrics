@@ -1,6 +1,6 @@
-<ActionBar [title]="'Partituras ' + instrument()?.label">
+<ActionBar [title]="'Partituras ' + instrument()?.label + ' - ' + status()">
 </ActionBar>
 
 <StackLayout (tap)="toggleVisibilityNav()">
-    <Image src="~/app/assets/scores/a_cristo_coronad.png" stretch="aspectFit" />
+    <Image [src]="`~/app/assets/scores/${currentSong()}.png`" stretch="aspectFit" />
 </StackLayout>
