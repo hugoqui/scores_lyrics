@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { knownFolders, path, File, Folder } from '@nativescript/core';
+import { knownFolders, path, File, Folder,  } from '@nativescript/core';
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { firstValueFrom, map, Observable } from 'rxjs';
@@ -23,7 +23,7 @@ export class ScoresDownloaderService {
                 const files: string[] = [];
                 while ((matches = regex.exec(html)) !== null) {
                     const fileName = matches[1];
-                    if (fileName !== '../' && /\.(png|jpe?g|gif)$/i.test(fileName)) {                                                
+                    if (fileName !== '../' && /\.(png|jpe?g|gif)$/i.test(fileName)) {
                         files.push(fileName);
                     }
                 }
@@ -35,16 +35,27 @@ export class ScoresDownloaderService {
     private async downloadFile(url: string, fileName: string, instrument: string): Promise<string> {
         try {
             const response = await fetch(url);
+            console.log('el url... ', url);
             if (!response.ok) throw new Error(`Error al descargar: ${response.statusText}`);
-            
+
             const arrayBuffer = await response.arrayBuffer();
+
             const documents = knownFolders.documents();
             const instrumentFolder = documents.getFolder(instrument);
-            const filePath = path.join(instrumentFolder.path, fileName.replace('%E2%94%9C%E2%96%92','ñ'));
+            const filePath = path.join(instrumentFolder.path, fileName.replace('%E2%94%9C%E2%96%92', 'ñ'));
 
-            // Guarda el archivo
             const file = File.fromPath(filePath);
-            await file.writeSync(new Uint8Array(arrayBuffer));
+
+            // Guardar binario correctamente
+            if (global.isIOS) {
+                const data = NSData.dataWithBytesLength(arrayBuffer as any, (arrayBuffer as ArrayBuffer).byteLength);
+                file.writeSync(data);
+            } else {
+                const bytes = new Uint8Array(arrayBuffer);
+                const outputStream = new java.io.FileOutputStream(filePath);
+                outputStream.write(bytes);
+                outputStream.close();
+            }
 
             console.log(`Archivo guardado en: ${filePath}`);
             return filePath;
@@ -55,25 +66,25 @@ export class ScoresDownloaderService {
     }
 
     async downloadScores(instrument: string): Promise<string[]> {
-        try {          
-            this.loading.set(true);  
+        try {
+            this.loading.set(true);
             const files = await firstValueFrom(this.getFileNames(instrument));
             console.log('Archivos a descargar encontrados:', files.length);
-            
+
             const downloadedFiles: string[] = [];
-            
+
             for (const file of files) {
                 this.percentage.set((downloadedFiles.length / files.length) * 100);
                 const filePath = await this.downloadFile(`https://partituras.iglesiacristianabelen.com/${instrument}/${file}`, file, instrument);
                 downloadedFiles.push(filePath);
             }
-            
+
             this.scores.set(downloadedFiles);
             this.loading.set(false);
             return downloadedFiles;
         } catch (error) {
             console.error('Error descargando las partituras:', error);
-            this.loading.set(false);  
+            this.loading.set(false);
             throw error;
         }
     }

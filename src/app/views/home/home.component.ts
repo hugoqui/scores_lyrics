@@ -29,6 +29,9 @@ export class HomeComponent {
 
   async setHost(): Promise<void> {
     try {
+      // this.router.navigate(['/menu']);
+      // return
+      
       console.log('setting host...')
       let host = appSettings.getString('host', 'http://192.168.5.1:3014');
    

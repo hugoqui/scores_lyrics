@@ -2,9 +2,14 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 32px;
   border-bottom: 1px solid #ccc;
   font-size: 18;
+  margin-top:  30;
+}
+
+.download-info{
+  font-size: 14;
+  margin-bottom: 30;
 }
 
 .title{

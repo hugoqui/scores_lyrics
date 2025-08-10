@@ -8,7 +8,7 @@ import { SocketIO } from '@triniwiz/nativescript-socketio';
 export class SocketService {
   private socketIO: any;
   private url: string;
-  connectionStatus = signal<'offline' | 'ok' | 'reconnecting' | 'fail'>('offline');
+  connectionStatus = signal<'offline' | 'online' | 'reconnecting' | 'fail'>('offline');
   currentSong = signal<string>('');
 
   constructor() {}
@@ -35,7 +35,7 @@ export class SocketService {
   private registerListeners() {
     this.socketIO.on('connect', () => {
       console.log('✅ Connected');
-      this.connectionStatus.set('ok');
+      this.connectionStatus.set('online');
     });
 
     this.socketIO.on('disconnect', (reason: string) => {

@@ -1,9 +1,9 @@
-import { Component, NO_ERRORS_SCHEMA, inject, signal, OnDestroy, AfterViewInit,effect } from '@angular/core'
+import { Component, NO_ERRORS_SCHEMA, inject, signal, OnDestroy, AfterViewInit, effect } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
 import * as appSettings from '@nativescript/core/application-settings';
 import { Instrument } from '../../models/instrument';
 import { ActivatedRoute } from '@angular/router';
-import { knownFolders, Page, path } from '@nativescript/core';
+import { knownFolders, Page, path, File } from '@nativescript/core';
 import { InstrumentsService } from '~/app/services/instruments.service';
 import { SocketService } from '~/app/services/socket.service';
 
@@ -18,9 +18,9 @@ import { SnackBar } from '@nativescript-community/ui-material-snackbar';
   imports: [NativeScriptCommonModule, NativeScriptRouterModule,],
   schemas: [NO_ERRORS_SCHEMA],
 })
-export class ScoreComponent implements AfterViewInit, OnDestroy{
+export class ScoreComponent implements AfterViewInit, OnDestroy {
   instrument = signal<Instrument>(null)
-  status = signal<'offline' | 'ok' | 'reconnecting' | 'fail'>('offline')
+  status = signal<'offline' | 'online' | 'reconnecting' | 'fail'>('offline')
   currentSong = signal<string>('')
   scorePath = signal<string>('')
 
@@ -34,12 +34,19 @@ export class ScoreComponent implements AfterViewInit, OnDestroy{
       this.status.set(this.socketService.connectionStatus());
       this.currentSong.set(this.socketService.currentSong());
 
+      if (!this.currentSong()) { return }
 
       const documents = knownFolders.documents();
       const instrumentFolder = documents.getFolder(this.instrument().path);
       const filePath = path.join(instrumentFolder.path, this.currentSong() + '.png');
-      const normalizedPath = `file://${filePath}`;
-      this.scorePath.set(normalizedPath);
+
+      if (File.exists(filePath)) {        
+        const imgFile = File.fromPath(filePath);
+        this.scorePath.set(imgFile.path);
+        console.log(imgFile.path)
+      } else {
+        console.log("No existe el archivo:", filePath);
+      }
     });
   }
   ngOnDestroy(): void {
@@ -53,16 +60,16 @@ export class ScoreComponent implements AfterViewInit, OnDestroy{
 
   async ngAfterViewInit() {
     try {
-      const host = appSettings.getString('host');      
+      const host = appSettings.getString('host');
       this.socketService.connect(host);
-      
+
     } catch (error) {
       console.log('error after init... ', error)
     }
   }
 
   toggleVisibilityNav() {
-    const newStatus = this.page.actionBar.visibility === 'visible' ? 'hidden' : 'visible'    
+    const newStatus = this.page.actionBar.visibility === 'visible' ? 'hidden' : 'visible'
     this.page.actionBar.visibility = newStatus
     if (newStatus === 'hidden') {
       this.page.actionBar.height = 0

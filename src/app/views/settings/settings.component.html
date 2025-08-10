@@ -10,8 +10,8 @@
   <ListView [items]="instrumentsService.instrumetns()" height="100%">
     <ng-template let-item>
       <StackLayout (tap)="downloadScores(item)">
-        <Label [text]="item.label" class="instrument-item text-gray-500"></Label>
-        
+        <Label [text]="item.label" class="instrument-item text-gray-700"></Label>
+        <Label [text]="`${getDownloadsLength(item.path)} partituras`" class="text-gray-500 download-info"></Label>
       </StackLayout>
     </ng-template>
 
