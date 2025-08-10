@@ -4,15 +4,17 @@
   align-items: center;
   border-bottom: 1px solid #ccc;
   font-size: 18;
-  margin-top:  30;
+  margin-top:  30;  
 }
 
 .download-info{
   font-size: 14;
   margin-bottom: 30;
+  color:#333;
 }
 
 .title{
+    color:#111;
     font-size: 18;
     font-weight: bold;
     margin-bottom: 20;

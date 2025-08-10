@@ -3,8 +3,8 @@
 <StackLayout margin="20">
   <Label text="Descargar Partituras" textWrap="true" class="title"></Label>
   @if(loading()){
-    <ActivityIndicator width="100" height="100" [busy]="true" />
-    <Label [text]="`${percentage().toFixed(2)}%`" hotizontalAlignment="center" fontSize="20"></Label>
+    <ActivityIndicator width="100" height="100" [busy]="true" color="#333"/>
+    <Label [text]="`${percentage().toFixed(2)}%`" class="text-gray-500" hotizontalAlignment="center" fontSize="20"></Label>
   }
 
   <ListView [items]="instrumentsService.instrumetns()" height="100%">
