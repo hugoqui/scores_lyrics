@@ -51,9 +51,14 @@ export class ScoresDownloaderService {
                 const data = NSData.dataWithBytesLength(arrayBuffer as any, (arrayBuffer as ArrayBuffer).byteLength);
                 file.writeSync(data);
             } else {
-                const bytes = new Uint8Array(arrayBuffer);
+                const bytes = new Uint8Array(arrayBuffer);                
+                const javaBytes = Array.create("byte", bytes.length);
+                for (let i = 0; i < bytes.length; i++) {
+                    javaBytes[i] = bytes[i];
+                }
+
                 const outputStream = new java.io.FileOutputStream(filePath);
-                outputStream.write(bytes);
+                outputStream.write(javaBytes);
                 outputStream.close();
             }
 
