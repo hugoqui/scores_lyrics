@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.song-item label{
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  font-size: 18;
+  padding:8;
+}

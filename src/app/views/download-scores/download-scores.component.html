@@ -1,0 +1,18 @@
+<ActionBar [title]="`Descargar Partituras - ${instrument().label}`"> </ActionBar>
+<StackLayout padding="20">
+    <StackLayout orientation="horizontal" horizontalAlignment="right">        
+        <Button @tap="" marginRight="20" padding="20">Descargar Todo</Button>          
+    </StackLayout>
+
+    
+    <ListView [items]="songList()" height="100%">
+        <ng-template let-song>
+            <GridLayout class="song-item" orientation="horizontal" columns="*, 100">
+                <Label col="0" [text]="song.title.replace('.png','')" class="" color="#000"></Label>
+                @if(!song.localPath){
+                    <Button col="1" @tap="" text="Descargar" class="btn btn-primary"></Button>
+                }
+            </GridLayout>
+        </ng-template>
+    </ListView>
+</StackLayout>

@@ -1,15 +1,15 @@
 .button{
     border-width: 1;
-    border-color: #333;
+    border-color: #bbb;
     padding: 32;
     border-radius: 8;
     vertical-align: middle;
     min-height: 100;
     text-align: center;
-    background-color: #eee;
+    background-color: #fff;
     width: 350;
     margin: 16;
-    color: #333;
+    color: #555;
 }
 
 .button *{

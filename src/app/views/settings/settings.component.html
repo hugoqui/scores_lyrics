@@ -5,14 +5,17 @@
   <!-- <Label class="text-gray-500" [text]="`isLoading ${loading()} - selectedId ${selectedId()} `"></Label> -->
   <ListView [items]="instrumentsService.instrumetns()" height="100%">
     <ng-template let-item>
-      <StackLayout (tap)="downloadScores(item)">
-        <Label [text]="item.label" class="instrument-item text-gray-700"></Label>
-        @if(loading() && selectedId()== item.id){
-          <Progress [value]="percentage()" width="100%"></Progress>                  
-          <Label [text]="`descargando...`" class="text-gray-300"></Label>
-        }
-        <Label [text]="`${getDownloadsLength(item.path)} partituras`" class="text-gray-500 download-info"></Label>
-      </StackLayout>
+      <GridLayout [nsRouterLink]="['/download-scores', item.id]" columns="60, *"  >
+        <Image [src]="`~/app/assets/icons/${item.name}.jpg`" class="instrument-image" col="0"></Image>
+        <StackLayout col="1" marginLeft="20">          
+          <Label [text]="item.label" class="instrument-item text-gray-700"></Label>
+          @if(loading() && selectedId()== item.id){
+            <Progress [value]="percentage()" width="100%"></Progress>                  
+            <Label [text]="`descargando...`" class="text-gray-300"></Label>
+          }
+          <Label [text]="`${getDownloadsLength(item.path)} partituras`" class="text-gray-500 download-info"></Label>
+        </StackLayout>
+      </GridLayout>
     </ng-template>
 
   </ListView>

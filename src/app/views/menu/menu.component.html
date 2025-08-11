@@ -1,10 +1,11 @@
 <ActionBar title="Symphony / Menú"> </ActionBar>
-<GridLayout>
-    <ListView [items]="instrumentsService.instrumetns()">
+<GridLayout columns="30,*,30">
+    <ListView [items]="instrumentsService.instrumetns()" col="1" height="100%">
         <ng-template let-item>
-            <StackLayout [nsRouterLink]="['/score', item.id]">
-                <Label [text]="item.label" class="instrument-item text-gray-500"></Label>                
-            </StackLayout>
+            <GridLayout [nsRouterLink]="['/score', item.id]" columns="60, *" >
+                <Image [src]="`~/app/assets/icons/${item.name}.jpg`" class="instrument-image" col="0"></Image>
+                <Label col="1" [text]="item.label" class="instrument-item text-gray-500"></Label>
+            </GridLayout>
         </ng-template>
 
     </ListView>

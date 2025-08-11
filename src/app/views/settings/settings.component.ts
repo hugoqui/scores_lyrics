@@ -31,7 +31,7 @@ export class SettingsComponent {
     })
   }
 
-  async downloadScores(item: Instrument): Promise<void> {
+  async downloadScores(item: Instrument): Promise<void> {    
     if (this.loading() && this.selectedId() !== item.id) {
       alert('No se puede iniciar otra descarga si hay una en progreso.')
       return //cannot start another download

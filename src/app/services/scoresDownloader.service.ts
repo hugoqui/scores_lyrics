@@ -2,6 +2,9 @@ import { Injectable, signal } from '@angular/core';
 import { knownFolders, path, File, Folder,  } from '@nativescript/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, map, Observable } from 'rxjs';
+import { getString, setString } from "@nativescript/core/application-settings";
+import { DownloadedFile } from '../models/downloadedFile';
+
 
 @Injectable({
     providedIn: 'root',
@@ -14,7 +17,7 @@ export class ScoresDownloaderService {
 
     constructor(private http: HttpClient) { }
 
-    private getFileNames(instrument: string): Observable<string[]> {
+    getFileNames(instrument: string): Observable<string[]> {
         return this.http.get(`https://partituras.iglesiacristianabelen.com/${instrument}/`, { responseType: 'text' }).pipe(
             map(html => {
                 const regex = /<a href="([^"]+)">/g;
@@ -73,6 +76,7 @@ export class ScoresDownloaderService {
         try {
             this.loading.set(true);
             const files = await firstValueFrom(this.getFileNames(instrument));
+
             console.log('Archivos a descargar encontrados:', files.length);
 
             const downloadedFiles: string[] = [];
@@ -83,7 +87,8 @@ export class ScoresDownloaderService {
                 const percentage = (downloadedFiles.length / files.length) * 100
                 this.percentage.set(parseFloat(percentage.toFixed(2)));
                 const filePath = await this.downloadFile(`https://partituras.iglesiacristianabelen.com/${instrument}/${file}`, file, instrument);
-                downloadedFiles.push(filePath);
+                this.addDownloadedFile({ instrument, fileName: file, localPath: filePath });
+                downloadedFiles.push(filePath);                
             }
 
             this.scores.set(downloadedFiles);
@@ -99,5 +104,22 @@ export class ScoresDownloaderService {
     cancelDownloads(){
         this.isCanceled.set(true)
     }
+
+    getDownloadedFiles(): DownloadedFile[] {
+        const data = getString("downloadedFiles", "[]");
+        return JSON.parse(data) as DownloadedFile[];
+    }
+
+    addDownloadedFile(file: DownloadedFile) {
+        const files = this.getDownloadedFiles();
+        files.push(file);
+        setString("downloadedFiles", JSON.stringify(files));
+    }
+
+    isFileDownloaded(instrument: string, fileName: string): boolean {
+        const files = this.getDownloadedFiles();
+        return files.some(f => f.instrument === instrument && f.fileName === fileName);
+    }
+
 
 }
