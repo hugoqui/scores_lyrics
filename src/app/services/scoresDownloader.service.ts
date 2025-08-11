@@ -1,9 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { knownFolders, path, File, Folder,  } from '@nativescript/core';
-
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, map, Observable } from 'rxjs';
-import * as bghttp from 'nativescript-background-http';
 
 @Injectable({
     providedIn: 'root',
@@ -12,6 +10,7 @@ export class ScoresDownloaderService {
     public scores = signal<string[]>([]);
     public loading = signal<boolean>(false);
     public percentage = signal<number>(0);
+    isCanceled = signal<boolean>(false); 
 
     constructor(private http: HttpClient) { }
 
@@ -79,7 +78,10 @@ export class ScoresDownloaderService {
             const downloadedFiles: string[] = [];
 
             for (const file of files) {
-                this.percentage.set((downloadedFiles.length / files.length) * 100);
+                if (this.isCanceled()) {return}
+
+                const percentage = (downloadedFiles.length / files.length) * 100
+                this.percentage.set(parseFloat(percentage.toFixed(2)));
                 const filePath = await this.downloadFile(`https://partituras.iglesiacristianabelen.com/${instrument}/${file}`, file, instrument);
                 downloadedFiles.push(filePath);
             }
@@ -94,6 +96,8 @@ export class ScoresDownloaderService {
         }
     }
 
-
+    cancelDownloads(){
+        this.isCanceled.set(true)
+    }
 
 }

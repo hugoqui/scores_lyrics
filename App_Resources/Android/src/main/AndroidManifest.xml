@@ -24,6 +24,7 @@
 		android:hardwareAccelerated="true">
 
 		<activity
+			android:gravity="centerCrop"
 			android:name="com.tns.NativeScriptActivity"
 			android:label="@string/title_activity_kimera"
 			android:configChanges="keyboard|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|locale|uiMode"

@@ -1,6 +1,6 @@
 import { Component, NO_ERRORS_SCHEMA, inject, signal, OnDestroy, AfterViewInit, effect } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
-import { knownFolders, Page, path } from '@nativescript/core'
+import { Dialogs, knownFolders, Page, path} from '@nativescript/core'
 import { InstrumentsService } from '../../services/instruments.service'
 import { ScoresDownloaderService } from '../../services/scoresDownloader.service'
 import { Instrument } from '~/app/models/instrument'
@@ -10,13 +10,14 @@ import { Instrument } from '~/app/models/instrument'
   selector: 'ns-settings',
   templateUrl: 'settings.component.html',
   styleUrls: ['settings.component.css'],
-  imports: [NativeScriptCommonModule, NativeScriptRouterModule,],
+  imports: [NativeScriptCommonModule, NativeScriptRouterModule, ],
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class SettingsComponent {
   scores = signal<string[]>([]);
   loading = signal<boolean>(false);
   percentage = signal<number>(0);
+  selectedId = signal<number>(null);
 
   constructor(
     private page: Page,
@@ -26,12 +27,29 @@ export class SettingsComponent {
     effect(() => {
       this.scores.set(this.scoresDownloaderService.scores());
       this.loading.set(this.scoresDownloaderService.loading());
-      this.percentage.set(this.scoresDownloaderService.percentage());
+      this.percentage.set(this.scoresDownloaderService.percentage());      
     })
   }
 
-  downloadScores(item: Instrument): void {
+  async downloadScores(item: Instrument): Promise<void> {
+    if (this.loading() && this.selectedId() !== item.id) {
+      alert('No se puede iniciar otra descarga si hay una en progreso.')
+      return //cannot start another download
+    }
+
+    else if (this.loading() && this.selectedId() === item.id){
+      const isCanceled =  await confirm('¿Desea detener la descarga?');
+      if (isCanceled){this.scoresDownloaderService.cancelDownloads()}
+      
+      return //whether is canceled or not, shouldn't countinue
+    }
+
     console.log('Downloading scores...', item)
+    const isConfirmed = await confirm('Desea comenzar la descarga?');
+    console.log('confirmed!!!', isConfirmed)
+    if (!isConfirmed) {return}
+
+    this.selectedId.set(item.id)
     this.scoresDownloaderService.downloadScores(item.path);
   }
 

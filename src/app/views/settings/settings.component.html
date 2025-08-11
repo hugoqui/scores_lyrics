@@ -2,15 +2,15 @@
 
 <StackLayout margin="20">
   <Label text="Descargar Partituras" textWrap="true" class="title"></Label>
-  @if(loading()){
-    <ActivityIndicator width="100" height="100" [busy]="true" color="#333"/>
-    <Label [text]="`${percentage().toFixed(2)}%`" class="text-gray-500" hotizontalAlignment="center" fontSize="20"></Label>
-  }
-
+  <!-- <Label class="text-gray-500" [text]="`isLoading ${loading()} - selectedId ${selectedId()} `"></Label> -->
   <ListView [items]="instrumentsService.instrumetns()" height="100%">
     <ng-template let-item>
       <StackLayout (tap)="downloadScores(item)">
         <Label [text]="item.label" class="instrument-item text-gray-700"></Label>
+        @if(loading() && selectedId()== item.id){
+          <Progress [value]="percentage()" width="100%"></Progress>                  
+          <Label [text]="`descargando...`" class="text-gray-300"></Label>
+        }
         <Label [text]="`${getDownloadsLength(item.path)} partituras`" class="text-gray-500 download-info"></Label>
       </StackLayout>
     </ng-template>

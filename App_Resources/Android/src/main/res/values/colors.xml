@@ -11,4 +11,6 @@
 
     <!-- this is unused in the default themes, so we might want to remove it? -->
     <!-- <color name="ns_blue">#272734</color> -->
+    <color name="splash_bg">#0D1B2A</color> <!-- azul marino del icono -->
+
 </resources>
