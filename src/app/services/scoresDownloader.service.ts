@@ -13,20 +13,22 @@ export class ScoresDownloaderService {
     public scores = signal<string[]>([]);
     public loading = signal<boolean>(false);
     public percentage = signal<number>(0);
-    isCanceled = signal<boolean>(false); 
+    public fileNameDownloading = signal<string>('')
+    public isCanceled = signal<boolean>(false); 
+    public scoresUrl = 'https://partituras.iglesiacristianabelen.com'
 
     constructor(private http: HttpClient) { }
 
     getFileNames(instrument: string): Observable<string[]> {
-        return this.http.get(`https://partituras.iglesiacristianabelen.com/${instrument}/`, { responseType: 'text' }).pipe(
+        return this.http.get(`${this.scoresUrl}/${instrument}/`, { responseType: 'text' }).pipe(
             map(html => {
                 const regex = /<a href="([^"]+)">/g;
                 let matches;
                 const files: string[] = [];
-                while ((matches = regex.exec(html)) !== null) {
-                    const fileName = matches[1];
+                while ((matches = regex.exec(html)) !== null) {                    
+                    const fileName = decodeURIComponent(matches[1]); 
                     if (fileName !== '../' && /\.(png|jpe?g|gif)$/i.test(fileName)) {
-                        files.push(fileName);
+                        files.push(fileName);                        
                     }
                 }
                 return files;
@@ -34,14 +36,14 @@ export class ScoresDownloaderService {
         );
     }
 
-    private async downloadFile(url: string, fileName: string, instrument: string): Promise<string> {
+    async downloadFile(fileName: string, instrument: string): Promise<string> {
         try {
-            const response = await fetch(url);
-            console.log('el url... ', url);
+            this.fileNameDownloading.set(fileName)
+            const response = await fetch(`${this.scoresUrl}/${instrument}`);
+
             if (!response.ok) throw new Error(`Error al descargar: ${response.statusText}`);
 
             const arrayBuffer = await response.arrayBuffer();
-
             const documents = knownFolders.documents();
             const instrumentFolder = documents.getFolder(instrument);
             const filePath = path.join(instrumentFolder.path, fileName.replace('%E2%94%9C%E2%96%92', 'ñ'));
@@ -86,7 +88,7 @@ export class ScoresDownloaderService {
 
                 const percentage = (downloadedFiles.length / files.length) * 100
                 this.percentage.set(parseFloat(percentage.toFixed(2)));
-                const filePath = await this.downloadFile(`https://partituras.iglesiacristianabelen.com/${instrument}/${file}`, file, instrument);
+                const filePath = await this.downloadFile(file, instrument);
                 this.addDownloadedFile({ instrument, fileName: file, localPath: filePath });
                 downloadedFiles.push(filePath);                
             }

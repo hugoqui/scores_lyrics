@@ -2,10 +2,19 @@
   display: block;
 }
 
+.song-item {height: 60;}
 .song-item label{
   margin: 10px;
   padding: 10px;
   border: 1px solid #ccc;
   font-size: 18;
   padding:8;
+}
+
+
+button{
+  background-color: #efefef;
+  color:#1171ee;
+  border-radius: 8;
+  margin:4;
 }
