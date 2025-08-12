@@ -8,8 +8,8 @@ import { DownloadScoresComponent } from './views/download-scores/download-scores
 import { ItemDetailComponent } from './components/item/item-detail.component';
 
 export const routes: Routes = [
-  // { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: '', redirectTo: '/download-scores/1', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  // { path: '', redirectTo: '/download-scores/1', pathMatch: 'full' },
   { path: 'home', component:  HomeComponent },
   { path: 'menu', component:  MenuComponent },
   { path: 'score/:id', component:  ScoreComponent },
