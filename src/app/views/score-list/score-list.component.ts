@@ -1,4 +1,4 @@
-import { Component, NO_ERRORS_SCHEMA, OnInit, effect, inject, signal } from '@angular/core'
+import { Component, NO_ERRORS_SCHEMA, OnInit, ViewChild, effect, inject, signal } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
 import { Page } from '@nativescript/core'
 import { InstrumentsService } from '../../services/instruments.service'
@@ -17,7 +17,7 @@ import { Instrument } from '~/app/models/instrument'
 export class ScoreListComponent implements OnInit {
   songList = signal<DownloadedFile[]>([]);
   instrument = signal<Instrument>(null)
-
+  
   constructor(
     private page: Page,
     public instrumentsService: InstrumentsService,
