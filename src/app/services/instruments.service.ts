@@ -6,7 +6,7 @@ import { Instrument } from '../models/instrument'
 })
 
 export class InstrumentsService {
-  instrumetns = signal<Instrument[]>([
+  instruments = signal<Instrument[]>([
     { id: 1, label: 'Piano / Órgano', path: 'piano', name: 'piano'},
     { id: 2, label: 'Violin 1', path: 'violin1', name: 'violin'  },
     { id: 3, label: 'Violin 2', path: 'violin2', name: 'violin'  },
@@ -20,6 +20,6 @@ export class InstrumentsService {
   ])
 
   getInstrument(id: number): Instrument {
-    return this.instrumetns().find((instrument) => instrument.id === id)
+    return this.instruments().find((instrument) => instrument.id === id)
   }
 }

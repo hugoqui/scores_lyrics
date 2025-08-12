@@ -1,0 +1,9 @@
+<ActionBar [title]="`Practicar - ${instrument().label}`"> </ActionBar>
+
+<ListView [items]="songList()" height="100%">
+    <ng-template let-song>        
+        <StackLayout (tap)="goToScore(song)">            
+            <Label  [text]="song.fileName.replace('.png','')" class="song-label" col="0"></Label>
+        </StackLayout>
+    </ng-template>
+</ListView>

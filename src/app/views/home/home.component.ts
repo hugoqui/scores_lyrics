@@ -6,6 +6,7 @@ import * as appSettings from '@nativescript/core/application-settings';
 import { Router } from "@angular/router";
 
 import { SocketIO } from '@triniwiz/nativescript-socketio';
+import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
 
 @Component({
   moduleId: module.id,
@@ -16,25 +17,26 @@ import { SocketIO } from '@triniwiz/nativescript-socketio';
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class HomeComponent {
+
   page = inject(Page)
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private scoreDownloaderService: ScoresDownloaderService) {
     this.page.on('loaded', (args) => {
       if (__IOS__) {
         const navigationController: UINavigationController = this.page.frame.ios.controller
         navigationController.navigationBar.prefersLargeTitles = true
       }
     })
-  }  
+  }
 
   async setHost(): Promise<void> {
     try {
       // this.router.navigate(['/menu']);
       // return
-      
+
       console.log('setting host...')
       let host = appSettings.getString('host', 'http://192.168.5.1:3014');
-   
+
       const newHost = await prompt({
         title: 'Servidor',
         message: 'Ingrese el url del servidor:',
@@ -49,7 +51,7 @@ export class HomeComponent {
       if (!newHost.result) { return }
 
       appSettings.setString('host', newHost.text);
-      this.router.navigate(['/menu']);
+      this.router.navigate(['/menu/live']);
 
     } catch (error) {
       console.log('error setting host...', error)
@@ -59,9 +61,14 @@ export class HomeComponent {
   goToSettings() {
     try {
       console.log('navigating to settings...')
-      this.router.navigate(['/settings']);      
+      this.router.navigate(['/settings']);
     } catch (error) {
       console.log('error navigating to settings...', error)
     }
+  }
+
+  wipeData() {
+    console.log('Wiping all data...');
+    this.scoreDownloaderService.wipeAll();
   }
 }

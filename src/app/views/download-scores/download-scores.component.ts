@@ -5,6 +5,7 @@ import { Page } from '@nativescript/core';
 import { map, switchMap, of } from 'rxjs';
 import { DownloadedFile } from '~/app/models/downloadedFile';
 import { Instrument } from '~/app/models/instrument';
+import { Song } from '~/app/models/song';
 import { InstrumentsService } from '~/app/services/instruments.service';
 import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
 
@@ -44,7 +45,7 @@ export class DownloadScoresComponent implements OnInit {
   getSongList(): void {
     this.scoresDownloaderService.getFileNames(this.instrument().path).pipe(
       switchMap(remoteFiles =>
-        of(this.scoresDownloaderService.getDownloadedFiles()).pipe(
+        of(this.scoresDownloaderService.getDownloadedFiles(this.instrument().name)).pipe(
           map(downloadedFiles => {
             const downloadedFileNames = downloadedFiles.map(f => f.fileName);
             return remoteFiles.map(fileName => ({
@@ -67,7 +68,7 @@ export class DownloadScoresComponent implements OnInit {
     this.loading.set(true)
     this.selectedSong.set(`${title}`)
     console.log('selected song...', this.selectedSong())
-    const filePath = await this.scoresDownloaderService.downloadFile(`${title}`, this.instrument().name);
+    const filePath = await this.scoresDownloaderService.downloadFile(`${title}`, this.instrument().path);
     const dowloadedFile: DownloadedFile = {
       instrument: this.instrument().name,
       fileName: `${title}`,
@@ -111,9 +112,4 @@ export class DownloadScoresComponent implements OnInit {
   cancelDownload(){
     this.isCanceled.set(true)
   }
-}
-
-interface Song {
-  title: string;
-  isDownloaded: boolean;
 }

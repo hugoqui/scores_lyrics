@@ -1,6 +1,5 @@
-<ActionBar [title]="'Partituras ' + instrument()?.label + ' - ' + status()">
-</ActionBar>
+<ActionBar [title]="`Symphony`"> </ActionBar>
 
-<StackLayout (tap)="toggleVisibilityNav()">        
-    <Image [src]="scorePath()" stretch="aspectFit" />
+<StackLayout (swipe)="onSwipe($event)" (tap)="toggleVisibilityNav()">        
+    <Image [src]="scorePath" stretch="aspectFit" />
 </StackLayout>

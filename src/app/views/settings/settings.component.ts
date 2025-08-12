@@ -18,6 +18,7 @@ export class SettingsComponent {
   loading = signal<boolean>(false);
   percentage = signal<number>(0);
   selectedId = signal<number>(null);
+  instruments = signal<Instrument[]>([]);
 
   constructor(
     private page: Page,

@@ -1,7 +1,8 @@
-import { Component, NO_ERRORS_SCHEMA, inject } from '@angular/core'
+import { Component, NO_ERRORS_SCHEMA, inject, signal } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
 import { Page, Label } from '@nativescript/core'
-import {InstrumentsService} from '../../services/instruments.service'
+import { InstrumentsService } from '../../services/instruments.service'
+import { ActivatedRoute, Router } from '@angular/router'
 @Component({
   selector: 'ns-menu',
   templateUrl: './menu.component.html',
@@ -10,12 +11,28 @@ import {InstrumentsService} from '../../services/instruments.service'
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class MenuComponent {
-  constructor(private page: Page, public instrumentsService: InstrumentsService) {
-    
+  constructor(
+    private page: Page,
+    public instrumentsService: InstrumentsService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
+
   }
 
+  menuPath = signal<string>('');
   ngOnInit() {
-    // console.log(this.instrumentsService.instrumetns());
+    this.menuPath.set(this.route.snapshot.params.menuPath)
+    console.log('##### menupath', this.menuPath())
+  }
+
+  navigateTo(id: string) {
+    try {
+      console.log('Navigating to:', id);      
+      this.router.navigate([`/${this.menuPath()}`, id]);
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
   }
 
 }

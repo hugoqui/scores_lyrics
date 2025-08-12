@@ -1,72 +1,46 @@
-import { Component, NO_ERRORS_SCHEMA, inject, signal, OnDestroy, AfterViewInit, effect } from '@angular/core'
+import { Component, NO_ERRORS_SCHEMA, OnInit, effect, inject, signal } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
-import * as appSettings from '@nativescript/core/application-settings';
-import { Instrument } from '../../models/instrument';
-import { ActivatedRoute } from '@angular/router';
-import { knownFolders, Page, path, File } from '@nativescript/core';
-import { InstrumentsService } from '~/app/services/instruments.service';
-import { SocketService } from '~/app/services/socket.service';
-
-import { SnackBar } from '@nativescript-community/ui-material-snackbar';
-
+import { Page, SwipeGestureEventData, SwipeDirection } from '@nativescript/core'
+import { ActivatedRoute, Router } from '@angular/router'
+import { DownloadedFile } from '~/app/models/downloadedFile';
 
 @Component({
-  moduleId: module.id,
   selector: 'ns-score',
-  templateUrl: 'score.component.html',
-  styleUrls: ['score.component.css'],
-  imports: [NativeScriptCommonModule, NativeScriptRouterModule,],
+  templateUrl: './score.component.html',
+  styleUrl: './score.component.css',
+  imports: [NativeScriptCommonModule, NativeScriptRouterModule],
   schemas: [NO_ERRORS_SCHEMA],
 })
-export class ScoreComponent implements AfterViewInit, OnDestroy {
-  instrument = signal<Instrument>(null)
-  status = signal<'offline' | 'online' | 'reconnecting' | 'fail'>('offline')
-  currentSong = signal<string>('')
-  scorePath = signal<string>('')
+export class ScoreComponent implements OnInit {
+  songs: DownloadedFile[] = [];
+  currentIndex = 0;
 
-  constructor(
-    public instrumentsService: InstrumentsService,
-    private route: ActivatedRoute,
-    private page: Page,
-    private socketService: SocketService
-  ) {
-    effect(() => {
-      this.status.set(this.socketService.connectionStatus());
-      this.currentSong.set(this.socketService.currentSong());
 
-      if (!this.currentSong()) { return }
-
-      const documents = knownFolders.documents();
-      const instrumentFolder = documents.getFolder(this.instrument().path);
-      const filePath = path.join(instrumentFolder.path, this.currentSong() + '.png');
-
-      if (File.exists(filePath)) {        
-        const imgFile = File.fromPath(filePath);
-        this.scorePath.set(imgFile.path);
-        console.log(imgFile.path)
-      } else {
-        console.log("No existe el archivo:", filePath);
-      }
-    });
-  }
-  ngOnDestroy(): void {
-    this.socketService.disconnect()
-  }
+  constructor(private page: Page, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    const id = +this.route.snapshot.params.id
-    this.instrument.set(this.instrumentsService.getInstrument(id))
+    this.currentIndex = +this.route.snapshot.params['id'];
+    this.songs = JSON.parse(this.route.snapshot.queryParams['songs'] || '[]');
   }
 
-  async ngAfterViewInit() {
-    try {
-      const host = appSettings.getString('host');
-      this.socketService.connect(host);
+  get scorePath(): string {
+    return this.songs[this.currentIndex]?.localPath || '';
+  }
 
-    } catch (error) {
-      console.log('error after init... ', error)
+  onSwipe(args: SwipeGestureEventData) {
+    if (args.direction === SwipeDirection.left) {
+      // Siguiente
+      if (this.currentIndex < this.songs.length - 1) {
+        this.currentIndex++;
+      }
+    } else if (args.direction === SwipeDirection.right) {
+      // Anterior
+      if (this.currentIndex > 0) {
+        this.currentIndex--;
+      }
     }
   }
+
 
   toggleVisibilityNav() {
     const newStatus = this.page.actionBar.visibility === 'visible' ? 'hidden' : 'visible'
@@ -77,11 +51,4 @@ export class ScoreComponent implements AfterViewInit, OnDestroy {
       this.page.actionBar.height = 44
     }
   }
-
-  showToast(message: string) {
-    console.log("🗨️ Mensaje:", message);
-    const snackbar = new SnackBar();
-    snackbar.simple(message);
-  }
-
 }
