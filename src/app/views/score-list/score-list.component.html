@@ -1,9 +1,18 @@
 <ActionBar [title]="`Practicar - ${instrument().label}`"> </ActionBar>
-
-<ListView [items]="songList()" height="100%">
-    <ng-template let-song>        
-        <StackLayout (tap)="goToScore(song)">            
-            <Label  [text]="song.fileName.replace('.png','')" class="song-label" col="0"></Label>
+<GridLayout rows="auto, *" columns="" padding="4">
+    <GridLayout rows="*" columns="*,auto">
+        <StackLayout col="1" orientation="horizontal"  marginRight="30">
+            <Label class="text-gray-500" text="Seleccionar Tonalidad " textWrap="true"></Label>
+            <button (tap)="selectFilter()" class="chord" background="#ddf">{{chordFilter}}</button>
         </StackLayout>
-    </ng-template>
-</ListView>
+
+    </GridLayout>
+    <ListView [items]="songList()" height="100%" row="1">
+        <ng-template let-song>
+            <GridLayout (tap)="goToScore(song)" columns="*,100">
+                <Label [text]="song.fileName.replace('.png','')" class="song-label" col="0"></Label>
+                <Label [text]="song.chord" class="chord" col="1"></Label>
+            </GridLayout>
+        </ng-template>
+    </ListView>
+</GridLayout>

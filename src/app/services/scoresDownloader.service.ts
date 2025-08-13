@@ -1,12 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { knownFolders, path, File, Folder, } from '@nativescript/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, map, Observable } from 'rxjs';
+import { firstValueFrom, map, Observable, single } from 'rxjs';
 import { getString, setString, clear } from "@nativescript/core/application-settings";
 import { DownloadedFile } from '../models/downloadedFile';
 import { InstrumentsService } from './instruments.service';
-import { Instrument } from '../models/instrument';
-
 
 @Injectable({
     providedIn: 'root',
@@ -18,6 +16,7 @@ export class ScoresDownloaderService {
     public fileNameDownloading = signal<string>('')
     public isCanceled = signal<boolean>(false);
     public scoresUrl = 'https://partituras.iglesiacristianabelen.com'
+    public dbSongList = signal<any[]>([]);
 
     constructor(private http: HttpClient, private instrumentService: InstrumentsService) { }
 
@@ -36,6 +35,14 @@ export class ScoresDownloaderService {
                 return files;
             })
         );
+    }
+
+    async getDbSongs():Promise<void> {
+        if(this.dbSongList().length !== 0 ){return} 
+        const req = await fetch('https://api.iglesiacristianabelen.com/api/cantos')
+        const res = await req.json()
+        this.dbSongList.set(res)
+        return
     }
 
     async downloadFile(fileName: string, instrument: string): Promise<string> {
@@ -82,9 +89,7 @@ export class ScoresDownloaderService {
         try {
             this.loading.set(true);
             const files = await firstValueFrom(this.getFileNames(instrument));
-
             console.log('Archivos a descargar encontrados:', files.length);
-
             const downloadedFiles: string[] = [];
 
             for (const file of files) {
@@ -92,8 +97,9 @@ export class ScoresDownloaderService {
 
                 const percentage = (downloadedFiles.length / files.length) * 100
                 this.percentage.set(parseFloat(percentage.toFixed(2)));
-                const filePath = await this.downloadFile(file, instrument);
-                this.addDownloadedFile({ instrument, fileName: file, localPath: filePath });
+                const filePath = await this.downloadFile(file, instrument);                
+                const chord: string = await this.getSongChord(file, instrument)
+                this.addDownloadedFile({ instrument, fileName: file, localPath: filePath, chord });
                 downloadedFiles.push(filePath);
             }
 
@@ -104,6 +110,23 @@ export class ScoresDownloaderService {
             console.error('Error descargando las partituras:', error);
             this.loading.set(false);
             throw error;
+        }
+    }
+
+    async getSongChord(title: string, instrument: string): Promise<string>{
+        try {
+            await this.getDbSongs()
+            const song = 
+                this.dbSongList()
+                .find(s=> 
+                    s.title.toLowerCase().replace(/ /g, '_') === title.replace('.png', '') ||
+                    s.title.toLowerCase().replace(/ /g, '_') + instrument === title.replace('.png', '')
+                )
+            
+            return song.chord
+        } catch (error) {
+            console.log('error al obtener tonalidad... ', error)
+            return 'F'
         }
     }
 

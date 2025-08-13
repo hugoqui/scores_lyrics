@@ -38,7 +38,6 @@ export class DownloadScoresComponent implements OnInit {
   ngOnInit(): void {
     const id = +this.route.snapshot.params.id
     this.instrument.set(this.instrumentsService.getInstrument(id))
-
     this.getSongList();
   }
 
@@ -48,10 +47,17 @@ export class DownloadScoresComponent implements OnInit {
         of(this.scoresDownloaderService.getDownloadedFiles(this.instrument().name)).pipe(
           map(downloadedFiles => {
             const downloadedFileNames = downloadedFiles.map(f => f.fileName);
-            return remoteFiles.map(fileName => ({
-              title: fileName,
-              isDownloaded: downloadedFileNames.includes(fileName)
-            }));
+            
+            return remoteFiles
+              .map(fileName => {
+                const isDownloaded = downloadedFileNames.includes(fileName)
+                const chord = isDownloaded? downloadedFiles.find(f=> f.fileName === fileName).chord : 'F'
+                return {
+                  title: fileName,
+                  isDownloaded: downloadedFileNames.includes(fileName),
+                  chord
+                }
+              });
           })
         )
       )
@@ -69,10 +75,12 @@ export class DownloadScoresComponent implements OnInit {
     this.selectedSong.set(`${title}`)
     console.log('selected song...', this.selectedSong())
     const filePath = await this.scoresDownloaderService.downloadFile(`${title}`, this.instrument().path);
+    const chord = await this.scoresDownloaderService.getSongChord(title, this.instrument().path)
     const dowloadedFile: DownloadedFile = {
       instrument: this.instrument().name,
       fileName: `${title}`,
-      localPath: filePath
+      localPath: filePath,
+      chord
     }
     this.scoresDownloaderService.addDownloadedFile(dowloadedFile);
     this.songList.update(list =>
