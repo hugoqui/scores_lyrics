@@ -41,7 +41,7 @@ export class ScoresDownloaderService {
     async downloadFile(fileName: string, instrument: string): Promise<string> {
         try {
             this.fileNameDownloading.set(fileName)
-            const url = `${this.scoresUrl}/${instrument}/${fileName}`;
+            const url = `${this.scoresUrl}/${instrument}/${encodeURIComponent(fileName)}`;
             console.log('### Descargando desde URL:', url);
             const response = await fetch(url);
 

@@ -1,8 +1,11 @@
 <ActionBar title="Symphony / Settings"> </ActionBar>
 
 <StackLayout margin="20">
+  <StackLayout orientation="horizontal" horizontalAlignment="right">      
+    <Button text="Borrar Datos" (tap)="wipeData()" class="button"></Button> 
+  </StackLayout>
+
   <Label text="Descargar Partituras" textWrap="true" class="title"></Label>
-  <!-- <Label class="text-gray-500" [text]="`isLoading ${loading()} - selectedId ${selectedId()} `"></Label> -->
   <ListView [items]="instrumentsService.instruments()" height="100%">
     <ng-template let-item>
       <GridLayout [nsRouterLink]="['/download-scores', item.id]" columns="60, *"  >
