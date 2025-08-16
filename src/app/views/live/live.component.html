@@ -1,8 +1,8 @@
 <ActionBar [title]="'Partituras ' + instrument()?.label + ' - ' + status()">
 </ActionBar>
 
-<GridLayout (tap)="toggleVisibilityNav()" columns="auto, *, auto" rows="*,auto">
-    <Image [src]="scorePath()" stretch="aspectFit" colSpan="3" rowSpan="2"/>
+<GridLayout  columns="auto, *, auto" rows="*,auto" (swipe)="onSwipe($event)" >
+    <Image  [src]="scorePath()" stretch="aspectFit" colSpan="3" rowSpan="2" (tap)="toggleVisibilityNav()" #imageRef/>
     @if(instrument().name !== 'piano'){
         <Button [text]="scoreType()==='melody'?'melodía':'arreglo'" (tap)="toggleArrangement()" row="1" class="btn"></Button>
     }    

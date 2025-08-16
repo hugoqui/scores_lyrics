@@ -58,8 +58,6 @@ export class ScoreComponent implements OnInit {
     });
   }
 
-
-
   toggleVisibilityNav() {
     const newStatus = this.page.actionBar.visibility === 'visible' ? 'hidden' : 'visible'
     this.page.actionBar.visibility = newStatus

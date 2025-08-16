@@ -1,15 +1,15 @@
-import { Component, NO_ERRORS_SCHEMA, inject, signal, OnDestroy, AfterViewInit, effect, ViewContainerRef } from '@angular/core'
+import { Component, NO_ERRORS_SCHEMA, inject, signal, OnDestroy, AfterViewInit, effect, ViewContainerRef, ViewChild, TRANSLATIONS } from '@angular/core'
 import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
 import * as appSettings from '@nativescript/core/application-settings';
 import { Instrument } from '../../models/instrument';
 import { ActivatedRoute } from '@angular/router';
-import { knownFolders, Page, path, File } from '@nativescript/core';
+import { knownFolders, Page, path, File, SwipeGestureEventData, SwipeDirection } from '@nativescript/core';
 import { InstrumentsService } from '~/app/services/instruments.service';
 import { SocketService } from '~/app/services/socket.service';
 import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
 import { SnackBar } from '@nativescript-community/ui-material-snackbar';
 import { HttpClient } from '@angular/common/http';
-
+import { Subscription } from 'rxjs';
 
 @Component({
   moduleId: module.id,
@@ -25,6 +25,9 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
   currentSong = signal<string>('')
   scorePath = signal<string>('')
   scoreType = signal<'melody' | 'arrangement'>('melody')
+  worshipList = signal<string[]>([]);
+  private listChangeSubscription: Subscription;
+  @ViewChild('imageRef', { static: true }) imageRef;
 
   constructor(
     public instrumentsService: InstrumentsService,
@@ -36,11 +39,7 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
     private httpClient: HttpClient
   ) {
     // efecto SOLO para scorePath (no cambies status ni currentSong aquí)
-    effect(() => {
-      if (this.instrument()) {
-        this.getLastSong();
-      }
-
+    effect(() => {    
       const instrument = this.instrument();
       const currentSong = this.currentSong();
       const scoreType = this.scoreType();
@@ -60,10 +59,8 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
         if (melodyExists) {
           const imgFile = File.fromPath(filePath);
           this.scorePath.set(imgFile.path);
-          console.log(imgFile.path);
         } else {
           this.scorePath.set('');
-          console.log("No existe el archivo:", filePath);
         }
         return;
       }
@@ -94,6 +91,9 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.socketService.disconnect()
+    if (this.listChangeSubscription) {
+      this.listChangeSubscription.unsubscribe();
+    }
   }
 
   ngOnInit(): void {
@@ -105,6 +105,15 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
     try {
       const host = appSettings.getString('host');
       this.socketService.connect(host);
+      this.listChangeSubscription = this.socketService.onListChange().subscribe(() => {
+        this.getWorshipList();
+      });
+
+      this.getWorshipList(); // carga inicial
+      
+      setTimeout(() => {        
+        this.getLastSong();
+      }, 500);
     } catch (error) {
       console.log('error after init... ', error)
     }
@@ -152,6 +161,52 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
       const title = res.title.replace(/ /g, '_').toLowerCase();
       this.currentSong.set(title)
     })
+  }
 
+  getWorshipList() {
+    const host = appSettings.getString('host')
+    const url = `${host}/api/songList`
+    this.httpClient.get<any>(url).subscribe(res => {
+      const list = res.map(s => s.title.replace(/ /g, '_').toLowerCase());
+      this.worshipList.set(list)
+      console.log('songs...', this.worshipList().length)
+    })
+  }
+  
+  onSwipe(args: SwipeGestureEventData) {
+    let currentIndex = this.worshipList().findIndex(s => s === this.currentSong());
+    let newIndex = currentIndex;
+
+    if (args.direction === SwipeDirection.left && currentIndex < this.worshipList().length - 1) {
+      newIndex = currentIndex + 1;
+      this.animateSwipe(-300);
+    } else if (args.direction === SwipeDirection.right && currentIndex > 0) {
+      newIndex = currentIndex - 1;
+      this.animateSwipe(300);
+    }
+
+    if (newIndex !== currentIndex) {
+      const title = this.worshipList()[newIndex];
+      console.log('Nuevo canto:', title);
+      this.currentSong.set(title);
+    }
+  }
+
+
+  animateSwipe(translateX: number) {
+    const image = this.imageRef.nativeElement; // referencia al <Image>
+    image.animate({
+      translate: { x: translateX, y: 0 },
+      opacity: 0,
+      duration: 200
+    }).then(() => {
+      // Reset posición para la nueva imagen
+      image.translateX = -translateX;
+      return image.animate({
+        translate: { x: 0, y: 0 },
+        opacity: 1,
+        duration: 200
+      });
+    });
   }
 }

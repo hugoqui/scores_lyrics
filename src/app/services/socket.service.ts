@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { SocketIO } from '@triniwiz/nativescript-socketio';
+import { Subject } from 'rxjs';
 
 
 @Injectable({
@@ -10,17 +11,18 @@ export class SocketService {
   private url: string;
   connectionStatus = signal<'offline' | 'online' | 'reconnecting' | 'fail'>('offline');
   currentSong = signal<string>('');
+  private listChangeSubject = new Subject<void>();
 
-  constructor() {}
+  constructor() { }
 
   connect(url: string): void {
     this.url = url;
 
-    if (!this.socketIO) {      
+    if (!this.socketIO) {
       this.socketIO = new SocketIO(this.url, {
         reconnect: true,
         reconnectionAttempts: 5,
-        reconnectionDelay: 2000,        
+        reconnectionDelay: 2000,
       });
 
       this.registerListeners();
@@ -60,21 +62,30 @@ export class SocketService {
     this.socketIO.on('text_change', (data: any) => {
       this.handleTextChange(data);
     });
+
+    this.socketIO.on('list_change', (data: any) => {
+      console.log('list change!!!')
+      this.listChangeSubject.next();
+    });
   }
 
-  private handleTextChange(data: any) {    
-    const id = this.getIdFromTitle(data.title);    
+  onListChange() {
+    return this.listChangeSubject.asObservable();
+  }
+
+  private handleTextChange(data: any) {
+    const id = this.getIdFromTitle(data.title);
     this.currentSong.set(id);
     console.log("#####:", id);
   }
 
-  getIdFromTitle(title: string): string{
+  getIdFromTitle(title: string): string {
     return title.replace(/ /g, '_').toLowerCase();
   }
 
   send(event: string, payload: any) {
     this.socketIO.emit(event, payload);
-  }  
+  }
 
   disconnect() {
     this.socketIO.disconnect();
