@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Page } from '@nativescript/core';
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
+import { getString,  } from "@nativescript/core/application-settings";
 
 @Component({
   selector: 'app-login',
@@ -36,7 +37,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.page.actionBarHidden = true;
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/home']);
+      return
     }
+
+    this.loginForm.value.email = getString('email', '');
+    this.loginForm.value.password = getString('password', '');
   }
 
   ngAfterViewInit(): void {
@@ -55,6 +60,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.errorMessage = '';
 
     const { email, password } = this.loginForm.value;
+    console.log('sendin..',email)
 
     this.authService.login(email, password).subscribe({
       next: (success) => {

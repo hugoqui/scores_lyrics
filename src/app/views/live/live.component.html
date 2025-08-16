@@ -1,6 +1,10 @@
 <ActionBar [title]="'Partituras ' + instrument()?.label + ' - ' + status()">
 </ActionBar>
 
-<StackLayout (tap)="toggleVisibilityNav()">        
-    <Image [src]="scorePath()" stretch="aspectFit" />
-</StackLayout>
+<GridLayout (tap)="toggleVisibilityNav()" columns="auto, *, auto" rows="*,auto">
+    <Image [src]="scorePath()" stretch="aspectFit" colSpan="3" rowSpan="2"/>
+    @if(instrument().name !== 'piano'){
+        <Button [text]="scoreType()==='melody'?'melodía':'arreglo'" (tap)="toggleArrangement()" row="1" class="btn"></Button>
+    }    
+    <Image src="~/app/assets/icons/search.png" class="search-icon" stretch="aspectFit" col="2" row="1" (tap)="openSearchModal()"/>    
+</GridLayout>

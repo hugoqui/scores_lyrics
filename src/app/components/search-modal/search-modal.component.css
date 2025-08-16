@@ -1,0 +1,17 @@
+.container{
+    padding: 16;
+    background-color: #fff;
+    border-radius: 16;
+    font-size: 18;
+}
+
+.list-group-item{
+    font-size: 18;
+    height: 36;
+    margin:8;
+}
+
+.search-box{
+    background-color: #fff;
+    font-size: 18;
+}

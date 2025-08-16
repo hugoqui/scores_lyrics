@@ -25,6 +25,8 @@ export class AuthService {
             .pipe(
                 map(response => {
                     console.log('Login successful', response);
+                    setString('email', username);
+                    setString('password', password);
                     setString('token', response.token);
                     // Guardar la fecha de expiración del token 60 días a partir de ahora
                     setString('expiration', new Date(Date.now() + (60 * 24 * 60 * 60 * 1000)).toISOString());

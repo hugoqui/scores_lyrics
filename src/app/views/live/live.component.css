@@ -1,3 +1,12 @@
-image{
-    
+button {
+    padding: 12;
+    background-color: #eee;
+    color: #2a9ce8;
+    margin-left: 8;
+    margin-bottom: 8;
+}
+
+.search-icon {
+    margin-right: 10;
+    height: 50;    
 }

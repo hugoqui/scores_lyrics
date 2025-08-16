@@ -1,29 +1,31 @@
 <ActionBar title="Symphony"> </ActionBar>
+<ScrollView>
+    <FlexboxLayout flexDirection="column" alignItems="center" justifyContent="center">
 
-<FlexboxLayout flexDirection="column" alignItems="center" justifyContent="center">
+        <!-- Logo -->
+        <Image src="~/app/assets/logo.png" width="300" marginBottom="20" />
 
-    <!-- Logo -->
-    <Image src="~/app/assets/logo.png" width="300" marginBottom="20" />
+        <!-- Contenedor de botones -->
+        <FlexboxLayout flexDirection="row" flexWrap="wrap" justifyContent="center">
 
-    <!-- Contenedor de botones -->
-    <FlexboxLayout flexDirection="row" flexWrap="wrap" justifyContent="center">
+            <GridLayout (tap)="setHost()" rows="60,auto" horizontalAlignment="center" verticalAlignment="middle"
+                class="button" margin="10">
+                <Image src="~/app/assets/stream.jpg" stretch="aspectFit" row="0" />
+                <Label text="conectarse a transmisión" textWrap="true" row="1"></Label>
+            </GridLayout>
 
-        <GridLayout (tap)="setHost()" rows="60,auto" horizontalAlignment="center" verticalAlignment="middle" class="button" margin="10">
-            <Image src="~/app/assets/stream.jpg" stretch="aspectFit" row="0"/>
-            <Label text="conectarse a transmisión" textWrap="true" row="1"></Label>
-        </GridLayout>    
-        
-        <GridLayout [nsRouterLink]="['/menu', 'practice']" rows="60,auto" horizontalAlignment="center" verticalAlignment="middle" class="button" margin="10">
-            <Image src="~/app/assets/music.jpg" stretch="aspectFit" row="0"/>
-            <Label text="practicar" textWrap="true" row="1"></Label>
-        </GridLayout>    
+            <GridLayout [nsRouterLink]="['/menu', 'practice']" rows="60,auto" horizontalAlignment="center"
+                verticalAlignment="middle" class="button" margin="10">
+                <Image src="~/app/assets/music.jpg" stretch="aspectFit" row="0" />
+                <Label text="practicar" textWrap="true" row="1"></Label>
+            </GridLayout>
 
-        <GridLayout (tap)="goToSettings()" rows="60,auto" horizontalAlignment="center" verticalAlignment="middle" class="button" margin="10">
-            <Image src="~/app/assets/config.jpg" stretch="aspectFit" row="0" />        
-            <Label text="configuración" textWrap="true" row="1"></Label>
-        </GridLayout>    
+            <GridLayout (tap)="goToSettings()" rows="60,auto" horizontalAlignment="center" verticalAlignment="middle"
+                class="button" margin="10">
+                <Image src="~/app/assets/config.jpg" stretch="aspectFit" row="0" />
+                <Label text="configuración" textWrap="true" row="1"></Label>
+            </GridLayout>
+        </FlexboxLayout>
 
-        <!-- <Button text="Eliminar Datos" (tap)="wipeData()" ></Button>          -->
     </FlexboxLayout>
-
-</FlexboxLayout>
+</ScrollView>

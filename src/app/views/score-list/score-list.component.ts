@@ -79,7 +79,7 @@ export class ScoreListComponent implements OnInit {
       message: 'Selecciona la tonalidad:',
       cancelButtonText: 'Cancelar',
       actions: options,
-      cancelable: true,      
+      cancelable: true,
     }).then(selected => {
       console.log("selected!!! ", selected)
       if (selected && selected !== 'Cancelar') {
