@@ -51,8 +51,11 @@ io.on('connection', (socket) => {
     socket.on("song_change", data => {
         console.log("song changed.... ", data)
         io.emit("text_change", data)
-        var fs = require('fs')        
-        fs.writeFile('src/songid.txt', data.title, function (err) {
+
+        if (data.reference) {return}
+        
+        var fs = require('fs')
+        fs.writeFile('src/songid.txt', JSON.stringify(data) , function (err) {
             if (err) {
                 console.log(err)
             }
