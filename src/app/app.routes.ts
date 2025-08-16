@@ -9,8 +9,8 @@ import { ScoreComponent } from './views/score/score.component';
 import { DownloadScoresComponent } from './views/download-scores/download-scores.component';
 
 export const routes: Routes = [
-  // { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '', redirectTo: '/live/3', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  // { path: '', redirectTo: '/live/3', pathMatch: 'full' },
   { path: 'login', component:  LoginComponent },
   { path: 'home', component:  HomeComponent },
   { path: 'menu/:menuPath', component:  MenuComponent },

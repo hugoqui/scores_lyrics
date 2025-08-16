@@ -1,5 +1,5 @@
 <StackLayout class="container">
-  <TextField hint="Buscar canto..." (textChange)="onSearchChange($event)" class="search-box"></TextField>
+  <TextField hint="Buscar canto..." (textChange)="onSearchChange($event)" class="search-box" #searchInput></TextField>
 
   <GridLayout rows="" columns="" marginTop="10">    
     <ListView [items]="songList()" class="list-group" height="100%">

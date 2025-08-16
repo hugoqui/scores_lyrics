@@ -3,7 +3,7 @@
 
 <GridLayout  columns="auto, *, auto" rows="*,auto" (swipe)="onSwipe($event)" >
     <Image  [src]="scorePath()" stretch="aspectFit" colSpan="3" rowSpan="2" (tap)="toggleVisibilityNav()" #imageRef/>
-    @if(instrument().name !== 'piano'){
+    @if(instrument().name !== 'piano' && instrument().name !=='trumpet'){
         <Button [text]="scoreType()==='melody'?'melodía':'arreglo'" (tap)="toggleArrangement()" row="1" class="btn"></Button>
     }    
     <Image src="~/app/assets/icons/search.png" class="search-icon" stretch="aspectFit" col="2" row="1" (tap)="openSearchModal()"/>    

@@ -1,0 +1,1 @@
+ns build android --release --aab --key-store-path symphony-key.keystore --key-store-password 123456 --key-store-alias symphony-key-alias --key-store-alias-password 123456

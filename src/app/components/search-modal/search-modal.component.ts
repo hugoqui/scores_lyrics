@@ -1,4 +1,4 @@
-import { Component, NO_ERRORS_SCHEMA, OnInit, effect, inject } from '@angular/core'
+import { AfterViewInit, Component, ElementRef, NO_ERRORS_SCHEMA, OnInit, ViewChild, effect, inject } from '@angular/core'
 import { ModalDialogParams, NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -6,6 +6,7 @@ import { debounceTime } from 'rxjs/operators';
 import { signal, computed } from '@angular/core';
 import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
 import { DownloadedFile } from '~/app/models/downloadedFile';
+import { TextField } from '@nativescript/core';
 
 @Component({
   moduleId: module.id,
@@ -15,7 +16,7 @@ import { DownloadedFile } from '~/app/models/downloadedFile';
   imports: [NativeScriptCommonModule, NativeScriptRouterModule,],
   schemas: [NO_ERRORS_SCHEMA],
 })
-export class SearchModalComponent implements OnInit {
+export class SearchModalComponent implements OnInit, AfterViewInit {
   private searchSubject = new Subject<string>();
   cantos: string[] = ['Canto A', 'Canto B', 'Canto X', 'Melodía Y', 'Arreglo Z'];
   searchText = signal('');
@@ -23,6 +24,7 @@ export class SearchModalComponent implements OnInit {
   private allSongs: DownloadedFile[] = [];
   songList = signal<DownloadedFile[]>([]);
 
+  @ViewChild('searchInput', { static: true }) searchInput: ElementRef<TextField>;
 
   constructor(private scoresDownloaderService: ScoresDownloaderService, private params: ModalDialogParams) {
 
@@ -47,6 +49,12 @@ export class SearchModalComponent implements OnInit {
     this.getSongList(this.instrument)
   }
 
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.searchInput.nativeElement.focus();
+    }, 0);
+  }
+
   onSearchChange(args) {
     const value = args.value.toLowerCase();
     this.searchSubject.next(value);
@@ -59,7 +67,7 @@ export class SearchModalComponent implements OnInit {
 
   getSongList(instrument: string): void {
     console.log('#### getting songs for ', instrument);
-    this.allSongs = this.scoresDownloaderService.getDownloadedFiles(instrument).filter(s=> !s.fileName.includes(this.instrument));
+    this.allSongs = this.scoresDownloaderService.getDownloadedFiles(instrument).filter(s => !s.fileName.includes(this.instrument));
     this.applyFilter();
   }
 

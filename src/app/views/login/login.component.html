@@ -1,27 +1,29 @@
-<StackLayout class="login-container" *ngIf="componentBuilded()">
-    <StackLayout class="form-container" [formGroup]="loginForm">
-        <Image src="~/app/assets/logo.png" class="logo"></Image>
-        <Label text="Iniciar Sesión" class="header"></Label>
-
-        <TextField formControlName="email" hint="Usuario" class="input" 
-            (textChange)="loginForm.controls.email.setValue($event.value)"
-            autocorrect="false" autocapitalizationType="none">
-        </TextField>
-        <Label *ngIf="loginForm.controls.email.invalid && loginForm.controls.email.touched" text="Usuario requerido"
-            class="error-label"></Label>
-
-        <TextField formControlName="password" hint="Contraseña" 
-            (textChange)="loginForm.controls.password.setValue($event.value)"
-            secure="true" class="input">
-        </TextField>
-        <Label *ngIf="loginForm.controls.password.invalid && loginForm.controls.password.touched"
-            text="Contraseña requerida" class="error-label"></Label>
-
-        <Label *ngIf="errorMessage" [text]="errorMessage" class="error-message"></Label>
-
-        <Button text="Ingresar" (tap)="onSubmit()" [isEnabled]="!isLoading()" class="btn-primary">
-        </Button>
-
-        <ActivityIndicator [busy]="isLoading()" *ngIf="isLoading()" class="activity-indicator"></ActivityIndicator>
+<ScrollView>
+    <StackLayout class="login-container" *ngIf="componentBuilded()">
+        <StackLayout class="form-container" [formGroup]="loginForm">
+            <Image src="~/app/assets/logo.png" class="logo"></Image>
+            <Label text="Iniciar Sesión" class="header"></Label>
+    
+            <TextField formControlName="email" hint="Usuario" class="input" 
+                (textChange)="loginForm.controls.email.setValue($event.value)"
+                autocorrect="false" autocapitalizationType="none">
+            </TextField>
+            <Label *ngIf="loginForm.controls.email.invalid && loginForm.controls.email.touched" text="Usuario requerido"
+                class="error-label"></Label>
+    
+            <TextField formControlName="password" hint="Contraseña" 
+                (textChange)="loginForm.controls.password.setValue($event.value)"
+                secure="true" class="input">
+            </TextField>
+            <Label *ngIf="loginForm.controls.password.invalid && loginForm.controls.password.touched"
+                text="Contraseña requerida" class="error-label"></Label>
+    
+            <Label *ngIf="errorMessage" [text]="errorMessage" class="error-message"></Label>
+    
+            <Button text="Ingresar" (tap)="onSubmit()" [isEnabled]="!isLoading()" class="btn-primary">
+            </Button>
+    
+            <ActivityIndicator [busy]="isLoading()" *ngIf="isLoading()" class="activity-indicator"></ActivityIndicator>
+        </StackLayout>
     </StackLayout>
-</StackLayout>
+</ScrollView>

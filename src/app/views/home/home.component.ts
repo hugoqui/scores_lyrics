@@ -27,6 +27,8 @@ export class HomeComponent {
         navigationController.navigationBar.prefersLargeTitles = true
       }
     })
+
+    this.page.actionBarHidden = true;
   }
 
   async setHost(): Promise<void> {
