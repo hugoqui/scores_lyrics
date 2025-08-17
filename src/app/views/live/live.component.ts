@@ -155,22 +155,30 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
   }
 
   getLastSong() {
-    const host = appSettings.getString('host')
-    const url = `${host}/api/lastSong`
-    this.httpClient.get<any>(url).subscribe(res => {
-      const title = res.title.replace(/ /g, '_').toLowerCase();
-      this.currentSong.set(title)
-    })
+    try {
+      const host = appSettings.getString('host')
+      const url = `${host}/api/lastSong`
+      this.httpClient.get<any>(url).subscribe(res => {
+        const title = res.title.replace(/ /g, '_').toLowerCase();
+        this.currentSong.set(title)
+      })      
+    } catch (error) {
+      console.log('### error getsong ', error)
+    }
   }
 
   getWorshipList() {
-    const host = appSettings.getString('host')
-    const url = `${host}/api/songList`
-    this.httpClient.get<any>(url).subscribe(res => {
-      const list = res.map(s => s.title.replace(/ /g, '_').toLowerCase());
-      this.worshipList.set(list)
-      console.log('songs...', this.worshipList().length)
-    })
+    try {
+      const host = appSettings.getString('host')
+      const url = `${host}/api/songList`
+      this.httpClient.get<any>(url).subscribe(res => {
+        const list = res.map(s => s.title.replace(/ /g, '_').toLowerCase());
+        this.worshipList.set(list)
+        console.log('songs...', this.worshipList().length)
+      })      
+    } catch (error) {
+      console.log('### error getlist', error)
+    }
   }
   
   onSwipe(args: SwipeGestureEventData) {

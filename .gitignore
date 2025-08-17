@@ -41,7 +41,7 @@ Thumbs.db
 build/
 *.apk
 *.ap_
-*.keystore
+# *.keystore
 local.properties
 
 # iOS/Xcode
