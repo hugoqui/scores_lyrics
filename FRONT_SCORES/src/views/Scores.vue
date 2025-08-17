@@ -106,11 +106,7 @@ export default {
                 let url = this.$store.state.url + "lastSong"
                 const req = await fetch(url)
                 if (req.ok) {
-                    let title = await req.text()
-                    title = title.substring(1)
-                    title = title.substring(0, title.length - 1)
-
-                    const data = { title: title }
+                    const data = await req.json()
                     this.displaySong(data)
                 }
             } catch (error) {
