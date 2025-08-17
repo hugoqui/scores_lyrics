@@ -63,7 +63,8 @@ export default {
             console.log("getting final url...")
 
             let host = localStorage.getItem("host") || "";
-            host = host.replace(/:\d+\/$/, "");
+            host.replace("3014", "8080")
+            // host = host.replace(/:\d+\/$/, "");
 
             if (this.showArragement && this.count == 1) {
                 console.log("a ver... con arreglo?")
