@@ -62,8 +62,7 @@ export default {
         getFinalUrl() {
             console.log("getting final url...")
 
-            let host = localStorage.getItem("host") || "";
-            host.replace("3014", "8080")
+            let host = localStorage.getItem("host").replace("3014", "8080");        
             // host = host.replace(/:\d+\/$/, "");
 
             if (this.showArragement && this.count == 1) {
