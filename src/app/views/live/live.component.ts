@@ -26,6 +26,7 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
   scorePath = signal<string>('')
   scoreType = signal<'melody' | 'arrangement'>('melody')
   worshipList = signal<string[]>([]);
+  workingOffline = signal<boolean>(false);
   private listChangeSubscription: Subscription;
   @ViewChild('imageRef', { static: true }) imageRef;
 
@@ -39,7 +40,7 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
     private httpClient: HttpClient
   ) {
     // efecto SOLO para scorePath (no cambies status ni currentSong aquí)
-    effect(() => {    
+    effect(() => {
       const instrument = this.instrument();
       const currentSong = this.currentSong();
       const scoreType = this.scoreType();
@@ -90,15 +91,19 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
 
 
   ngOnDestroy(): void {
-    this.socketService.disconnect()
-    if (this.listChangeSubscription) {
-      this.listChangeSubscription.unsubscribe();
-    }
+    this.turnOffSocket()
   }
 
   ngOnInit(): void {
     const id = +this.route.snapshot.params.id
     this.instrument.set(this.instrumentsService.getInstrument(id))
+  }
+
+  turnOffSocket() {
+    this.socketService.disconnect()
+    if (this.listChangeSubscription) {
+      this.listChangeSubscription.unsubscribe();
+    }
   }
 
   async ngAfterViewInit() {
@@ -110,8 +115,8 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
       });
 
       this.getWorshipList(); // carga inicial
-      
-      setTimeout(() => {        
+
+      setTimeout(() => {
         this.getLastSong();
       }, 500);
     } catch (error) {
@@ -150,6 +155,8 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
       if (selectedSong) {
         console.log('Canto seleccionado:', selectedSong);
         this.currentSong.set(selectedSong)
+        const updatedList = [...this.worshipList(), selectedSong];
+        this.worshipList.set(updatedList);
       }
     });
   }
@@ -161,7 +168,7 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
       this.httpClient.get<any>(url).subscribe(res => {
         const title = res.title.replace(/ /g, '_').toLowerCase();
         this.currentSong.set(title)
-      })      
+      })
     } catch (error) {
       console.log('### error getsong ', error)
     }
@@ -173,14 +180,16 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
       const url = `${host}/api/songList`
       this.httpClient.get<any>(url).subscribe(res => {
         const list = res.map(s => s.title.replace(/ /g, '_').toLowerCase());
-        this.worshipList.set(list)
+        const currentWorshipList = [...this.worshipList()]
+        const mergedList = [...new Set([...list, ...currentWorshipList])];
+        this.worshipList.set(mergedList)
         console.log('songs...', this.worshipList().length)
-      })      
+      })
     } catch (error) {
       console.log('### error getlist', error)
     }
   }
-  
+
   onSwipe(args: SwipeGestureEventData) {
     let currentIndex = this.worshipList().findIndex(s => s === this.currentSong());
     let newIndex = currentIndex;
