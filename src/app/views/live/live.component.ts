@@ -166,6 +166,7 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
       const host = appSettings.getString('host')
       const url = `${host}/api/lastSong`
       this.httpClient.get<any>(url).subscribe(res => {
+        if (!(res && res.tile)) return
         const title = res.title.replace(/ /g, '_').toLowerCase();
         this.currentSong.set(title)
       })
