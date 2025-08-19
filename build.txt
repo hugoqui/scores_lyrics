@@ -1,4 +1,4 @@
-ns build android  --release  --key-store-path symphony-upload.keystore --key-store-password 123456  --key-store-alias symphony-key-alias  --key-store-alias-password 123456  --aab
+ns build android  --release  --key-store-path symphony-upload.keystore --key-store-password 123456  --key-store-alias symphony-upload-alias  --key-store-alias-password 123456  --aab
 
 
 security cms -D -i dist.mobileprovision | plutil -extract UUID xml1 -o - - | xmllint --xpath 'string(//string)' -
