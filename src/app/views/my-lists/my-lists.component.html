@@ -1,0 +1,23 @@
+<ActionBar title="Symphony"> </ActionBar>
+
+<StackLayout>
+    <GridLayout rows="auto,*" columns="*,200" margin="20">
+        <Button text="Crear lista" (tap)="addList()" col="1" class="button"></Button>
+
+        <CollectionView [items]="service.myLists()" [tkSwipeActions]="true" row="1" colSpan="2">
+            <!-- template de item -->
+            <ng-template tkListItemTemplate let-item="item" let-i="index">
+                <GridLayout columns="*" class="list-item">
+                    <Label [text]="item.name" col="0"></Label>
+                </GridLayout>
+            </ng-template>
+
+            <!-- template de swipe -->
+            <ng-template tkSwipeTemplate let-i="index">
+                <GridLayout columns="auto,*" class="swipe-template">
+                    <Button text="Eliminar" backgroundColor="red" (tap)="removeList(i)" col="0"></Button>
+                </GridLayout>
+            </ng-template>
+        </CollectionView>
+    </GridLayout>
+</StackLayout>

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './views/home/home.component';
+import { MyListsComponent } from './views/my-lists/my-lists.component';
 import { LoginComponent } from './views/login/login.component';
 import { MenuComponent } from './views/menu/menu.component';
 import { SettingsComponent } from './views/settings/settings.component';
@@ -21,5 +22,7 @@ export const routes: Routes = [
   { path: 'download-scores/:id', component: DownloadScoresComponent },
   
   { path: 'settings', component: SettingsComponent },
-
+  
+  { path: 'myLists', component:  MyListsComponent },
+  { path: 'myLists/:listName', component:  MyListsComponent },
 ];
