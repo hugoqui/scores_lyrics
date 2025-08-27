@@ -41,6 +41,7 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
   ) {
     // efecto SOLO para scorePath (no cambies status ni currentSong aquí)
     effect(() => {
+      console.log("!!!!!!!!!!!!!!! el primer effect lanzado")
       const instrument = this.instrument();
       const currentSong = this.currentSong();
       const scoreType = this.scoreType();
@@ -84,6 +85,7 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
 
     // efecto para sockets
     effect(() => {
+      console.log("!!!!!!!!!!!!!!! el segundo effect lanzado")
       this.status.set(this.socketService.connectionStatus());
       this.currentSong.set(this.socketService.currentSong());
     });
@@ -162,33 +164,37 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
   }
 
   getLastSong() {
-    try {
-      const host = appSettings.getString('host')
-      const url = `${host}/api/lastSong`
-      this.httpClient.get<any>(url).subscribe(res => {
+    const host = appSettings.getString('host')
+    const url = `${host}/api/lastSong`
+    this.httpClient.get<any>(url).subscribe(
+      res => {
         if (!(res && res.tile)) return
         const title = res.title.replace(/ /g, '_').toLowerCase();
         this.currentSong.set(title)
-      })
-    } catch (error) {
-      console.log('### error getsong ', error)
-    }
+      },
+      err => {
+        console.error('!!!!! Error en GetlastSong :', err);
+        this.showToast('No se pudo obtener el último canto.');
+      }
+    )
   }
 
   getWorshipList() {
-    try {
-      const host = appSettings.getString('host')
-      const url = `${host}/api/songList`
-      this.httpClient.get<any>(url).subscribe(res => {
+    const host = appSettings.getString('host')
+    const url = `${host}/api/songList`
+    this.httpClient.get<any>(url).subscribe(
+      res => {
         const list = res.map(s => s.title.replace(/ /g, '_').toLowerCase());
         const currentWorshipList = [...this.worshipList()]
         const mergedList = [...new Set([...list, ...currentWorshipList])];
         this.worshipList.set(mergedList)
         console.log('songs...', this.worshipList().length)
-      })
-    } catch (error) {
-      console.log('### error getlist', error)
-    }
+      },
+      err => {
+        console.error('!!!!! Error en GetWorship :', err);
+        this.showToast('No se pudo obtener el listado.');
+      }
+    )
   }
 
   onSwipe(args: SwipeGestureEventData) {
@@ -209,7 +215,6 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
       this.currentSong.set(title);
     }
   }
-
 
   animateSwipe(translateX: number) {
     const image = this.imageRef.nativeElement; // referencia al <Image>
