@@ -99,7 +99,7 @@ export class ScoresDownloaderService {
                 this.percentage.set(parseFloat(percentage.toFixed(2)));
                 const filePath = await this.downloadFile(file, instrument);                
                 const chord: string = await this.getSongChord(file, instrument)
-                this.addDownloadedFile({ instrument, fileName: file, localPath: filePath, chord });
+                this.addDownloadedFile({ instrument, fileName: file, chord });
                 downloadedFiles.push(filePath);
             }
 

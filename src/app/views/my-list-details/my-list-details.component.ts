@@ -1,6 +1,7 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, ViewContainerRef, computed, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router';
 import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
+import { knownFolders, path } from '@nativescript/core';
 import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
 import { DownloadedFile } from '~/app/models/downloadedFile';
 import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
@@ -70,9 +71,10 @@ export class MyListDetailsComponent implements OnInit {
   }
 
   goToScore(song: DownloadedFile): void {
-    const index = this.songs().findIndex(s => s.localPath === song.localPath);
+    const index = this.songs().findIndex(s => s.instrument === song.instrument && s.fileName === song.fileName);
     this.router.navigate(['/score', index], {
       queryParams: { songs: JSON.stringify(this.songs()) }
     });
+
   }
 }

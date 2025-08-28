@@ -50,7 +50,7 @@ export class ScoreListComponent implements OnInit {
   }
 
   goToScore(song: DownloadedFile): void {
-    const index = this.songList().findIndex(s => s.localPath === song.localPath);
+    const index = this.songList().findIndex(s => s.fileName === song.fileName && s.instrument === song.instrument);
     this.router.navigate(['/score', index], {
       queryParams: { songs: JSON.stringify(this.songList()) }
     });

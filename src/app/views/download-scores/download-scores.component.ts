@@ -73,13 +73,11 @@ export class DownloadScoresComponent implements OnInit {
   async downloadSingleSong(title: string): Promise<void> {
     this.loading.set(true)
     this.selectedSong.set(`${title}`)
-    console.log('selected song...', this.selectedSong())
-    const filePath = await this.scoresDownloaderService.downloadFile(`${title}`, this.instrument().path);
+    console.log('selected song...', this.selectedSong())    
     const chord = await this.scoresDownloaderService.getSongChord(title, this.instrument().path)
     const dowloadedFile: DownloadedFile = {
       instrument: this.instrument().name,
-      fileName: `${title}`,
-      localPath: filePath,
+      fileName: `${title}`,      
       chord
     }
     this.scoresDownloaderService.addDownloadedFile(dowloadedFile);

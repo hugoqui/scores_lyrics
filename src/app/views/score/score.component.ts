@@ -1,6 +1,6 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, ViewChild, effect, inject, signal } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
-import { Page, SwipeGestureEventData, SwipeDirection } from '@nativescript/core'
+import { Page, SwipeGestureEventData, SwipeDirection, knownFolders, path } from '@nativescript/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { DownloadedFile } from '~/app/models/downloadedFile';
 
@@ -24,7 +24,12 @@ export class ScoreComponent implements OnInit {
   }
 
   get scorePath(): string {
-    return this.songs[this.currentIndex]?.localPath || '';
+    const song = this.songs[this.currentIndex];
+    if (!song) return '';
+
+    const documents = knownFolders.documents();
+    const instrumentFolder = documents.getFolder(song.instrument);
+    return path.join(instrumentFolder.path, song.fileName);
   }
 
   onSwipe(args: SwipeGestureEventData) {
