@@ -7,14 +7,15 @@ android {
   compileSdkVersion 36
   buildToolsVersion "36"
   // ndkVersion ""
+  ndkVersion "26.1.10909125"
 
   defaultConfig {
     minSdkVersion 23
     targetSdkVersion 36
 
     // Version Information
-    versionCode 4
-    versionName "1.0.4"
+    versionCode 5
+    versionName "1.0.5"
     
     generatedDensities = []
   }
