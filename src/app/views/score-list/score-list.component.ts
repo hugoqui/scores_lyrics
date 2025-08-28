@@ -37,7 +37,7 @@ export class ScoreListComponent implements OnInit {
       console.log('ScoreListComponent ngOnInit...')
       const id = +this.route.snapshot.params.instrumentId
       this.instrument.set(this.instrumentsService.getInstrument(id))
-      this.getSongList(this.instrument().name);
+      this.getSongList(this.instrument().path);
     } catch (error) {
       console.error('Error in ScoreListComponent ngOnInit:', error);
     }

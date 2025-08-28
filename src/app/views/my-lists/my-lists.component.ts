@@ -47,7 +47,7 @@ export class MyListsComponent {
 
   async selectInstrument() {
     const instruments = this.instrumentService.instruments();
-    const options = instruments.map(i => i.name)
+    const options = instruments.map(i => i.path)
 
     return await Dialogs.action({
       title: 'Instrumento',

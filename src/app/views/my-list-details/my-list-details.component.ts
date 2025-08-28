@@ -4,6 +4,7 @@ import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule 
 import { knownFolders, path } from '@nativescript/core';
 import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
 import { DownloadedFile } from '~/app/models/downloadedFile';
+import { InstrumentsService } from '~/app/services/instruments.service';
 import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
 import { SongListsService } from '~/app/services/song-lists.service';
 
@@ -18,6 +19,7 @@ import { SongListsService } from '~/app/services/song-lists.service';
 export class MyListDetailsComponent implements OnInit {
   listName!: string;
   instrument: string = '';
+  instrumentLabel: string = '';
 
   songs = computed(() => {
     const list = this.service.myLists().find(l => l.name === this.listName);
@@ -30,6 +32,7 @@ export class MyListDetailsComponent implements OnInit {
     private modalService: ModalDialogService,
     private vcRef: ViewContainerRef,
     private router: Router,
+    private instrumentsService: InstrumentsService,
     private downloadedScoresService: ScoresDownloaderService
   ) { }
 
@@ -39,6 +42,8 @@ export class MyListDetailsComponent implements OnInit {
       const list = this.service.myLists().find(l => l.name === this.listName);
       this.instrument = list?.instrument ?? '';
     });
+
+    this.instrumentLabel = this.instrumentsService.instruments().find(i=> i.path === this.instrument).label ?? ''
   }
 
   async addSong() {

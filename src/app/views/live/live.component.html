@@ -9,7 +9,7 @@
 
 <GridLayout columns="auto, *, auto" rows="*,auto" (swipe)="onSwipe($event)">
     <Image [src]="scorePath()" stretch="aspectFit" colSpan="3" rowSpan="2" (tap)="toggleVisibilityNav()" #imageRef />
-    @if(instrument().name !== 'piano' && instrument().name !=='trumpet'){
+    @if(instrument().path !== 'piano' && instrument().path !=='trumpet'){
     <Button 
         [text]="scoreType()==='melody'?'melodía':'arreglo'" 
         (tap)="toggleArrangement()" row="1"

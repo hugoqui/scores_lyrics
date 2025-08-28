@@ -37,8 +37,8 @@ export class ScoresDownloaderService {
         );
     }
 
-    async getDbSongs():Promise<void> {
-        if(this.dbSongList().length !== 0 ){return} 
+    async getDbSongs(): Promise<void> {
+        if (this.dbSongList().length !== 0) { return }
         const req = await fetch('https://api.iglesiacristianabelen.com/api/cantos')
         const res = await req.json()
         this.dbSongList.set(res)
@@ -97,7 +97,7 @@ export class ScoresDownloaderService {
 
                 const percentage = (downloadedFiles.length / files.length) * 100
                 this.percentage.set(parseFloat(percentage.toFixed(2)));
-                const filePath = await this.downloadFile(file, instrument);                
+                const filePath = await this.downloadFile(file, instrument);
                 const chord: string = await this.getSongChord(file, instrument)
                 this.addDownloadedFile({ instrument, fileName: file, chord });
                 downloadedFiles.push(filePath);
@@ -113,16 +113,16 @@ export class ScoresDownloaderService {
         }
     }
 
-    async getSongChord(title: string, instrument: string): Promise<string>{
+    async getSongChord(title: string, instrument: string): Promise<string> {
         try {
             await this.getDbSongs()
-            const song = 
+            const song =
                 this.dbSongList()
-                .find(s=> 
-                    s.title.toLowerCase().replace(/ /g, '_') === title.replace('.png', '') ||
-                    s.title.toLowerCase().replace(/ /g, '_') + instrument === title.replace('.png', '')
-                )
-            
+                    .find(s =>
+                        s.title.toLowerCase().replace(/ /g, '_') === title.replace('.png', '') ||
+                        s.title.toLowerCase().replace(/ /g, '_') + instrument === title.replace('.png', '')
+                    )
+
             return song.chord
         } catch (error) {
             console.log('error al obtener tonalidad... ', error)
@@ -154,26 +154,40 @@ export class ScoresDownloaderService {
         return files.some(f => f.instrument === instrument && f.fileName === fileName);
     }
 
-    wipeAll(): void {
+    async wipeAll(): Promise<void> {
         try {
+            // Borrar settings
             clear();
             console.log("✅ Todos los application-settings fueron borrados.");
-            const instruments = this.instrumentService.instruments();           
-            
-            for (const instrument of instruments) {                
-                let downloadsFolder: Folder = knownFolders.documents().getFolder(instrument.name);
-        
-                downloadsFolder.clear()
-                .then(() => {console.log(`✅ Carpeta de ${instrument.name} vaciada.`);})
-                .catch(err => {console.error("❌ Error al borrar descargas:", err);});            
-                
-                downloadsFolder = knownFolders.documents().getFolder(instrument.path);
-        
-                downloadsFolder.clear()
-                .then(() => {console.log(`✅ Carpeta de ${instrument.name} vaciada.`);})
-                .catch(err => {console.error("❌ Error al borrar descargas:", err);});            
+
+            // Carpeta principal de documentos
+            const documents = knownFolders.documents();
+
+            // Obtener todas las subcarpetas
+            const entities = await documents.getEntities(); // <-- esperar la promesa
+            const subfolders = entities.filter(e => e instanceof Folder) as Folder[];
+
+            // Borrar todas las subcarpetas y sus contenidos
+            for (const folder of subfolders) {
+                try {
+                    await folder.clear();
+                    console.log(`✅ Carpeta ${folder.name} vaciada.`);
+                } catch (err) {
+                    console.error(`❌ Error al borrar ${folder.name}:`, err);
+                }
             }
-            
+
+            // Borrar archivos directamente dentro de Documents
+            const files = entities.filter(e => e instanceof File) as File[];
+
+            for (const file of files) {
+                try {
+                    await file.remove();
+                    console.log(`✅ Archivo ${file.name} eliminado.`);
+                } catch (err) {
+                    console.error(`❌ Error al borrar archivo ${file.name}:`, err);
+                }
+            }
 
         } catch (error) {
             console.error("❌ Error al limpiar los datos:", error);

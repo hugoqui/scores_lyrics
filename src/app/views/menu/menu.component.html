@@ -3,7 +3,7 @@
     <ListView [items]="instrumentsService.instruments()" col="1" height="100%">
         <ng-template let-item>            
             <GridLayout (tap)="navigateTo(item.id)" columns="60, *" >
-                <Image [src]="`~/app/assets/icons/${item.name}.jpg`" class="instrument-image" col="0"></Image>
+                <Image [src]="`~/app/assets/icons/${item.path}.jpg`" class="instrument-image" col="0"></Image>
                 <Label col="1" [text]="item.label" class="instrument-item text-gray-500"></Label>                
             </GridLayout>
         </ng-template>

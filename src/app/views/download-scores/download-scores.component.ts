@@ -44,7 +44,7 @@ export class DownloadScoresComponent implements OnInit {
   getSongList(): void {
     this.scoresDownloaderService.getFileNames(this.instrument().path).pipe(
       switchMap(remoteFiles =>
-        of(this.scoresDownloaderService.getDownloadedFiles(this.instrument().name)).pipe(
+        of(this.scoresDownloaderService.getDownloadedFiles(this.instrument().path)).pipe(
           map(downloadedFiles => {
             const downloadedFileNames = downloadedFiles.map(f => f.fileName);
             
@@ -76,7 +76,7 @@ export class DownloadScoresComponent implements OnInit {
     console.log('selected song...', this.selectedSong())    
     const chord = await this.scoresDownloaderService.getSongChord(title, this.instrument().path)
     const dowloadedFile: DownloadedFile = {
-      instrument: this.instrument().name,
+      instrument: this.instrument().path,
       fileName: `${title}`,      
       chord
     }

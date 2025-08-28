@@ -151,7 +151,7 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
       viewContainerRef: this.vcRef,
       fullscreen: false,
       context: {
-        instrument: this.instrument().name
+        instrument: this.instrument().path
       }
     }).then(selectedSong => {
       if (selectedSong) {
