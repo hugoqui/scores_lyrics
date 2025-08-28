@@ -6,7 +6,7 @@
 
         <ListView row="1" colSpan="2" [items]="songs()" height="100%">
             <ng-template let-song let-i="index">
-                <GridLayout columns="10, 100, *" rows="5,*,5" class="list-item">
+                <GridLayout columns="10, 100, *" rows="5,*,5" class="list-item" (tap)="goToScore(song)">
                     <Button col="1" row="1"  height="40" padding="0" text="borrar" (tap)="removeSong(song)" class="button" fontSize="12"></Button>
                     <Label  col="2" row="1"  [text]="song.fileName.replace('.png', '')" ></Label>
                 </GridLayout>

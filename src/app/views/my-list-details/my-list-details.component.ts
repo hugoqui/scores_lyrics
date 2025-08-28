@@ -1,5 +1,5 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, ViewContainerRef, computed, inject } from '@angular/core'
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
 import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
 import { DownloadedFile } from '~/app/models/downloadedFile';
@@ -28,6 +28,7 @@ export class MyListDetailsComponent implements OnInit {
     private service: SongListsService,
     private modalService: ModalDialogService,
     private vcRef: ViewContainerRef,
+    private router: Router,
     private downloadedScoresService: ScoresDownloaderService
   ) { }
 
@@ -66,5 +67,12 @@ export class MyListDetailsComponent implements OnInit {
 
   removeSong(song: DownloadedFile) {
     this.service.removeSongFromList(song, this.listName);
+  }
+
+  goToScore(song: DownloadedFile): void {
+    const index = this.songs().findIndex(s => s.localPath === song.localPath);
+    this.router.navigate(['/score', index], {
+      queryParams: { songs: JSON.stringify(this.songs()) }
+    });
   }
 }

@@ -29,13 +29,13 @@ export class ScoreComponent implements OnInit {
 
   onSwipe(args: SwipeGestureEventData) {
     if (args.direction === SwipeDirection.left) {
-      this.animateSwipe(-300); // hacia la izquierda
       if (this.currentIndex < this.songs.length - 1) {
+        this.animateSwipe(-300); // hacia la izquierda
         this.currentIndex++;
       }
     } else if (args.direction === SwipeDirection.right) {
-      this.animateSwipe(300); // hacia la derecha
       if (this.currentIndex > 0) {
+        this.animateSwipe(300); // hacia la derecha
         this.currentIndex--;
       }
     }
