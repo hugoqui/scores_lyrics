@@ -1,4 +1,7 @@
+import { DownloadedFile } from "./downloadedFile";
+
 export interface SongList{
     name: string;
-    songs: string[];
+    instrument: string;
+    songs: DownloadedFile[];
 }

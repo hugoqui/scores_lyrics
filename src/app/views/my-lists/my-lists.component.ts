@@ -6,6 +6,10 @@ import { SongListsService } from '../../services/song-lists.service'
 import { prompt, confirm } from "@nativescript/core/ui/dialogs";
 import { CollectionViewModule } from '@nativescript-community/ui-collectionview/angular';
 import { install } from '@nativescript-community/ui-collectionview-swipemenu';
+import { Router } from '@angular/router';
+import { Dialogs, Page } from '@nativescript/core'
+import { InstrumentsService } from '~/app/services/instruments.service';
+
 install();
 
 @Component({
@@ -17,12 +21,9 @@ install();
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class MyListsComponent {
-  constructor(public service: SongListsService) {
-
-  }
+  constructor(public service: SongListsService, private router: Router, private instrumentService: InstrumentsService) { }
 
   async addList() {
-
     const newList = await prompt({
       title: 'Nueva Lista',
       message: 'Ingrese el título de la nueva lista:',
@@ -37,7 +38,24 @@ export class MyListsComponent {
     const canContinue = this.checkIfExists(newName);
     if (!canContinue) { return }
 
-    this.service.createList(newName)
+    const instrument = await this.selectInstrument()
+    console.log('instrumetn... ', instrument)
+    if (instrument === 'Cancelar') { return }
+
+    this.service.createList(newName, instrument)
+  }
+
+  async selectInstrument() {
+    const instruments = this.instrumentService.instruments();
+    const options = instruments.map(i => i.name)
+
+    return await Dialogs.action({
+      title: 'Instrumento',
+      cancelButtonText: 'Cancelar',
+      actions: options,
+      cancelable: true,
+    })
+
   }
 
   async removeList(i) {
@@ -60,21 +78,11 @@ export class MyListsComponent {
     }
   }
 
-  items = [
-    { index: 0, name: 'TURQUOISE', color: '#1abc9c' },
-    { index: 1, name: 'EMERALD', color: '#2ecc71' },
-    { index: 2, name: 'PETER RIVER', color: '#3498db' },
-    { index: 3, name: 'AMETHYST', color: '#9b59b6' },
-    { index: 4, name: 'WET ASPHALT', color: '#34495e' },
-    { index: 5, name: 'GREEN SEA', color: '#16a085' },
-    { index: 6, name: 'NEPHRITIS', color: '#27ae60' },
-    { index: 7, name: 'BELIZE HOLE', color: '#2980b9' },
-    { index: 8, name: 'WISTERIA', color: '#8e44ad' },
-    { index: 9, name: 'MIDNIGHT BLUE', color: '#2c3e50' }
-  ];
-  removeItem(i: number) {
-    this.items.splice(i, 1);
+  goToDetails(item: SongList) {
+    this.router.navigate(['/myLists', item.name]);
   }
+
+
 
 }
 

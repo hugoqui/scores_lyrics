@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './views/home/home.component';
 import { MyListsComponent } from './views/my-lists/my-lists.component';
+import { MyListDetailsComponent } from './views/my-list-details/my-list-details.component';
 import { LoginComponent } from './views/login/login.component';
 import { MenuComponent } from './views/menu/menu.component';
 import { SettingsComponent } from './views/settings/settings.component';
@@ -24,5 +25,5 @@ export const routes: Routes = [
   { path: 'settings', component: SettingsComponent },
   
   { path: 'myLists', component:  MyListsComponent },
-  { path: 'myLists/:listName', component:  MyListsComponent },
+  { path: 'myLists/:listName', component:  MyListDetailsComponent },
 ];

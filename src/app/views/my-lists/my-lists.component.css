@@ -1,42 +1,10 @@
 .list-item {
     font-size: 24px;
     color: #333;
-    margin: 20 40;    
-    position: relative;
-    overflow: hidden;
-    min-height: 50;
+    margin-left: 40;    
 }
 
-.swipe-template {
-    background-color: #f44336;
-    height: 100%;
-    align-items: center;
+.instrument-name{
+    margin-left: 40;
+    margin-bottom: 20;
 }
-
-.delete-button {
-    color: #fff;
-    background: transparent;
-    border: none;
-}
-
-
-gvs:SwipeMenu {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-}
-
-.swipe-template {
-  width: 100%;
-  height: 100%;
-  background-color: transparent;
-  justify-content: flex-start;
-  align-items: center;
-}
-.swipe-template Button {
-  width: 80;
-  height: 100%;
-}
-

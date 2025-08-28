@@ -1,0 +1,11 @@
+.list-item {
+    font-size: 18px;
+    color: #333;
+    margin-left: 20;
+    margin-bottom: 50;   
+}
+
+.list-item label{
+    margin-left: 20;
+}
+
