@@ -1,6 +1,6 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, ViewChild, effect, inject, signal } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
-import { Page, SwipeGestureEventData, SwipeDirection, knownFolders, path } from '@nativescript/core'
+import { Page, SwipeGestureEventData, SwipeDirection, knownFolders, path, File } from '@nativescript/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { DownloadedFile } from '~/app/models/downloadedFile';
 
@@ -29,8 +29,17 @@ export class ScoreComponent implements OnInit {
 
     const documents = knownFolders.documents();
     const instrumentFolder = documents.getFolder(song.instrument);
-    return path.join(instrumentFolder.path, song.fileName);
+    const finalPath = path.join(instrumentFolder.path, song.fileName);
+
+    if (!File.exists(finalPath)) {
+      console.warn('Archivo no existe en path:', finalPath);
+      return '';
+    }
+
+    console.log('path...', finalPath);
+    return finalPath;
   }
+
 
   onSwipe(args: SwipeGestureEventData) {
     if (args.direction === SwipeDirection.left) {

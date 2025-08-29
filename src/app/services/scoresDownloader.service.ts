@@ -85,42 +85,20 @@ export class ScoresDownloaderService {
         }
     }
 
-    async downloadScores(instrument: string): Promise<string[]> {
-        try {
-            this.loading.set(true);
-            const files = await firstValueFrom(this.getFileNames(instrument));
-            console.log('Archivos a descargar encontrados:', files.length);
-            const downloadedFiles: string[] = [];
-
-            for (const file of files) {
-                if (this.isCanceled()) { return }
-
-                const percentage = (downloadedFiles.length / files.length) * 100
-                this.percentage.set(parseFloat(percentage.toFixed(2)));
-                const filePath = await this.downloadFile(file, instrument);
-                const chord: string = await this.getSongChord(file, instrument)
-                this.addDownloadedFile({ instrument, fileName: file, chord });
-                downloadedFiles.push(filePath);
-            }
-
-            this.scores.set(downloadedFiles);
-            this.loading.set(false);
-            return downloadedFiles;
-        } catch (error) {
-            console.error('Error descargando las partituras:', error);
-            this.loading.set(false);
-            throw error;
-        }
-    }
-
     async getSongChord(title: string, instrument: string): Promise<string> {
         try {
+            console.log('finding chord... ', title, instrument)
             await this.getDbSongs()
+
+            const a = this.dbSongList().filter(s=> s.title === 'yo_te_exalto')
+            console.log('resultado primero... ', a)
+            
             const song =
                 this.dbSongList()
                     .find(s =>
                         s.title.toLowerCase().replace(/ /g, '_') === title.replace('.png', '') ||
-                        s.title.toLowerCase().replace(/ /g, '_') + instrument === title.replace('.png', '')
+                        s.title.toLowerCase().replace(/ /g, '_') + instrument === title.replace('.png', '') ||
+                        s.title.trim().toLowerCase().replace(/ /g, '_') + '_' + instrument === title.replace('.png', '')
                     )
 
             return song.chord
@@ -164,11 +142,17 @@ export class ScoresDownloaderService {
             const documents = knownFolders.documents();
 
             // Obtener todas las subcarpetas
-            const entities = await documents.getEntities(); // <-- esperar la promesa
+            const entities = await documents.getEntities();
             const subfolders = entities.filter(e => e instanceof Folder) as Folder[];
 
-            // Borrar todas las subcarpetas y sus contenidos
-            for (const folder of subfolders) {
+            // Obtener nombres de carpetas correspondientes a instrumentos a borrar
+            const instruments = this.instrumentService.instruments().map(i => i.path);
+
+            // Filtrar solo las carpetas que correspondan a instrumentos
+            const foldersToDelete = subfolders.filter(folder => instruments.includes(folder.name));
+
+            // Borrar solo las carpetas de instrumentos
+            for (const folder of foldersToDelete) {
                 try {
                     await folder.clear();
                     console.log(`✅ Carpeta ${folder.name} vaciada.`);
@@ -177,17 +161,7 @@ export class ScoresDownloaderService {
                 }
             }
 
-            // Borrar archivos directamente dentro de Documents
-            const files = entities.filter(e => e instanceof File) as File[];
-
-            for (const file of files) {
-                try {
-                    await file.remove();
-                    console.log(`✅ Archivo ${file.name} eliminado.`);
-                } catch (err) {
-                    console.error(`❌ Error al borrar archivo ${file.name}:`, err);
-                }
-            }
+            console.log("✅ Limpieza de carpetas de instrumentos completada.");
 
         } catch (error) {
             console.error("❌ Error al limpiar los datos:", error);

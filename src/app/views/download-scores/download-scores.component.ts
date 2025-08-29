@@ -34,6 +34,9 @@ export class DownloadScoresComponent implements OnInit {
   downloadedFiles = signal([]);
   instrument = signal<Instrument>(null);
   selectedSong = signal<string>('')
+  isCanceled = signal<boolean>(false);
+  generalLoading = signal(false);
+  nScores = signal<number>(0)
 
   ngOnInit(): void {
     const id = +this.route.snapshot.params.id
@@ -47,11 +50,11 @@ export class DownloadScoresComponent implements OnInit {
         of(this.scoresDownloaderService.getDownloadedFiles(this.instrument().path)).pipe(
           map(downloadedFiles => {
             const downloadedFileNames = downloadedFiles.map(f => f.fileName);
-            
+
             return remoteFiles
               .map(fileName => {
                 const isDownloaded = downloadedFileNames.includes(fileName)
-                const chord = isDownloaded? downloadedFiles.find(f=> f.fileName === fileName).chord : 'F'
+                const chord = isDownloaded ? downloadedFiles.find(f => f.fileName === fileName).chord : 'F'
                 return {
                   title: fileName,
                   isDownloaded: downloadedFileNames.includes(fileName),
@@ -71,29 +74,37 @@ export class DownloadScoresComponent implements OnInit {
   }
 
   async downloadSingleSong(title: string): Promise<void> {
-    this.loading.set(true)
-    this.selectedSong.set(`${title}`)
-    console.log('selected song...', this.selectedSong())    
-    const chord = await this.scoresDownloaderService.getSongChord(title, this.instrument().path)
-    const dowloadedFile: DownloadedFile = {
-      instrument: this.instrument().path,
-      fileName: `${title}`,      
-      chord
-    }
-    this.scoresDownloaderService.addDownloadedFile(dowloadedFile);
-    this.songList.update(list =>
-      list.map(song =>
-        song.title === `${title}`
-          ? { ...song, isDownloaded: true }
-          : song
-      )
-    );
-    this.loading.set(false)
-  }
+    try {
+      this.loading.set(true);
+      this.selectedSong.set(`${title}`);
+      console.log('selected song...', this.selectedSong());
 
-  isCanceled = signal<boolean>(false);
-  generalLoading = signal(false);
-  nScores = signal<number>(0)
+      // Descargar el archivo físicamente
+      await this.scoresDownloaderService.downloadFile(title, this.instrument().path);
+
+      // Obtener la tonalidad (chord)
+      const chord = await this.scoresDownloaderService.getSongChord(title, this.instrument().path);
+
+      const downloadedFile: DownloadedFile = {
+        instrument: this.instrument().path,
+        fileName: `${title}`,
+        chord
+      };
+      this.scoresDownloaderService.addDownloadedFile(downloadedFile);
+
+      this.songList.update(list =>
+        list.map(song =>
+          song.title === `${title}`
+            ? { ...song, isDownloaded: true }
+            : song
+        )
+      );
+      this.loading.set(false);
+    } catch (error) {
+      this.loading.set(false);
+      console.log('error downloading song ----- ', error);
+    }
+  }
 
   async downloadAllSongs() {
     const isConfirmed = await confirm('Se descargarán 45mb, ¿Desea comenzar la descarga?');
@@ -105,17 +116,17 @@ export class DownloadScoresComponent implements OnInit {
 
     for (let i = 0; i < this.songList().length; i++) {
       if (this.isCanceled()) {
-        this.generalLoading.set(false)        
+        this.generalLoading.set(false)
       }
       const title: string = this.songList()[i].title;
-      await this.downloadSingleSong(title); 
-      this.nScores.set(this.nScores() + 1);    
+      await this.downloadSingleSong(title);
+      this.nScores.set(this.nScores() + 1);
     }
 
     this.generalLoading.set(false)
   }
 
-  cancelDownload(){
+  cancelDownload() {
     this.isCanceled.set(true)
   }
 }

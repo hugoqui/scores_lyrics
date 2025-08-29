@@ -31,29 +31,7 @@ export class SettingsComponent {
       this.loading.set(this.scoresDownloaderService.loading());
       this.percentage.set(this.scoresDownloaderService.percentage());
     })
-  }
-
-  async downloadScores(item: Instrument): Promise<void> {
-    if (this.loading() && this.selectedId() !== item.id) {
-      alert('No se puede iniciar otra descarga si hay una en progreso.')
-      return //cannot start another download
-    }
-
-    else if (this.loading() && this.selectedId() === item.id) {
-      const isCanceled = await confirm('¿Desea detener la descarga?');
-      if (isCanceled) { this.scoresDownloaderService.cancelDownloads() }
-
-      return //whether is canceled or not, shouldn't countinue
-    }
-
-    console.log('Downloading scores...', item)
-    const isConfirmed = await confirm('Desea comenzar la descarga?');
-    console.log('confirmed!!!', isConfirmed)
-    if (!isConfirmed) { return }
-
-    this.selectedId.set(item.id)
-    this.scoresDownloaderService.downloadScores(item.path);
-  }
+  } 
 
   getDownloadsLength(instrumentPath: string): number {
     try {
