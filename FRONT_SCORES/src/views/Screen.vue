@@ -31,6 +31,12 @@ export default {
                 });
             }, 300);
         });
+        this.$socket.on('clear_screen', (data) => {
+            this.classOut = "animated-out";
+            setTimeout(() => {
+                this.showVerse = false;     
+            }, 300);
+        });
     },
     beforeDestroy() {
         this.$socket.off('text_change');

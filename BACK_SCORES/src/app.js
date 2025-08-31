@@ -106,6 +106,10 @@ io.on('connection', (socket) => {
         io.emit("go_top", step)
     })
     
+    socket.on("clear_screen_server", (step) => {
+        io.emit("clear_screen", step)
+    })
+    
     socket.on("send_text_server", (text) => {
         console.log("change text... ")
         io.emit("receive_text", text)

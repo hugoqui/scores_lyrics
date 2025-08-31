@@ -316,7 +316,7 @@ export default {
             data.text = ""
             data.reference = ""
             data.title = ""
-            this.$socket.emit("song_change", data)
+            this.$socket.emit("clear_screen_server", data)
         }
     }
 }

@@ -31,8 +31,14 @@ module.exports = {
             fs.readFile(NOMBRE_ARCHIVO, 'utf8', (error, datos) => {
                 if (error) throw error;
                 console.log("El contenido es: ", datos);
+                let jsonResult
+                try {
+                    jsonResult = JSON.parse(datos)                    
+                } catch (error) {
+                    jsonResult = {text: '', reference:'', title:''}
+                }
 
-                res.status(200).json(JSON.parse(datos))
+                res.status(200).json(jsonResult)
             });
 
         } catch (error) {
