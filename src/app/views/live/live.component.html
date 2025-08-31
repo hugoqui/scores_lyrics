@@ -7,8 +7,8 @@
 </ActionBar>
 
 
-<GridLayout columns="auto, *, auto" rows="*,auto" (swipe)="onSwipe($event)">
-    <Image [src]="scorePath()" stretch="aspectFit" colSpan="3" rowSpan="2" (tap)="toggleVisibilityNav()" #imageRef />
+<GridLayout columns="auto, *, auto" rows="*,auto" (swipe)="onSwipe($event)" #imageRef >
+    <ns-zoom-image [src]="scorePath()" colSpan="3" rowSpan="2" (tap)="toggleVisibilityNav()"></ns-zoom-image>    
     @if(instrument().path !== 'piano' && instrument().path !=='trumpet'){
     <Button 
         [text]="scoreType()==='melody'?'melodía':'arreglo'" 

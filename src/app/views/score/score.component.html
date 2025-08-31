@@ -1,5 +1,6 @@
 <ActionBar [title]="`Symphony`"> </ActionBar>
 
-<StackLayout #imageRef (swipe)="onSwipe($event)" (tap)="toggleVisibilityNav()">        
-    <Image [src]="scorePath" stretch="aspectFit" />
+<StackLayout #imageRef (swipe)="onSwipe($event)" (tap)="toggleVisibilityNav()">
+    <ns-zoom-image [src]="scorePath"></ns-zoom-image>
 </StackLayout>
+

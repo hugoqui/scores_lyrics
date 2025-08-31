@@ -1,11 +1,12 @@
-import { Component, NO_ERRORS_SCHEMA, OnInit, ViewChild, effect, inject, signal } from '@angular/core'
-import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
+import { Component, NO_ERRORS_SCHEMA, OnInit, ViewChild, ViewContainerRef, effect, inject, signal } from '@angular/core'
+import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
 import { Dialogs, Page } from '@nativescript/core'
 import { InstrumentsService } from '../../services/instruments.service'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ScoresDownloaderService } from '../../services/scoresDownloader.service';
 import { DownloadedFile } from '../../models/downloadedFile'
 import { Instrument } from '~/app/models/instrument'
+import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
 
 @Component({
   selector: 'ns-score-list',
@@ -17,7 +18,7 @@ import { Instrument } from '~/app/models/instrument'
 export class ScoreListComponent implements OnInit {
   songList = signal<DownloadedFile[]>([]);
   instrument = signal<Instrument>(null)
-  chordFilter: string = '';
+  chordFilter: string = '*';
   private allSongs: DownloadedFile[] = [];
 
   constructor(
@@ -25,6 +26,8 @@ export class ScoreListComponent implements OnInit {
     public instrumentsService: InstrumentsService,
     private route: ActivatedRoute,
     private router: Router,
+    private modalService: ModalDialogService,
+    private vcRef: ViewContainerRef,
     private scoresDownloaderService: ScoresDownloaderService
   ) {
     effect(() => {
@@ -58,7 +61,7 @@ export class ScoreListComponent implements OnInit {
 
   // Filtra la lista según el filtro de chord
   applyFilter(): void {
-    if (!this.chordFilter || this.chordFilter === 'Todas') {
+    if (!this.chordFilter || this.chordFilter === '*') {
       this.songList.set(this.allSongs);
     } else {
       const filtered = this.allSongs.filter(song => song.chord === this.chordFilter);
@@ -72,7 +75,7 @@ export class ScoreListComponent implements OnInit {
     this.applyFilter();
   }
 
-  selectFilter() {
+  async selectFilter() {
     const options = ['Todas', 'C', 'Eb', 'F', 'G', 'Bb'];
     Dialogs.action({
       title: 'Nota',
@@ -83,10 +86,28 @@ export class ScoreListComponent implements OnInit {
     }).then(selected => {
       console.log("selected!!! ", selected)
       if (selected && selected !== 'Cancelar') {
+        if (selected == 'Todas') {
+          selected = '*'
+        }
         this.onFilterChange(selected);
       }
     });
+  }
 
+  async openSearchModal() {
+    const selectedSongName = await this.modalService.showModal(SearchModalComponent, {
+      viewContainerRef: this.vcRef,
+      fullscreen: false,
+      context: {
+        instrument: this.instrument().path
+      }
+    })
+
+    if (!selectedSongName) { return }
+    
+    console.log('Canto seleccionado:', selectedSongName);
+    const selectedSong = this.songList().find(s => s.fileName.replace('.png', '') === selectedSongName);
+    this.goToScore(selectedSong);
   }
 
 }

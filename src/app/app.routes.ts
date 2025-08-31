@@ -12,7 +12,8 @@ import { DownloadScoresComponent } from './views/download-scores/download-scores
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  // { path: '', redirectTo: '/live/3', pathMatch: 'full' },
+  // { path: '', redirectTo: 'score/3', pathMatch: 'full' },
+
   { path: 'login', component:  LoginComponent },
   { path: 'home', component:  HomeComponent },
   { path: 'menu/:menuPath', component:  MenuComponent },

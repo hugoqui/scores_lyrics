@@ -10,13 +10,14 @@ import { SearchModalComponent } from '~/app/components/search-modal/search-modal
 import { SnackBar } from '@nativescript-community/ui-material-snackbar';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import { ZoomImageComponent } from '~/app/components/zoom-image/zoom-image.component';
 
 @Component({
   moduleId: module.id,
   selector: 'ns-live',
   templateUrl: 'live.component.html',
   styleUrls: ['live.component.css'],
-  imports: [NativeScriptCommonModule, NativeScriptRouterModule],
+  imports: [NativeScriptCommonModule, NativeScriptRouterModule, ZoomImageComponent],
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class LiveComponent implements AfterViewInit, OnDestroy {

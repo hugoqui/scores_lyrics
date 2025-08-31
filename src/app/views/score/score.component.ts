@@ -3,22 +3,25 @@ import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescrip
 import { Page, SwipeGestureEventData, SwipeDirection, knownFolders, path, File } from '@nativescript/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { DownloadedFile } from '~/app/models/downloadedFile';
+import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
+import { ZoomImageComponent } from '~/app/components/zoom-image/zoom-image.component';
 
 @Component({
   selector: 'ns-score',
   templateUrl: './score.component.html',
   styleUrl: './score.component.css',
-  imports: [NativeScriptCommonModule, NativeScriptRouterModule],
+  imports: [NativeScriptCommonModule, NativeScriptRouterModule, ZoomImageComponent],
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class ScoreComponent implements OnInit {
   songs: DownloadedFile[] = [];
   currentIndex = 0;
-
+  
   @ViewChild('imageRef', { static: true }) imageRef;
-  constructor(private page: Page, private route: ActivatedRoute) { }
+  constructor(private page: Page, private route: ActivatedRoute, private scoresDownloaderService: ScoresDownloaderService ) { }
 
   ngOnInit(): void {
+    console.log('el id parameter...', this.route.snapshot.params['id'])    
     this.currentIndex = +this.route.snapshot.params['id'];
     this.songs = JSON.parse(this.route.snapshot.queryParams['songs'] || '[]');
   }
