@@ -1,10 +1,9 @@
 import { Component, OnInit, NO_ERRORS_SCHEMA, signal, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Page } from '@nativescript/core';
-import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
-import { getString,  } from "@nativescript/core/application-settings";
+import { NativeScriptCommonModule, NativeScriptRouterModule, RouterExtensions } from '@nativescript/angular'
+import { getString, } from "@nativescript/core/application-settings";
 
 @Component({
   selector: 'app-login',
@@ -22,7 +21,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
+    private routerExtensions: RouterExtensions,
     private page: Page
   ) {
     this.loginForm = this.fb.group({
@@ -36,7 +35,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.page.actionBarHidden = true;
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/home']);
+      this.routerExtensions.navigate(['/home'], { clearHistory: true });
+
       return
     }
 
@@ -60,15 +60,15 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.errorMessage = '';
 
     const { email, password } = this.loginForm.value;
-    console.log('sendin..',email)
+    console.log('sendin..', email)
 
     this.authService.login(email, password).subscribe({
-      next: (success) => {
+      next: (result) => {
         this.isLoading.set(false);
-        if (success) {
-          this.router.navigate(['/home']);
+        if (result.success) {
+          this.routerExtensions.navigate(['/home'], { clearHistory: true });
         } else {
-          this.errorMessage = 'Credenciales incorrectas';
+          this.errorMessage = result.message || 'Credenciales incorrectas';
         }
       },
       error: (error) => {
@@ -77,6 +77,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         console.error('Login error:', error);
       }
     });
+
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {

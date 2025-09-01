@@ -38,8 +38,7 @@ export class ScoreComponent implements OnInit {
       console.warn('Archivo no existe en path:', finalPath);
       return '';
     }
-
-    console.log('path...', finalPath);
+    
     return finalPath;
   }
 

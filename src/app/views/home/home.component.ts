@@ -1,11 +1,10 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, inject } from '@angular/core'
-import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
+import { NativeScriptCommonModule, NativeScriptRouterModule, RouterExtensions } from '@nativescript/angular'
 import { Page, Label } from '@nativescript/core'
 import { prompt } from "@nativescript/core/ui/dialogs";
 import * as appSettings from '@nativescript/core/application-settings';
 import { Router } from "@angular/router";
-
-import { SocketIO } from '@triniwiz/nativescript-socketio';
+import { setString, remove } from '@nativescript/core/application-settings';
 import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
 
 @Component({
@@ -20,7 +19,7 @@ export class HomeComponent {
 
   page = inject(Page)
 
-  constructor(private router: Router, private scoreDownloaderService: ScoresDownloaderService) {
+  constructor(private router: Router, private scoreDownloaderService: ScoresDownloaderService, private routerExtensions: RouterExtensions) {
     this.page.on('loaded', (args) => {
       if (__IOS__) {
         const navigationController: UINavigationController = this.page.frame.ios.controller
@@ -33,9 +32,6 @@ export class HomeComponent {
 
   async setHost(): Promise<void> {
     try {
-      // this.router.navigate(['/menu']);
-      // return
-
       console.log('setting host...')
       let host = appSettings.getString('host', 'http://192.168.5.1:3014');
 
@@ -72,5 +68,14 @@ export class HomeComponent {
   wipeData() {
     console.log('Wiping all data...');
     this.scoreDownloaderService.wipeAll();
+  }
+
+  logout() {
+    console.log('cerrando sesión...')
+    remove('token');
+    remove('email');
+    remove('password');
+    remove('expiration');
+    this.routerExtensions.navigate(['/login'], { clearHistory: true });
   }
 }

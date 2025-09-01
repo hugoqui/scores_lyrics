@@ -14,29 +14,27 @@ export class AuthService {
 
     constructor(private http: HttpClient, private router: Router) { }
 
-    login(username: string, password: string): Observable<boolean> {
+    login(username: string, password: string): Observable<{ success: boolean, message?: string }> {
         setString('token', '');
 
         const deviceUUID = getUUID();
         console.log(`El UUID del dispositivo es: ${deviceUUID}`);
 
-        return this.http
-            .post<any>(this.apiUrl, { email: username, password: password, device: deviceUUID })
-            .pipe(
-                map(response => {
-                    console.log('Login successful', response);
-                    setString('email', username);
-                    setString('password', password);
-                    setString('token', response.token);
-                    // Guardar la fecha de expiración del token 60 días a partir de ahora
-                    setString('expiration', new Date(Date.now() + (60 * 24 * 60 * 60 * 1000)).toISOString());
-                    return true;
-                }),
-                catchError(error => {
-                    console.error('Login failed', error);
-                    return of(false);
-                })
-            );
+        return this.http.post<any>(this.apiUrl, { email: username, password, device: deviceUUID }).pipe(
+            map(response => {
+                setString('email', username);
+                setString('password', password);
+                setString('token', response.token);
+                //30 días para pedirle credenciales
+                setString('expiration', new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)).toISOString());
+                return { success: true };
+            }),
+            catchError(error => {
+                const errMsg = error?.error?.message || 'Error desconocido';
+                return of({ success: false, message: errMsg });
+            })
+        );
+
     }
 
     isAuthenticated(): boolean {

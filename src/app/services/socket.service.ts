@@ -74,13 +74,23 @@ export class SocketService {
   }
 
   private handleTextChange(data: any) {
+    if (data.reference){
+      console.log('includes reference... ')
+      return
+    }
     const id = this.getIdFromTitle(data.title);
+    if (!id) {return}
+
     this.currentSong.set(id);
-    console.log("#####:", id);
+    console.log('#####:', id);
   }
 
   getIdFromTitle(title: string): string {
-    return title.replace(/ /g, '_').toLowerCase();
+    try {
+      return title.replace(/ /g, '_').toLowerCase();      
+    } catch (error) {
+      return null
+    }
   }
 
   send(event: string, payload: any) {

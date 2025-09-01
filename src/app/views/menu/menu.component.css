@@ -3,6 +3,12 @@
 }
 
 .instrument-item{
-    font-size: 24;
-    padding: 24;
+    margin-top: 30;
+    font-size: 24;    
+}
+
+.download-info{
+  font-size: 14;
+  margin-bottom: 30;
+  color:#333;
 }

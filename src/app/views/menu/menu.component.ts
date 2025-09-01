@@ -1,6 +1,6 @@
 import { Component, NO_ERRORS_SCHEMA, inject, signal } from '@angular/core'
 import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
-import { Page, Label } from '@nativescript/core'
+import { Page, Label, knownFolders } from '@nativescript/core'
 import { InstrumentsService } from '../../services/instruments.service'
 import { ActivatedRoute, Router } from '@angular/router'
 @Component({
@@ -28,10 +28,20 @@ export class MenuComponent {
 
   navigateTo(id: string) {
     try {
-      console.log('Navigating to:', id);      
+      console.log('Navigating to:', id);
       this.router.navigate([`/${this.menuPath()}`, id]);
     } catch (error) {
       console.error('Navigation error:', error);
+    }
+  }
+
+  getDownloadsLength(instrumentPath: string): number {
+    try {
+      const documents = knownFolders.documents();
+      const instrumentFolder = documents.getFolder(instrumentPath);
+      return instrumentFolder.getEntitiesSync().length;
+    } catch (error) {
+      return 0
     }
   }
 

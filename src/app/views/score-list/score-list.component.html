@@ -7,7 +7,7 @@
         </StackLayout>
 
     </GridLayout>
-    <ListView [items]="songList()" height="100%" row="1" rowSpan="2">
+    <ListView [items]="songList()" height="100%" row="1" >
         <ng-template let-song>
             <GridLayout (tap)="goToScore(song)" columns="*,100">
                 <Label [text]="song.fileName.replace('.png','')" class="song-label" col="0"></Label>

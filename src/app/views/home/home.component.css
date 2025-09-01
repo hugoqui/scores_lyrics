@@ -1,4 +1,4 @@
-.button{
+.button-menu{
     border-width: 1;
     border-color: #bbb;
     padding: 32;
@@ -12,7 +12,7 @@
     color: #555;
 }
 
-.button *{
+.button-menu *{
     horizontal-alignment:center;
     padding: 8;    
 }

@@ -1,37 +1,42 @@
 <ActionBar title="Symphony"> </ActionBar>
-<ScrollView>
-    <FlexboxLayout flexDirection="column" alignItems="center" justifyContent="center">
-
+<StackLayout>
+    <GridLayout  rows="10,auto" margin="20">        
+        <Button (tap)="logout()" class="button" text="Cerrar sesión" textWrap="true" row="1" horizontalAlignment="right"></Button>
+    </GridLayout>
+    
+    <FlexboxLayout flexDirection="column" alignItems="center" justifyContent="center">    
         <!-- Logo -->
-        <Image src="~/app/assets/logo.png" width="300" marginBottom="20" />
-
+        <Image src="~/app/assets/logo.png" width="300" marginBottom="30" />
+    
         <!-- Contenedor de botones -->
         <FlexboxLayout flexDirection="row" flexWrap="wrap" justifyContent="center">
-
+    
             <GridLayout (tap)="setHost()" rows="60,auto" horizontalAlignment="center" verticalAlignment="middle"
-                class="button" margin="10">
+                class="button-menu" margin="10">
                 <Image src="~/app/assets/stream.jpg" stretch="aspectFit" row="0" />
                 <Label text="conectarse a transmisión" textWrap="true" row="1"></Label>
             </GridLayout>
-
+    
             <GridLayout [nsRouterLink]="['/menu', 'practice']" rows="60,auto" horizontalAlignment="center"
-                verticalAlignment="middle" class="button" margin="10">
+                verticalAlignment="middle" class="button-menu" margin="10">
                 <Image src="~/app/assets/music.jpg" stretch="aspectFit" row="0" />
                 <Label text="practicar" textWrap="true" row="1"></Label>
             </GridLayout>
-
+    
             <GridLayout [nsRouterLink]="['/myLists']" rows="60,auto" horizontalAlignment="center"
-                verticalAlignment="middle" class="button" margin="10">
+                verticalAlignment="middle" class="button-menu" margin="10">
                 <Image src="~/app/assets/list.jpg" stretch="aspectFit" row="0" />
                 <Label text="listas" textWrap="true" row="1"></Label>
             </GridLayout>
-
+    
             <GridLayout (tap)="goToSettings()" rows="60,auto" horizontalAlignment="center" verticalAlignment="middle"
-                class="button" margin="10">
+                class="button-menu" margin="10">
                 <Image src="~/app/assets/config.jpg" stretch="aspectFit" row="0" />
                 <Label text="configuración" textWrap="true" row="1"></Label>
             </GridLayout>
         </FlexboxLayout>
-
+    
     </FlexboxLayout>
+</StackLayout>
+<ScrollView>
 </ScrollView>

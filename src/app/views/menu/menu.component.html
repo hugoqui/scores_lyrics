@@ -2,9 +2,12 @@
 <GridLayout columns="30,*,30">
     <ListView [items]="instrumentsService.instruments()" col="1" height="100%">
         <ng-template let-item>            
-            <GridLayout (tap)="navigateTo(item.id)" columns="60, *" >
+            <GridLayout (tap)="navigateTo(item.id)" columns="60, 20, *" >
                 <Image [src]="`~/app/assets/icons/${item.path}.jpg`" class="instrument-image" col="0"></Image>
-                <Label col="1" [text]="item.label" class="instrument-item text-gray-500"></Label>                
+                <StackLayout col="2">
+                    <Label  [text]="item.label" class="instrument-item text-gray-500"></Label>                
+                    <Label [text]="`${getDownloadsLength(item.path)} partituras`" class="text-gray-300 download-info"></Label>
+                </StackLayout>
             </GridLayout>
         </ng-template>
 

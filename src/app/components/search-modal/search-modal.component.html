@@ -1,11 +1,24 @@
 <StackLayout class="container">
   <TextField hint="Buscar canto..." (textChange)="onSearchChange($event)" class="search-box" #searchInput></TextField>
 
-  <GridLayout rows="" columns="" marginTop="10">    
+  <GridLayout rows="*,auto" columns="" marginTop="10">
     <ListView [items]="songList()" class="list-group" height="100%">
       <ng-template let-song>
-        <Label [text]="song.fileName" class="list-group-item" (tap)="selectSong(song)"></Label>
+        <GridLayout columns="*, 40">
+          <Label [text]="song.fileName" class="list-group-item" (tap)="selectSong(song)"></Label>          
+          <Label [text]="song.chord" fontSize="10" col="1"></Label>
+        </GridLayout>
       </ng-template>
     </ListView>
+
+    <StackLayout orientation="horizontal" row="1" paddingTop="4" >        
+      <button (tap)="selecFilter('*')" class="btn-chord" [class]="selectedChord()=='*' ? 'selected': ''">*</button>
+      <button (tap)="selecFilter('C')" class="btn-chord" [class]="selectedChord()=='C' ? 'selected': ''">C</button>      
+      <button (tap)="selecFilter('F')" class="btn-chord" [class]="selectedChord()=='F' ? 'selected': ''">F</button>      
+      <button (tap)="selecFilter('G')" class="btn-chord" [class]="selectedChord()=='G' ? 'selected': ''">G</button>      
+      <button (tap)="selecFilter('Bb')" class="btn-chord" [class]="selectedChord()=='Bb' ? 'selected': ''">Bb</button>      
+      <button (tap)="selecFilter('Eb')" class="btn-chord" [class]="selectedChord()=='Eb' ? 'selected': ''">Eb</button>      
+    </StackLayout>
+  
   </GridLayout>
 </StackLayout>

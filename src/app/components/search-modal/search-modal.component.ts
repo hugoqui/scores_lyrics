@@ -23,6 +23,7 @@ export class SearchModalComponent implements OnInit, AfterViewInit {
   instrument: string;
   private allSongs: DownloadedFile[] = [];
   songList = signal<DownloadedFile[]>([]);
+  selectedChord = signal('*')
 
   @ViewChild('searchInput', { static: true }) searchInput: ElementRef<TextField>;
 
@@ -73,17 +74,29 @@ export class SearchModalComponent implements OnInit, AfterViewInit {
 
   // Filtra la lista según el filtro de chord
   applyFilter(): void {
-    if (this.searchText().trim() === '') {
-      this.songList.set(this.allSongs);
-    } else {
-      const filtered = this.allSongs.filter(song => song.fileName.replace('_', ' ').includes(this.searchText().toLowerCase()));
-      this.songList.set(filtered);
+    const text = this.searchText().trim().toLowerCase();
+    const chord = this.selectedChord();
+
+    let filtered = this.allSongs;
+
+    if (text !== '') {
+      filtered = filtered.filter(song => song.fileName.replace('_', ' ').toLowerCase().includes(text));
     }
-    console.log('filtrados...', this.songList().length)
+
+    if (chord !== '*' && chord !== '') {
+      filtered = filtered.filter(song => song.chord?.toLowerCase() === chord.toLowerCase());
+    }
+
+    this.songList.set(filtered);
   }
 
   selectSong(song: DownloadedFile) {
     this.params.closeCallback(song.fileName.replace('.png', ''));
+  }
+
+  selecFilter(chordFilter: string) {
+    this.selectedChord.set(chordFilter);
+    this.applyFilter();
   }
 
 }
