@@ -1,13 +1,3 @@
-/*
-let config = {
-    host: '107.180.24.242',
-    user: 'chanin',
-    password: 'LIa4{=SA.r$H',
-    database: 'chanin',
-    connectionLimit: 0
-}
-*/
-
 let config = {
     host: '195.26.248.10',
     user: 'belen',
@@ -23,11 +13,12 @@ let config = {
 //     database: 'bible',
 //     connectionLimit: 0
 // }
+
 // let config = {
 //     host: 'localhost',
+//     database: 'belen',
 //     user: 'root',
-//     password: '',
-//     database: 'bible',
+//     password: 'mysql@pass7',
 //     connectionLimit: 0
 // }
 

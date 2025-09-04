@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "serve": "set NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "build": "set NODE_OPTIONS=--openssl-legacy-provider &&vue-cli-service build"
+    "serve-ios": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
+    "build": "set NODE_OPTIONS=--openssl-legacy-provider &&vue-cli-service build",
+    "build-ios": "export NODE_OPTIONS=--openssl-legacy-provider &&vue-cli-service build"
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "register-service-worker": "^1.7.1",
+    "socket.io-client": "^4.8.1",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
-    "vue-socket.io": "^3.0.10",
     "vuex": "^3.4.0"
   },
   "devDependencies": {

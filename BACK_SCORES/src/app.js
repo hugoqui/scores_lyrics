@@ -7,11 +7,12 @@ const bodyParser = require('body-parser')
 
 //cors
 const cors = (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
-    res.header('Access-Control-Allow-Headers', 'Content-Type')
-    next()
-}
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+};
 
 app.use(morgan('dev'))
 app.use(bodyParser.json())
@@ -20,36 +21,50 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
 app.use(cors)
 
-
-
 let PORT = process.env.PORT || 3014
-//let PORT =  3014
+const http = require('http')
+const server = http.createServer(app)
 
-const server = express()
-    .use(app)
-    .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+server.listen(PORT, () => console.log(`Listening on ${PORT}`))
+// process.env.DEBUG = 'socket.io*';
 
-//socket
-const socketIO = require('socket.io')
+const io = require('socket.io')(server, {
+  pingInterval: 25000,
+  pingTimeout: 30000,
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
 
-// setInterval(() => io.emit('time', new Date().toTimeString()), 1000)
-global.io = socketIO(server)
+
+
+global.io = io;
+// setInterval(() => io.emit('time',  `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}` ), 30 * 1000)
+
 io.on('connection', (socket) => { 
 
-    console.log('Client connected....');
-    socket.on('disconnect', () => console.log('Client disconnected'))
+    console.log('🥳🥳🥳🥳🥳 Client connected....');
+    socket.on('disconnect', (reason) =>   console.log(`Client disconnected. Reason: ${reason}`))
     
     socket.on("song_change", data => {
         console.log("song changed.... ", data)
         io.emit("text_change", data)
 
-        var fs = require('fs')
+        if (data.reference) {return}
         
-        fs.writeFile('src/songid.txt', data.title, function (err) {
+        var fs = require('fs')
+        fs.writeFile('src/songid.txt', JSON.stringify(data) , function (err) {
             if (err) {
                 console.log(err)
             }
         })
+    })
+
+    socket.on("text_change", data => {
+        console.log("verse changed... ", data)
+        io.emit("text_change", data)
     })
 
     socket.on("streamActionToServer", data => {
@@ -91,6 +106,10 @@ io.on('connection', (socket) => {
         io.emit("go_top", step)
     })
     
+    socket.on("clear_screen_server", (step) => {
+        io.emit("clear_screen", step)
+    })
+    
     socket.on("send_text_server", (text) => {
         console.log("change text... ")
         io.emit("receive_text", text)
@@ -102,5 +121,5 @@ require('./routes/routes.js')(app)
 let mysql = require("mysql")
 let config = require('./config/config')
 global.pool = mysql.createPool(config)
-console.log('conectado...')
+console.log('base de datos conectada...')
 global.fetch = require("node-fetch");

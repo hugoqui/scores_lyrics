@@ -1,15 +1,14 @@
 import Vue from 'vue'
 import App from './App.vue'
-import './registerServiceWorker'
 import router from './router'
 import store from './store'
+import socket from "./socket";
 
 Vue.config.productionTip = false
 
-
 let host = localStorage.getItem("host")
 if (!host) {
-  host = "http://192.168.0.181:3014/"
+  host = `http://${window.location.hostname}:3014/`
 }
 store.commit("setHost",host)
 
@@ -23,16 +22,7 @@ store.commit("setServer", !!isServer)
 let isControl = localStorage.getItem("isControl")
 store.commit("setControl", !!isControl)
 
-import VueSocketIO from 'vue-socket.io'
-Vue.use(new VueSocketIO({
-  debug: true,
-  connection: store.state.socketUrl,
-  vuex: {
-    store,
-    actionPrefix: 'SOCKET_',
-    mutationPrefix: 'SOCKET_'
-  },
-}))
+Vue.prototype.$socket = socket;
 
 new Vue({
   router,

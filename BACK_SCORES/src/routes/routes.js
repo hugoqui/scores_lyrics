@@ -1,5 +1,6 @@
 const bible = require('../controllers/bible')
 const songs = require('../controllers/songs')
+const stream = require('../controllers/stream')
 
 module.exports = app => {
     //bible
@@ -8,6 +9,7 @@ module.exports = app => {
     app.get('/api/verses/:bookId/:chapter', bible.getVerses)
     app.get('/api/verse/:bookId/:chapter/:verse/:show?', bible.getVerse)
     app.get('/api/search/:text', bible.search)
+    app.get('/api/completeBible', bible.getCompleteBible)
     
     //songs
     app.get('/api/songs/', songs.getAll)
@@ -18,9 +20,10 @@ module.exports = app => {
     app.get('/api/songList', songs.getList)
     app.post('/api/songList', songs.addToList)
     app.delete('/api/songList/:id', songs.removeFromList)
+    app.post('/api/setNewSong', songs.setNewSong)
     
     //last song
     app.get('/api/lastSong/', songs.getLast)
-
+    app.get('/api/config', stream.getConfig)
         
 }

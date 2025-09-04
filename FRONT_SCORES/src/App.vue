@@ -1,28 +1,44 @@
 <template>
   <div id="app">
+    <button class="btn gold shadow d-none d-md-block" @click="$router.go(-1)" v-if="$route.path !== '/screen' && $route.path !== '/' "
+            style="border-radius: 30%; width: 40px; height: 40px; position: fixed; z-index: 9;
+                   left: 10px; top:10px; background-color: #111;"><</button>
     <router-view/>
   </div>
 </template>
 
 <script>
 export default {
-  beforeCreate(){
-    let host = this.$store.state.url
-    
-    console.log("el url del host... ", host)
-  }
+  data() {
+    return {
+      showBack: false,
+    }
+  },
+  async mounted(){
+    const url = this.$store.state.url + "config"
+    const req = await fetch(url)
+    const res = await req.json()
+    console.log("config...", res)
+    this.$store.commit("setConfig", res)
+  },
 }
 </script>
 
 
 <style lang="scss">
+*{
+  font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings:"wdth" 100;
+}
+
 $dark: #343740;
 $gold: #FFCD30;
 $white: #fff;
 
 body, html{
   background: $dark;
-  // scroll-behavior: smooth;
 }
 
 .white{color: $white;}
@@ -65,5 +81,35 @@ body, html{
 
 .btn:hover, .btn:focus {
   color: lighten($color: $gold, $amount: 10);
+}
+
+#clear-btn{
+    position: fixed;
+    bottom: .5rem;        
+    width: auto;   
+    left: 45%;
+    padding:  8px 32px;
+    border: none;
+    border-radius: 32px;
+    background-color: #4f5360;        
+    color:#fff;
+    z-index: 999;
+}
+
+.zoom{
+  cursor: pointer;
+  /* animation: zoom 300ms; */
+  transition: all 300ms;
+}
+
+.zoom:hover{
+  transform: scale(1.04);
+}
+
+.no-selectable{
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 </style>

@@ -1,90 +1,85 @@
 <template>
-  <div class="container-fluid mt-2 mb-5">
-      
-    <div class="row">
-      <div class="col">
-        <!-- <input type="text" v-model="searchedBook" placeholder="Libro" list="books" autocomplete="on">
-        <datalist id="books">
-          <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{book.likeName}}</option>
-        </datalist> -->
-      </div>
-
-      <form  @submit.prevent="searchVerse()" class="col-3">
-        <div class="input-group">
-          <input v-model="searchedText" type="text" class="form-control" placeholder="buscar... " >
-          <div class="input-group-append">
-            <button type="submit" class="btn bg-darker gold">buscar</button>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <div class="row" v-if="searchedVerses.length > 0">
-      <div class="col-md-4">
-        <div @click="selectVerse(verse)" v-for="verse in searchedVerses" :key="verse.reference" class="border p-2 gold my-1" style="cursor:pointer">
-          {{verse.text}}
-          <i> {{verse.reference }} </i>
-        </div>
-      </div>
-    </div>
-
-    <div class="row mt-3">
-      <div class="col-4" style="height:72vh; overflow-y:auto">
-        <div class="row">
-          <div class="col-4" v-for="book in books" :key="book.id" 
-                style="cursor:pointer;" @click="getChapters(book.idBook)">
-              <div class="p-1 mt-2 text-center " style="height:5rem; display:flex;" 
-                    :class="selectedBook == book.idBook ? 'bg-gold dark' : 'bg-darker white'">
-                <div style="margin: auto;" class="h5"> {{book.reference}}</div> 
+  <div class="container-fluid my-3 mb-5 rounded shadow-lg no-selectable"
+       style="max-width: 1400px; background-color: rgba(0,0,0,0.1);">
+    
+    <div class="row my-4">
+      <!-- BUSCAR POR CONTENIDO -->
+      <div class="col-md-4 ">
+        <h1 class="gold text-center mt-3 mb-4 font-weight-bold">Biblia - RV60</h1>
+        <div class="shadow-lg p-4">
+          <form @submit.prevent="searchVerse()">
+            <div class="input-group">
+              <input v-model="searchedText" type="text" class="form-control" placeholder="buscar... ">
+              <div class="input-group-append">
+                <button type="submit" class="btn bg-darker gold">buscar</button>
               </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col">
-        <div style="height:72vh; overflow-y:auto; border-left:1px solid #FFCD30; border-right:1px solid #FFCD30;" class="row">
-          <div class="col-4" v-for="chapter in chapters" :key="chapter.id" >
-            <div class="p-3  text-center h4  " style="cursor:pointer"
-                :class="selectedChapter == chapter.chapter ? 'bg-gold dark' : 'bg-darker white'" 
-                @click="getVerses(chapter.chapter)">
-              {{chapter.chapter}}
             </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col">
-        <div style="height:72vh; overflow-y:auto" class="row">
-          <div class="col-4" v-for="verse in verses" :key="verse.id" >            
-            <div class="p-3 text-center h4" style="cursor:pointer"
-                :class="selectedVerse == verse.verse ? 'bg-gold dark' : 'bg-darker white'" 
-                @click="showVerse(verse.verse)">
-              {{verse.verse}}
+          </form>
+
+          <section v-if="searchedVerses.length > 0" style="max-height: 65vh; overflow-y: scroll;" class="mt-2">
+            <div @click="showSearchedVerse(verse)" v-for="verse in searchedVerses" :key="verse.reference"
+              class="p-2 gold my-1" style="cursor:pointer; background-color: rgba(0,0,0,0.1);">
+              {{ verse.text }} <b class="text-secondary">{{ verse.reference }}</b>
             </div>
-          </div>
+          </section>
         </div>
       </div>
 
-    </div>
-    <div class="row mt-2" style="height:10vh">
-      <div class="col-4">
-        <section class="text-center gold p-2 pt-3" >
-          <p style="font-size:1.25rem">{{previousScripture.text}}</p>
-          <span>{{previousScripture.reference}} </span>          
-        </section>
+      <!-- ESCRIBIR PASAJE -->
+      <div class="col-md-4 ">
+        <div class="shadow-lg p-4 mt-5">
+          <button class="btn btn-dark float-right px-4 " style="border-radius: 3rem; background-color: rgba(0,0,0,0.4);" @click="cleanScreen()">Limpiar</button>
+          <br>
+          <strong class="gold mb-4">Seleccionar Verso</strong> <br>
+
+          <div style="display: flex;" class="mt-2">
+            <input class="input-search " type="text" v-model="selectedBook" placeholder="Libro" list="books"
+              autocomplete="on" @input="onInputChange"  @focus="selectAllText" @change="findBook(selectedBook)">
+            <datalist id="books">
+              <option v-for="book in books" :value="book.idBook" :key="book.idBook">{{ book.likeName }}</option>
+            </datalist>
+  
+            <input ref="chapterBox" class="input-search" type="number" v-model.lazy="selectedChapter" placeholder="Cap" 
+                @focus="selectAllText" @change="getChapterVerses(selectedChapter)" style="width: 80px;">
+  
+            <input ref="verseBox" class="input-search" type="number" v-model="preSelectedVerse" placeholder="Verso" 
+                @focus="selectAllText" @keyup.enter="showVerse(preSelectedVerse)" style="width: 80px;">          
+          </div>
+
+
+          <div class="mt-3 text-center" v-if="scripture">
+            <button class="shadow btn bg-dark gold" @click="changeVerse('up')">< Anterior</button>
+            <button class="shadow btn bg-dark gold ml-3" @click="changeVerse('down')">Siguiente ></button>
+          </div>
+
+          <section class="text-left gold p-2 pt-3 mt-4 zoom" style="background-color:rgba(0,0,0,0.2)" @click="showVerse(selectedVerse)">
+            <p style="font-size:16px">{{scripture.text}}</p>
+            <b class="text-white">{{scripture.reference}} </b>          
+          </section>
+
+        </div>
+
       </div>
-      <div class="col-4">
-        <section class="text-center gold p-2 pt-3" style="background-color:rgba(0,0,0,0.2)" >
-          <p style="font-size:1.25rem">{{scripture.text}}</p>
-          <span>{{scripture.reference}} </span>          
-        </section>
+
+      <!-- LISTA DE VERSICULOS -->
+      <div class="col-md-4 ">
+        <div ref="verseContainer"
+             class="shadow-lg m-2 p-4 gold" style="height: 90vh; overflow-y: auto;">
+
+          <section v-for="verse in chapterVerses" class="my-2 shadow rounded p-2 zoom "
+                  :ref="'verse_' + verse.verse" @click="showVerse(verse.verse)"
+                  style="background-color:rgba(250,250,250,0.05)"
+                  :class="selectedVerse== verse.verse ? 'bg-warning text-dark' : ''">
+            {{ verse.text }}
+            <label class="text-white" :class="selectedVerse== verse.verse ? 'font-weight-bold text-dark' : ''">
+              {{ verse.name }} {{ verse.chapter }}:{{ verse.verse }}
+            </label>
+            
+          </section>
+        </div>
+
       </div>
-      <div class="col-4">
-        <section class="text-center gold p-2 pt-3" >
-          <p style="font-size:1.25rem">{{followingScripture.text}}</p>
-          <span>{{followingScripture.reference}} </span>          
-        </section>
-      </div>
+
     </div>
 
   </div>
@@ -94,108 +89,199 @@
 
 export default {
 
-  data: ()=>({
-    books:[],
-    chapters:[],
-    verses:[],
-    searchedText: "", 
+  data: () => ({
+    books: [],
+    chapters: [],
+    verses: [],
+    searchedText: "",
     searchedVerses: [],
-    scripture:"",
-
-    selectedBook:1,
-    selectedChapter:1,
-    selectedVerse:1,
+    scripture: "",
+        
     url: "",
 
-    searchedBook:"",
-    searchedChapterNumber:"",
-    searchedVerseNumber:"",
+    selectedBook: null,
+    selectedId: null,
+    selectedChapter: null,
+    preSelectedVerse: null, 
+    selectedVerse: null,
 
-    followingScripture:{},
-    previousScripture:{},
+    followingScripture: {},
+    previousScripture: {},
+
+    completeBible: [],
+    chapterVerses: [],
+
   }),
-  async mounted(){
-    document.addEventListener("keydown", this.nextVerse)
+  async mounted() {    
+    document.body.style.overflowY = 'hidden'
     this.url = this.$store.state.url
-    await this.getBooks()
-    await this.getChapters(1)    
+    await this.getBooks()    
+    this.getCompleteBible()
   },
-  methods:{
-    async getBooks(){
+
+  beforeDestroy() {
+    document.body.style.overflowY = 'auto';
+  },
+
+  watch: {
+    selectedBook: function (val) {
+      if (val == "") {
+        this.chapterVerses = []
+        this.selectedChapter = null
+        this.selectedVerse = null
+        this.preSelectedVerse = null
+        this.scripture = {}
+        return
+      }      
+      this.selectedChapter = ""      
+    },
+  },
+
+  methods: {
+    async getBooks() {
       const req = await fetch(this.url + "books")
       let books = await req.json()
-      this.books = books.map(b=>{
-        let res = {idBook : b.idBook, name: b.name, reference: b.reference}
+      this.books = books.map(b => {
+        let res = { idBook: b.idBook, name: b.name, reference: b.reference }
         let likeName = b.name.toLowerCase()
         likeName = likeName.replace("á", "a")
         likeName = likeName.replace("é", "e")
         likeName = likeName.replace("í", "i")
         likeName = likeName.replace("ó", "o")
         likeName = likeName.replace("ú", "u")
-        res.likeName = likeName 
+        res.likeName = likeName
         return res
       })
-      console.log(this.books[0])
+            
     },
 
-    async getChapters(bookId){
+    async getChapters(bookId) {
       this.selectedBook = bookId
-      const url = this.url + "chapters/" + bookId      
+      const url = this.url + "chapters/" + bookId
       const req = await fetch(url)
-      this.chapters = await req.json()
-
-      //getverses
-      this.selectedChapter = 1
-      this.getVerses(1)
-    },
-    
-    async getVerses(chapter){
-      this.selectedChapter = chapter
-      const url = this.url + "verses/" + this.selectedBook + "/" + chapter      
-      const req = await fetch(url)
-      this.verses = await req.json()
-
+      this.chapters = await req.json()      
     },
 
-    async showVerse(verse){
-      
-      let url = this.url + "verse/" + this.selectedBook + "/" + this.selectedChapter + "/" + (verse+1)           
-      let req = await fetch(url)
-      this.followingScripture = await req.json()
-      
-      url = this.url + "verse/" + this.selectedBook + "/" + this.selectedChapter + "/" + (verse-1)           
-      req = await fetch(url)
-      this.previousScripture = await req.json()
-      
+    async getChapterVerses(chapter) {
+      if (this.selectedBook == "") {
+        this.selectedChapter = ""
+        this.selectedVerse = ""
+        this.preSelectedVerse = ""
+        this.scripture = {}
+        return
+      }      
+
+      this.chapterVerses = this.completeBible.filter(b => b.idBook == this.selectedBookId && b.chapter == chapter)
+      this.$refs["verseBox"].focus()
+    },
+
+    async showVerse(verse) {
       this.selectedVerse = verse
-      url = this.url + "verse/" + this.selectedBook + "/" + this.selectedChapter + "/" + verse  + "/true"         
-      req = await fetch(url)
-      this.scripture = await req.json()
+      let scripture = this.completeBible
+        .find(v => v.idBook == this.selectedBookId 
+                  && v.chapter == this.selectedChapter 
+                  && v.verse == verse)
+
+      scripture.reference = `${this.selectedBook} ${this.selectedChapter}:${verse}`
+      this.scripture = { ...scripture }
+
       this.searchedVerses = []
+      this.$store.dispatch("showVerse", this.scripture)
+      // this.$socket.emit("text_change", this.scripture)
 
+      const verseElement = this.$refs[`verse_${verse}`];
+     
+      if (verseElement && verseElement.length > 0) {
+        verseElement[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (verseElement) {
+        verseElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     },
 
-    selectVerse(verse){
-      this.selectedBook = verse.idBook
-      this.selectedChapter = verse.chapter
-      this.showVerse(verse.verse)
+
+    selectVerse(verse) {
+      this.selectedBookId = verse.idBook      
+      setTimeout(() => {        
+        this.selectedChapter = verse.chapter     
+        this.preSelectedVerse = verse.verse                 
+        this.showVerse(verse.verse)
+      }, 300);
     },
 
-    async searchVerse(){
-      const url = this.url + "search/"+ this.searchedText
+    async searchVerse() {
+      const url = this.url + "search/" + this.searchedText
       const req = await fetch(url)
       this.searchedVerses = await req.json()
     },
 
-    nextVerse(event){
-      if (event.keyCode ===40) {
-        console.log("next...")
-        this.showVerse(this.selectedVerse+1)
-      } else if (event.keyCode ===38) {
-        console.log("prev...")
-        this.showVerse(this.selectedVerse-1)        
+    showSearchedVerse(verse){     
+      const {name} = this.books.find(b=> b.idBook == verse.idBook)
+      this.selectedBook = name      
+      
+      this.selectVerse(verse)
+      this.getChapterVerses(verse.chapter)
+    },
+
+    changeVerse(event) {
+      if (event === "down") {        
+        this.showVerse(Number(this.selectedVerse) + 1)
+      } else if (event === "up") {        
+        this.showVerse(Number(this.selectedVerse) - 1)
       }
-    }
+    },
+
+    async cleanScreen() {
+      let data = {}
+      data.text = ""
+      data.reference = ""
+      data.title = ""
+      this.$socket.emit("text_change", data)
+    },
+
+    async getCompleteBible() {
+      const req = await fetch(this.url + "completeBible")
+      this.completeBible = await req.json()
+    },
+
+    //autocomplete
+    findBook(id) {
+      this.selectedBookId = id
+      this.selectedVerse =null
+      this.selectedChapter =null
+
+      const book = this.books.find(b => b.idBook == id)
+      if (book) {
+        this.getChapters(id)
+        this.selectedBook = book.name
+        setTimeout(() => {
+          this.$refs["chapterBox"].focus()          
+        }, 300);
+        
+        return
+      }
+
+      this.selectedBook = ""
+    },
+
+    onInputChange() {      
+      this.selectedBookId = null;
+    },
+
+    selectAllText(event) {
+      event.target.select(); // Selecciona todo el texto en el input
+    },
+
   }
 }
 </script>
+
+
+<style>
+
+.input-search {
+  border: none;
+  padding: 8px;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+</style>
