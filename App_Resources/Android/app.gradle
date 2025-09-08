@@ -15,7 +15,7 @@ android {
 
     // Version Information
     versionCode 1090
-    versionName "1.0.9"
+    versionName "1.9.0"
     
     generatedDensities = []
   }

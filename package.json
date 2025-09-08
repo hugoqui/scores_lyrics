@@ -1,7 +1,7 @@
 {
   "name": "symphony",
   "main": "./src/main.ts",
-  "version": "1.0.9",
+  "version": "1.9.0",
   "private": true,
   "dependencies": {
     "@angular/animations": "~20.0.0",
