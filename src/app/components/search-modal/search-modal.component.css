@@ -26,7 +26,7 @@
     text-align: center;
     text-transform: none;
     border-radius: 6;
-    width: 40;    
+    min-width: 40;    
 }
 
 .selected {

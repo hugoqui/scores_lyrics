@@ -53,6 +53,7 @@ export class ScoreListComponent implements OnInit {
   }
 
   goToScore(song: DownloadedFile): void {
+    console.log('>>>>>>>>>>>>>>> antes de navegar miremos... ', song)
     const index = this.songList().findIndex(s => s.fileName === song.fileName && s.instrument === song.instrument);
     this.router.navigate(['/score', index], {
       queryParams: { songs: JSON.stringify(this.songList()) }
@@ -107,7 +108,9 @@ export class ScoreListComponent implements OnInit {
     
     console.log('Canto seleccionado:', selectedSongName);
     const selectedSong = this.songList().find(s => s.fileName.replace('.png', '') === selectedSongName);
-    this.goToScore(selectedSong);
+    setTimeout(() => {      
+      this.goToScore(selectedSong);    
+    }, 100);
   }
 
 }
