@@ -8,6 +8,7 @@ import { DownloadedFile } from '../../models/downloadedFile'
 import { Instrument } from '~/app/models/instrument'
 import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
 
+
 @Component({
   selector: 'ns-score-list',
   templateUrl: './score-list.component.html',
@@ -15,7 +16,7 @@ import { SearchModalComponent } from '~/app/components/search-modal/search-modal
   imports: [NativeScriptCommonModule, NativeScriptRouterModule],
   schemas: [NO_ERRORS_SCHEMA],
 })
-export class ScoreListComponent implements OnInit {
+export class ScoreListComponent implements OnInit {  
   songList = signal<DownloadedFile[]>([]);
   instrument = signal<Instrument>(null)
   chordFilter: string = '*';
@@ -40,6 +41,7 @@ export class ScoreListComponent implements OnInit {
       console.log('ScoreListComponent ngOnInit...')
       const id = +this.route.snapshot.params.instrumentId
       this.instrument.set(this.instrumentsService.getInstrument(id))
+      this.page.actionBarHidden = false;
       this.getSongList(this.instrument().path);
     } catch (error) {
       console.error('Error in ScoreListComponent ngOnInit:', error);

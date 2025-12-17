@@ -31,7 +31,7 @@ module.exports = {
                 }
             }
 
-            if (user.deviceId !== device){
+            if (user.deviceId !== device && user.role !== 1){
                 return res.status(403).json({ message: 'Dispositivo no autorizado.' })
             }
 

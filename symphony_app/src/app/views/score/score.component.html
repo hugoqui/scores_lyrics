@@ -1,6 +1,41 @@
 <ActionBar [title]="`Symphony`"> </ActionBar>
 
-<StackLayout #imageRef (swipe)="onSwipe($event)" (tap)="toggleVisibilityNav()">
+<!-- Usamos un GridLayout para poder superponer el botón de play -->
+<GridLayout rows="*">
+  <StackLayout
+    #imageRef
+    (swipe)="onSwipe($event)"
+    (tap)="toggleVisibilityNav()"
+  >
     <ns-zoom-image [src]="scorePath"></ns-zoom-image>
-</StackLayout>
+  </StackLayout>
 
+  <!-- Botón flotante de Play/Pausa -->
+  @if (audioState().hasAudio){
+
+  <StackLayout
+    verticalAlignment="bottom"
+    horizontalAlignment="left"
+    marginBottom="0"
+    marginLeft="10"
+    orientation="horizontal"
+    class="player-controls"
+  >
+    <!-- Indicador de Carga o Botón de Play/Pausa -->
+    @if (audioState().isLoading) {
+      <ActivityIndicator busy="true" class="player-button"></ActivityIndicator>
+    } @else if (audioState().isPlaying) {
+      <!-- Botón de Pausa -->
+      <Image src="~/app/assets/icons/pause.png" (tap)="pause()" class="player-button" height="60" />
+    } @else {
+      <!-- Botón de Play -->
+      <Image src="~/app/assets/icons/play.png" (tap)="play()" class="player-button" height="60"/>
+    }
+
+    <!-- Botón de Detener (visible si está sonando o en pausa) -->
+    @if (audioState().isPlaying || _player.currentTime > 0) {
+      <Image src="~/app/assets/icons/stop.png" (tap)="stop()" class="player-button" marginLeft="4" height="40"/>
+    }
+  </StackLayout>
+  }
+</GridLayout>

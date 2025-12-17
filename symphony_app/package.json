@@ -19,6 +19,7 @@
     "@nativescript/core": "~8.9.3",
     "@nativescript/iqkeyboardmanager": "^2.1.2",
     "@triniwiz/nativescript-socketio": "^6.0.0",
+    "nativescript-audio": "^6.2.6",
     "nativescript-ui-listview": "^15.2.3",
     "nativescript-uuid-v2": "^2.0.1",
     "rxjs": "~7.8.0",
