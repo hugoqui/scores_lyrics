@@ -4,6 +4,7 @@ import { Page, SwipeGestureEventData, SwipeDirection, knownFolders, path, File, 
 import { ActivatedRoute } from '@angular/router'
 import { DownloadedFile } from '~/app/models/downloadedFile';
 import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
+import { InstrumentsService } from '~/app/services/instruments.service';
 import { ZoomImageComponent } from '~/app/components/zoom-image/zoom-image.component';
 import { HttpClient } from '@angular/common/http';
 import { TNSPlayer } from 'nativescript-audio';
@@ -26,7 +27,13 @@ export class ScoreComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   
   @ViewChild('imageRef', { static: true }) imageRef;
-  constructor(private page: Page, private route: ActivatedRoute, private scoresDownloaderService: ScoresDownloaderService, private zone: NgZone ) {
+  constructor(
+    private page: Page, 
+    private route: ActivatedRoute, 
+    private scoresDownloaderService: ScoresDownloaderService, 
+    private zone: NgZone,
+    private instrumentsService: InstrumentsService
+  ) {
     this._player = new TNSPlayer();
     this._player.debug = false; // Poner en true para más logs
   }
@@ -83,8 +90,24 @@ export class ScoreComponent implements OnInit, OnDestroy {
     const song = this.songs[this.currentIndex];
     if (!song) return;
 
+    // Nueva lógica para determinar la URL del audio
     const audioFileName = song.fileName.replace('.png', '.mp3');
-    const audioUrl = `https://partituras.iglesiacristianabelen.com/audios/base/${audioFileName}`;
+    let audioUrl = '';
+
+    // Obtenemos dinámicamente la lista de instrumentos desde el servicio
+    const instrumentSuffixes = this.instrumentsService.instruments().map(i => i.path);
+    
+    // Buscamos si el nombre del archivo termina con alguno de los sufijos de instrumento
+    const foundInstrument = instrumentSuffixes.find(suffix => audioFileName.includes(`_${suffix}.mp3`));
+
+    if (foundInstrument) {
+      // Si el nombre del archivo incluye un instrumento, usamos la carpeta de ese instrumento.
+      // Ejemplo: a_aquel_que_es_poderoso_violin1.mp3 -> /audios/violin1/a_aquel_que_es_poderoso_violin1.mp3
+      audioUrl = `https://partituras.iglesiacristianabelen.com/audios/${foundInstrument}/${audioFileName}`;
+    } else {
+      // Si no, usamos la carpeta 'base' por defecto.
+      audioUrl = `https://partituras.iglesiacristianabelen.com/audios/base/${audioFileName}`;
+    }
     console.log('Verificando existencia de audio en URL:', audioUrl);
 
     this.http.get(audioUrl, { observe: 'response', responseType: 'blob' }).pipe(
@@ -157,6 +180,7 @@ export class ScoreComponent implements OnInit, OnDestroy {
   private disposePlayer(): void {
     if (this._player) {
       this._player.dispose();
+      this._player = new TNSPlayer(); // Creamos una nueva instancia limpia.
     }
   }
 
