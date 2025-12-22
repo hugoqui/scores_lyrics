@@ -50,6 +50,7 @@
 	</dict>
 	<key>ITSAppUsesNonExemptEncryption</key>  
 	<false/>
-
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Esta aplicación necesita acceso al micrófono para grabar tu práctica con las partituras.</string>
 </dict>
 </plist>
