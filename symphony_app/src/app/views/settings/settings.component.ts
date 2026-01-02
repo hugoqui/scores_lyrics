@@ -1,5 +1,5 @@
 import { Component, NO_ERRORS_SCHEMA, inject, signal, OnDestroy, AfterViewInit, effect } from '@angular/core'
-import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
+import { NativeScriptCommonModule, NativeScriptRouterModule, RouterExtensions } from '@nativescript/angular'
 import { Dialogs, knownFolders, Page, path } from '@nativescript/core'
 import { InstrumentsService } from '../../services/instruments.service'
 import { ScoresDownloaderService } from '../../services/scoresDownloader.service'
@@ -24,7 +24,8 @@ export class SettingsComponent {
     private page: Page,
     private scoreDownloaderService: ScoresDownloaderService,
     public instrumentsService: InstrumentsService,
-    private scoresDownloaderService: ScoresDownloaderService
+    private scoresDownloaderService: ScoresDownloaderService,
+    private routerExtensions: RouterExtensions
   ) {
     effect(() => {
       this.scores.set(this.scoresDownloaderService.scores());
@@ -33,6 +34,9 @@ export class SettingsComponent {
     })
   } 
 
+  goBack(): void {
+    this.routerExtensions.backToPreviousPage();
+  }
   getDownloadsLength(instrumentPath: string): number {
     try {
       const documents = knownFolders.documents();

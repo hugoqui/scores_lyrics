@@ -1,6 +1,6 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, ViewContainerRef, computed, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router';
-import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
+import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule, RouterExtensions } from '@nativescript/angular'
 import { knownFolders, path } from '@nativescript/core';
 import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
 import { DownloadedFile } from '~/app/models/downloadedFile';
@@ -17,6 +17,7 @@ import { SongListsService } from '~/app/services/song-lists.service';
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class MyListDetailsComponent implements OnInit {
+
   listName!: string;
   instrument: string = '';
   instrumentLabel: string = '';
@@ -33,8 +34,13 @@ export class MyListDetailsComponent implements OnInit {
     private vcRef: ViewContainerRef,
     private router: Router,
     private instrumentsService: InstrumentsService,
-    private downloadedScoresService: ScoresDownloaderService
+    private downloadedScoresService: ScoresDownloaderService,
+    private routerExtensions: RouterExtensions
   ) { }
+
+  goBack(): void {
+    this.routerExtensions.backToPreviousPage();
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {

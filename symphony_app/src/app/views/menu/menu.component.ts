@@ -1,5 +1,5 @@
 import { Component, NO_ERRORS_SCHEMA, inject, signal } from '@angular/core'
-import { NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
+import { NativeScriptCommonModule, NativeScriptRouterModule, RouterExtensions } from '@nativescript/angular'
 import { Page, Label, knownFolders } from '@nativescript/core'
 import { InstrumentsService } from '../../services/instruments.service'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -15,12 +15,17 @@ export class MenuComponent {
     private page: Page,
     public instrumentsService: InstrumentsService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private routerExtensions: RouterExtensions
   ) {
 
   }
 
   menuPath = signal<string>('');
+
+  goBack(): void {
+    this.routerExtensions.backToPreviousPage();
+  }
   ngOnInit() {
     this.menuPath.set(this.route.snapshot.params.menuPath)
     console.log('##### menupath', this.menuPath())

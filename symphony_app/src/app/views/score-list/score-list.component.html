@@ -1,4 +1,6 @@
-<ActionBar [title]="`Practicar - ${instrument().label}`"> </ActionBar>
+<ActionBar [title]="`Practicar - ${instrument().label}`">
+    <NavigationButton text="Volver" android.systemIcon="ic_menu_back" (tap)="goBack()"></NavigationButton>
+</ActionBar>
 <GridLayout rows="auto, *,auto" columns="" padding="4">
     <GridLayout rows="*" columns="*,auto">
         <StackLayout col="1" orientation="horizontal"  marginRight="30">

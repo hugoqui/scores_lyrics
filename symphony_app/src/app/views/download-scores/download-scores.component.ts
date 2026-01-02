@@ -1,6 +1,6 @@
 import { Component, effect, NO_ERRORS_SCHEMA, OnInit, signal, Signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { NativeScriptCommonModule, NativeScriptRouterModule, registerElement } from '@nativescript/angular';
+import { NativeScriptCommonModule, NativeScriptRouterModule, registerElement, RouterExtensions } from '@nativescript/angular';
 import { Page } from '@nativescript/core';
 import { map, switchMap, of } from 'rxjs';
 import { DownloadedFile } from '~/app/models/downloadedFile';
@@ -21,7 +21,8 @@ export class DownloadScoresComponent implements OnInit {
   constructor(public page: Page,
     private scoresDownloaderService: ScoresDownloaderService,
     private route: ActivatedRoute,
-    private instrumentsService: InstrumentsService
+    private instrumentsService: InstrumentsService,
+    private routerExtensions: RouterExtensions
   ) {
     effect(() => {
 
@@ -38,6 +39,9 @@ export class DownloadScoresComponent implements OnInit {
   generalLoading = signal(false);
   nScores = signal<number>(0)
 
+  goBack(): void {
+    this.routerExtensions.backToPreviousPage();
+  }
   ngOnInit(): void {
     const id = +this.route.snapshot.params.id
     this.instrument.set(this.instrumentsService.getInstrument(id))

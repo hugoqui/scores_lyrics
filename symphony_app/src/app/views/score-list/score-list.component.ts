@@ -1,5 +1,5 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, ViewChild, ViewContainerRef, effect, inject, signal } from '@angular/core'
-import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule } from '@nativescript/angular'
+import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule, RouterExtensions } from '@nativescript/angular'
 import { Dialogs, Page } from '@nativescript/core'
 import { InstrumentsService } from '../../services/instruments.service'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -29,7 +29,8 @@ export class ScoreListComponent implements OnInit {
     private router: Router,
     private modalService: ModalDialogService,
     private vcRef: ViewContainerRef,
-    private scoresDownloaderService: ScoresDownloaderService
+    private scoresDownloaderService: ScoresDownloaderService,
+    private routerExtensions: RouterExtensions
   ) {
     effect(() => {
       this.songList()
@@ -48,9 +49,13 @@ export class ScoreListComponent implements OnInit {
     }
   }
 
+  goBack(): void {
+    this.routerExtensions.backToPreviousPage();
+  }
+
   getSongList(instrument: string): void {
-    console.log('getSongList called with instrument:', instrument);
-    this.allSongs = this.scoresDownloaderService.getDownloadedFiles(instrument);
+    console.log('getSongList called with instrument:', instrument);    
+    this.allSongs = this.scoresDownloaderService.getDownloadedFiles(instrument).filter(s => !s.fileName.includes(instrument));
     this.applyFilter();
   }
 

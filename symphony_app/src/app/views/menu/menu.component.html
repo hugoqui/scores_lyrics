@@ -1,4 +1,6 @@
-<ActionBar title="Symphony / Menú"> </ActionBar>
+<ActionBar title="Symphony / Practiar">
+    <NavigationButton text="Volver" android.systemIcon="ic_menu_back" (tap)="goBack()"></NavigationButton>
+</ActionBar>
 <GridLayout columns="30,*,30">
     <ListView [items]="instrumentsService.instruments()" col="1" height="100%">
         <ng-template let-item>            

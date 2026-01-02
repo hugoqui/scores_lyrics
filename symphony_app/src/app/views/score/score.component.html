@@ -1,4 +1,6 @@
-<ActionBar [title]="`Symphony`"> </ActionBar>
+<ActionBar [title]="`Symphony - ${baseName}`">
+    <NavigationButton text="Volver" android.systemIcon="ic_menu_back" (tap)="goBack()"></NavigationButton>
+</ActionBar>
 
 <!-- Usamos un GridLayout para poder superponer el botón de play -->
 <GridLayout rows="*">
@@ -9,6 +11,18 @@
   >
     <ns-zoom-image [src]="scorePath"></ns-zoom-image>
   </StackLayout>
+
+  <!-- Botón Flotante para cambiar Partitura (Melodía/Arreglo) -->
+  @if (shouldShowScoreSwitch()) {
+    <Button 
+        [text]="scoreType()==='melody'?'melodía':'arreglo'" 
+        (tap)="toggleScoreType()"
+        verticalAlignment="top"
+        horizontalAlignment="right"
+        margin="20"
+        class="btn">
+    </Button>
+  }
 
   <!-- Contenedor izquierdo: Switch + Botones de reproducción -->
   <StackLayout

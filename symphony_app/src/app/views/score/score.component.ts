@@ -12,6 +12,7 @@ import {
 import {
   NativeScriptCommonModule,
   NativeScriptRouterModule,
+  RouterExtensions,
 } from "@nativescript/angular";
 import {
   Page,
@@ -22,6 +23,7 @@ import {
   File,
   Connectivity,
   Switch,
+  Application,
 } from "@nativescript/core";
 import { ActivatedRoute } from "@angular/router";
 import { DownloadedFile } from "~/app/models/downloadedFile";
@@ -66,6 +68,7 @@ export class ScoreComponent implements OnInit, OnDestroy {
     recordingPath: "", // Ruta donde se guardará el archivo
     hasRecording: false, // Indica si ya existe una grabación hecha (para mostrar botón de compartir)
   });
+  scoreType = signal<'melody' | 'arrangement'>('arrangement');
 
   private _player: TNSPlayer;
   private _recorder: TNSRecorder;
@@ -77,7 +80,8 @@ export class ScoreComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private scoresDownloaderService: ScoresDownloaderService,
     private zone: NgZone,
-    private instrumentsService: InstrumentsService
+    private instrumentsService: InstrumentsService,
+    private routerExtensions: RouterExtensions
   ) {
     this._player = new TNSPlayer();
     this._recorder = new TNSRecorder();
@@ -91,6 +95,7 @@ export class ScoreComponent implements OnInit, OnDestroy {
       console.log("ScoreComponent ngOnInit, currentIndex:", this.currentIndex);
       this.songs = JSON.parse(this.route.snapshot.queryParams["songs"] || "[]");
       console.log("ScoreComponent ngOnInit, songs:", this.songs.length);
+      this.initializeScoreType();
       this.checkForAudio();
       console.log("after checkForAudio...");
     } catch (error) {
@@ -99,8 +104,51 @@ export class ScoreComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Restaurar la UI si estaba en pantalla completa al salir
+    if (this.page.actionBarHidden) {
+        this.page.actionBarHidden = false;
+        if (isAndroid) {
+            const activity = Application.android.startActivity || Application.android.foregroundActivity;
+            const window = activity.getWindow();
+            window.getDecorView().setSystemUiVisibility(0); // 0 = VISIBLE
+        } else if (isIOS) {
+            UIApplication.sharedApplication.setStatusBarHiddenWithAnimation(false, 1); // 1 = Fade
+        }
+    }
+
     // Liberar recursos del reproductor al salir de la vista
     this.disposePlayer();
+  }
+
+  goBack(): void {
+    this.routerExtensions.backToPreviousPage();
+  }
+
+  // Método centralizado para obtener el nombre del archivo según el modo (Melodía/Arreglo)
+  baseName: string;
+  private getTargetFileName(): string {
+    const song = this.songs[this.currentIndex];
+    if (!song) return "";
+    
+    this.baseName = song.fileName.replace('.png', '');
+    // Si el nombre base ya tiene el sufijo del instrumento, lo quitamos para tener la raíz
+    if (this.baseName.endsWith(`_${song.instrument}`)) {
+        this.baseName = this.baseName.replace(`_${song.instrument}`, '');
+    }
+
+    if (this.scoreType() === 'melody') {
+        return `${this.baseName}.png`;
+    } else {
+        return `${this.baseName}_${song.instrument}.png`;
+    }
+  }
+
+  private initializeScoreType() {
+    const song = this.songs[this.currentIndex];
+    if (!song) return;
+    // Si el archivo cargado originalmente tiene el sufijo, iniciamos en modo arreglo
+    const isArrangement = song.fileName.includes(`_${song.instrument}`);
+    this.scoreType.set(isArrangement ? 'arrangement' : 'melody');
   }
 
   get scorePath(): string {
@@ -109,9 +157,30 @@ export class ScoreComponent implements OnInit, OnDestroy {
 
     const documents = knownFolders.documents();
     const instrumentFolder = documents.getFolder(song.instrument);
-    const finalPath = path.join(instrumentFolder.path, song.fileName);
+    
+    // Usamos el método centralizado para saber qué archivo buscar
+    const targetFileName = this.getTargetFileName();
 
+    const finalPath = path.join(instrumentFolder.path, targetFileName);
+
+    // Verificar existencia y aplicar Fallbacks
     if (!File.exists(finalPath)) {
+      // Recuperamos el baseName para el fallback
+      let baseName = song.fileName.replace('.png', '');
+      if (baseName.endsWith(`_${song.instrument}`)) {
+          baseName = baseName.replace(`_${song.instrument}`, '');
+      }
+
+      // Si buscábamos arreglo y no está, intentamos mostrar la melodía como respaldo
+      if (this.scoreType() === 'arrangement') {
+          const melodyPath = path.join(instrumentFolder.path, `${baseName}.png`);
+          if (File.exists(melodyPath)) return melodyPath;
+      }
+      
+      // Último recurso: el archivo original que venía en el objeto song
+      const originalPath = path.join(instrumentFolder.path, song.fileName);
+      if (File.exists(originalPath)) return originalPath;
+
       console.warn("Archivo no existe en path:", finalPath);
       return "";
     }
@@ -138,7 +207,8 @@ export class ScoreComponent implements OnInit, OnDestroy {
     const song = this.songs[this.currentIndex];
     if (!song) return;
 
-    const audioFileName = song.fileName.replace(".png", ".mp3");
+    // IMPORTANTE: Usamos el nombre virtual según el scoreType
+    const audioFileName = this.getTargetFileName().replace(".png", ".mp3");
 
     // 1. DETERMINAR SI ES ARREGLO
     const instrumentSuffixes = this.instrumentsService
@@ -191,12 +261,32 @@ export class ScoreComponent implements OnInit, OnDestroy {
     });
   }
 
+  toggleScoreType() {
+    // Limpiamos el reproductor actual para evitar que reproduzca el audio anterior cacheado
+    this.disposePlayer();
+    this.scoreType() === 'melody' ? this.scoreType.set('arrangement') : this.scoreType.set('melody');
+    // Al cambiar la partitura, recargamos la lógica de audio para que coincida con el nuevo contexto
+    this.checkForAudio();
+  }
+
+  shouldShowScoreSwitch(): boolean {
+      const song = this.songs[this.currentIndex];
+      if (!song) return false;
+      // Ocultar para piano y trompeta (lógica heredada de LiveComponent)
+      if (song.instrument === 'piano' || song.instrument === 'trumpet') return false;
+      return true;
+  }
+
   // Función que determina si debería mostrarse el switch
   shouldShowAudioSwitch(): boolean {
+    // Si estamos viendo la melodía, NO mostramos switch de audio (comportamiento de "canto base")
+    if (this.scoreType() === 'melody') return false;
+
     const song = this.songs[this.currentIndex];
     if (!song) return false;
 
-    const audioFileName = song.fileName.replace(".png", ".mp3");
+    // Usamos el nombre virtual
+    const audioFileName = this.getTargetFileName().replace(".png", ".mp3");
     const instrumentSuffixes = this.instrumentsService
       .instruments()
       .map((i) => i.path);
@@ -249,7 +339,8 @@ export class ScoreComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const audioFileName = song.fileName.replace(".png", ".mp3");
+    // Usamos el nombre virtual
+    const audioFileName = this.getTargetFileName().replace(".png", ".mp3");
 
     // 1. Determinar nuevo modo
     const newMode =
@@ -447,13 +538,31 @@ export class ScoreComponent implements OnInit, OnDestroy {
   }
 
   toggleVisibilityNav() {
-    const newStatus =
-      this.page.actionBar.visibility === "visible" ? "hidden" : "visible";
-    this.page.actionBar.visibility = newStatus;
-    if (newStatus === "hidden") {
-      this.page.actionBar.height = 0;
-    } else {
-      this.page.actionBar.height = 44;
+    // Invertimos el estado: Si el ActionBar se ve, queremos ocultarlo (Full Screen)
+    const goFullScreen = !this.page.actionBarHidden;
+
+    // 1. Controlar el ActionBar (NativeScript maneja la altura automáticamente)
+    this.page.actionBarHidden = goFullScreen;
+
+    // 2. Controlar Barra de Estado y Botones de Navegación (Nativo)
+    if (isAndroid) {
+      const activity = Application.android.startActivity || Application.android.foregroundActivity;
+      const window = activity.getWindow();
+      const decorView = window.getDecorView();
+      
+      if (goFullScreen) {
+        // Modo Inmersivo Sticky: Oculta Status Bar y Navigation Bar, pero permite sacarlos con un swipe
+        // Flags: IMMERSIVE_STICKY (4096) | FULLSCREEN (4) | HIDE_NAVIGATION (2)
+        const uiOptions = 4096 | 4 | 2; 
+        decorView.setSystemUiVisibility(uiOptions);
+      } else {
+        // Restaurar visibilidad normal
+        decorView.setSystemUiVisibility(0);
+      }
+    } else if (isIOS) {
+      // Ocultar Status Bar en iOS con animación Fade (1)
+      const app = UIApplication.sharedApplication;
+      app.setStatusBarHiddenWithAnimation(goFullScreen, 1);
     }
   }
 

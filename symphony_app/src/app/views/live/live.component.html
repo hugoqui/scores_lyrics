@@ -8,7 +8,9 @@
 
 
 <GridLayout columns="auto, *, auto" rows="*,auto" (swipe)="onSwipe($event)" #imageRef >
-    <ns-zoom-image [src]="scorePath()" colSpan="3" rowSpan="2" (tap)="toggleVisibilityNav()"></ns-zoom-image>    
+    <ContentView colSpan="3" rowSpan="2" (tap)="toggleVisibilityNav()">
+        <ns-zoom-image [src]="scorePath()"></ns-zoom-image>
+    </ContentView>
     @if(instrument().path !== 'piano' && instrument().path !=='trumpet'){
     <Button 
         [text]="scoreType()==='melody'?'melodía':'arreglo'" 

@@ -3,7 +3,7 @@ import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule 
 import * as appSettings from '@nativescript/core/application-settings';
 import { Instrument } from '../../models/instrument';
 import { ActivatedRoute } from '@angular/router';
-import { knownFolders, Page, path, File, SwipeGestureEventData, SwipeDirection } from '@nativescript/core';
+import { knownFolders, Page, path, File, SwipeGestureEventData, SwipeDirection, Application, isAndroid, isIOS } from '@nativescript/core';
 import { InstrumentsService } from '~/app/services/instruments.service';
 import { SocketService } from '~/app/services/socket.service';
 import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
@@ -95,6 +95,18 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.turnOffSocket()
+
+    // Restaurar la UI si estaba en pantalla completa al salir
+    if (this.page.actionBarHidden) {
+        this.page.actionBarHidden = false;
+        if (isAndroid) {
+            const activity = Application.android.startActivity || Application.android.foregroundActivity;
+            const window = activity.getWindow();
+            window.getDecorView().setSystemUiVisibility(0); // 0 = VISIBLE
+        } else if (isIOS) {
+            UIApplication.sharedApplication.setStatusBarHiddenWithAnimation(false, 1); // 1 = Fade
+        }
+    }
   }
 
   ngOnInit(): void {
@@ -128,12 +140,36 @@ export class LiveComponent implements AfterViewInit, OnDestroy {
   }
 
   toggleVisibilityNav() {
-    const newStatus = this.page.actionBar.visibility === 'visible' ? 'hidden' : 'visible'
-    this.page.actionBar.visibility = newStatus
-    if (newStatus === 'hidden') {
-      this.page.actionBar.height = 0
-    } else {
-      this.page.actionBar.height = 44
+    // Invertimos el estado: Si el ActionBar se ve, queremos ocultarlo (Full Screen)
+    try {
+      console.log('tratango de poner fulscreen')
+      const goFullScreen = !this.page.actionBarHidden;
+  
+      // 1. Controlar el ActionBar (NativeScript maneja la altura automáticamente)
+      this.page.actionBarHidden = goFullScreen;
+  
+      // 2. Controlar Barra de Estado y Botones de Navegación (Nativo)
+      if (isAndroid) {
+        const activity = Application.android.startActivity || Application.android.foregroundActivity;
+        const window = activity.getWindow();
+        const decorView = window.getDecorView();
+        
+        if (goFullScreen) {
+          // Modo Inmersivo Sticky: Oculta Status Bar y Navigation Bar, pero permite sacarlos con un swipe
+          // Flags: IMMERSIVE_STICKY (4096) | FULLSCREEN (4) | HIDE_NAVIGATION (2)
+          const uiOptions = 4096 | 4 | 2; 
+          decorView.setSystemUiVisibility(uiOptions);
+        } else {
+          // Restaurar visibilidad normal
+          decorView.setSystemUiVisibility(0);
+        }
+      } else if (isIOS) {
+        // Ocultar Status Bar en iOS con animación Fade (1)
+        const app = UIApplication.sharedApplication;
+        app.setStatusBarHiddenWithAnimation(goFullScreen, 1);
+      }      
+    } catch (error) {
+      console.log('error al poner fullscreen', error)
     }
   }
 
