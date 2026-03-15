@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-{"text":"Adelante, oh Rey eterno,\nel día de marcha llegó\nEn tus tiendas moraremos\nsaliendo a conquistar\n","reference":"","title":"Adelante oh Rey eterno"}
-=======
-{"text":"\nAl Rey de gloria y paz, \nHonores tributad;\nY bendecid al Inmortal, \nPor toda eternidad.\n","reference":"","title":"A Cristo coronad"}
->>>>>>> 319745de9d418ffe5286fdadc30a6e787ea8a29b
+{"text":"\nEstaré seguro bajo \ntus alas Señor\nMe has dado la heredad \nde los que temen","reference":"","title":"Llevame a la roca"}ñor esta pasando"}

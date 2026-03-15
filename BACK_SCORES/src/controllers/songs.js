@@ -110,7 +110,7 @@ module.exports = {
     setNewSong: async (req, res) => {
         try {
             const data = req.body
-            if (data.reference) { return }
+            // if (data.reference) { return }
 
             console.log("new song... ", data)
             io.emit("text_change", data)
