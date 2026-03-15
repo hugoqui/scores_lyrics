@@ -1,0 +1,21 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+
+# Archivos de configuración local (donde está la IP)
+# Es mejor no subirlo para que cada quien tenga su propia IP
+config.json
+
+# Ejecutables generados
+*.exe
+dist/
+build/
+
+# Entorno y logs
+.env
+logs/
+*.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
