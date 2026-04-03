@@ -8,14 +8,13 @@
     - [x] Crear `lib/core/constants/app_dimensions.dart` para espaciados y tamaños y mover `app_dimensions.dart`.
     - [x] Crear `lib/core/constants/app_styles.dart` para estilos de texto y mover `app_styles.dart`.
 - [x] **Temas:** Crear `lib/core/theme/app_theme.dart` para definir `ThemeData` (Light/Dark) y mover `app_theme.dart`.
-- [x] **Aplicar Tema:** Modificar `main.dart` para usar `AppTheme` y actualizar importaciones.
+- [x] **Manejo de estados:** Configurar `Riverpod` en `main.dart`.
+- [x] **Inyección de dependencias:** Configurar `GetIt` en `lib/core/di/service_locator.dart`.
 - [ ] **Soporte de UI:** Configurar `SystemChrome` para pantalla completa (se abordará en el punto 4).
-- [ ] Configurar manejo de estados (Riverpod o Bloc recomendado para la complejidad de señales actual).
-- [ ] Configurar inyección de dependencias (GetIt).
 
 ## 1.1. Migración de Datos Legados (NativeScript -> Flutter)
-- [ ] **Análisis de Rutas:** Verificar que `getApplicationDocumentsDirectory()` coincida con el path de NS para no perder partituras descargadas.
-- [ ] **Migración de SharedPreferences/UserDefaults:** Mapear llaves de `appSettings` (host, token, settings) para ser leídas por Flutter.
+- [x] **Análisis de Rutas:** Confirmado que `path_provider` accede al mismo sandbox.
+- [x] **Migración de SharedPreferences/UserDefaults:** Implementado en `MigrationService`.
 - [ ] **Script de Primer Inicio:** Crear un servicio que verifique si existen archivos antiguos y los indexe en la nueva base de datos local si es necesario.
 
 ## 2. Capa de Datos y Servicios Core
