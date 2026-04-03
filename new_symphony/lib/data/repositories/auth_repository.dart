@@ -18,6 +18,8 @@ class AuthRepository {
 
       final authResponse = AuthResponse.fromJson(response.data);
       await _prefs.setString('token', authResponse.token);
+      await _prefs.setString('last_login_date', DateTime.now().toIso8601String());
+
       // Guardar email y password para "recordarme"
       await _prefs.setString('saved_email', email);
       await _prefs.setString('saved_password', password);
@@ -27,7 +29,17 @@ class AuthRepository {
     }
   }
 
-  bool isLoggedIn() => _prefs.getString('token') != null;
+  bool isLoggedIn() {
+    final token = _prefs.getString('token');
+    final lastLoginStr = _prefs.getString('last_login_date');
+    
+    if (token == null || lastLoginStr == null) return false;
+
+    final lastLogin = DateTime.parse(lastLoginStr);
+    final difference = DateTime.now().difference(lastLogin).inDays;
+    
+    return difference < 30; // La sesión es válida por 30 días
+  }
 
   String? getSavedEmail() {
     return _prefs.getString('saved_email');
@@ -41,5 +53,7 @@ class AuthRepository {
   Future<void> clearSavedCredentials() async {
     await _prefs.remove('saved_email');
     await _prefs.remove('saved_password');
+    await _prefs.remove('token');
+    await _prefs.remove('last_login_date');
   }
 }

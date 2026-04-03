@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/constants/app_styles.dart';
+import 'package:new_symphony/features/download/ui/instrument_selection_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -30,46 +31,62 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-        child: GridView(
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: maxColumnWidth,
-            mainAxisExtent: itemHeight,
-            crossAxisSpacing: AppDimensions.paddingMedium,
-            mainAxisSpacing: AppDimensions.paddingMedium,
+      body: Column(
+        children: [
+          const SizedBox(height: AppDimensions.paddingExtraLarge),
+          Image.asset(
+            'assets/images/logo.png',
+            height: 100,
+            fit: BoxFit.contain,
           ),
-          children: [
-            _MenuCard(
-              title: 'Conectarse a Transmisión',
-              icon: Icons.wifi_tethering,
-              onTap: () {
-                // Navegar a LiveComponent
-              },
-            ),            
-            _MenuCard(
-              title: 'Mis Listas',
-              icon: Icons.list,
-              onTap: () {
-                // Navegar a listas locales
-              },
+          const SizedBox(height: AppDimensions.paddingMedium),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+              child: GridView(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: maxColumnWidth,
+                  mainAxisExtent: itemHeight,
+                  crossAxisSpacing: AppDimensions.paddingMedium,
+                  mainAxisSpacing: AppDimensions.paddingMedium,
+                ),
+                children: [
+                  _MenuCard(
+                    title: 'Conectarse a Transmisión',
+                    icon: Icons.wifi_tethering,
+                    onTap: () {
+                      // Navegar a LiveComponent
+                    },
+                  ),            
+                  _MenuCard(
+                    title: 'Mis Listas',
+                    icon: Icons.list,
+                    onTap: () {
+                      // Navegar a listas locales
+                    },
+                  ),
+                  _MenuCard(
+                    title: 'Practicar',
+                    icon: Icons.music_note,
+                    onTap: () {
+                      // Navegar a explorador local
+                    },
+                  ),
+                  _MenuCard(
+                    title: 'Descargar',
+                    icon: Icons.download,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const InstrumentSelectionScreen()),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-            _MenuCard(
-              title: 'Practicar',
-              icon: Icons.music_note,
-              onTap: () {
-                // Navegar a explorador local
-              },
-            ),
-            _MenuCard(
-              title: 'Descargar',
-              icon: Icons.download,
-              onTap: () {
-                // Navegar a descarga de partituras
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
