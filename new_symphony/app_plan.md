@@ -1,27 +1,21 @@
 # Plan de Migración: Symphony App (NativeScript -> Flutter)
 
 ## 1. Configuración Inicial y Arquitectura
-- [x] Inicializar proyecto Flutter.
-- [x] **Estructura de Carpetas:** Crear `lib/core` para constantes y temas, y mover archivos.
-- [x] **Constantes de Diseño:**
-    - [x] Crear `lib/core/constants/app_colors.dart` para colores y mover `app_colors.dart`.
-    - [x] Crear `lib/core/constants/app_dimensions.dart` para espaciados y tamaños y mover `app_dimensions.dart`.
-    - [x] Crear `lib/core/constants/app_styles.dart` para estilos de texto y mover `app_styles.dart`.
-- [x] **Temas:** Crear `lib/core/theme/app_theme.dart` para definir `ThemeData` (Light/Dark) y mover `app_theme.dart`.
-- [x] **Manejo de estados:** Configurar `Riverpod` en `main.dart`.
-- [x] **Inyección de dependencias:** Configurar `GetIt` en `lib/core/di/service_locator.dart`.
-- [ ] **Soporte de UI:** Configurar `SystemChrome` para pantalla completa (se abordará en el punto 4).
+- [x] Inicializar proyecto Flutter (Arquitectura por funcionalidad/core).
+- [x] Configurar manejo de estados (Riverpod configurado en `main.dart`).
+- [x] Configurar temas (Dark/Light centralizados en `AppTheme`).
+- [x] Configurar inyección de dependencias (GetIt configurado en `service_locator.dart`).
 
 ## 1.1. Migración de Datos Legados (NativeScript -> Flutter)
-- [x] **Análisis de Rutas:** Confirmado que `path_provider` accede al mismo sandbox.
+- [x] **Análisis de Rutas:** Verificado uso de `path_provider`.
 - [x] **Migración de SharedPreferences/UserDefaults:** Implementado en `MigrationService`.
-- [ ] **Script de Primer Inicio:** Crear un servicio que verifique si existen archivos antiguos y los indexe en la nueva base de datos local si es necesario.
+- [x] **Script de Primer Inicio:** Lógica de migración integrada en el constructor de `ScoreRepository`.
 
 ## 2. Capa de Datos y Servicios Core
-- [ ] **Cliente HTTP (Dio):** Implementar interceptores para JWT y manejo de errores.
-- [ ] **Local Storage:** Implementar `shared_preferences` (para settings) y `path_provider` (para archivos de partituras).
-- [ ] **Servicio de Instrumentos:** Migrar lógica de `InstrumentsService`.
-- [ ] **Capa de Abstracción de Partituras (ScoreRepository):** Crear una interfaz para la obtención y descarga de partituras.
+- [x] **Cliente HTTP (Dio):** Configurado con interceptores para host dinámico y JWT.
+- [x] **Local Storage:** Implementado con `shared_preferences` y registrado en el locator.
+- [x] **Servicio de Instrumentos:** Migrado a `InstrumentsService`.
+- [x] **Capa de Abstracción de Partituras (ScoreRepository):** Estructura base y persistencia local creadas.
     - [ ] **Implementación actual:** Replicar la lógica de `ScoresDownloaderService` para obtener la lista de cantos (actualmente desde un JSON) y URLs de descarga (actualmente parseando HTML).
     - [ ] Lógica de descarga de binarios (PNG/MP3).
     - [ ] Gestión de carpetas por instrumento.
@@ -29,9 +23,9 @@
     - [ ] **Nota:** Esta implementación será reemplazada cuando el backend mejore, pero la interfaz del `ScoreRepository` debe permanecer estable.
 
 ## 3. Autenticación y Seguridad
-- [ ] Migrar flujo de Login (Email/User, Password en texto plano, DeviceID).
-- [ ] Persistencia de Token JWT.
-- [ ] Lógica de validación de dispositivo único.
+- [x] Migrar flujo de Login (Email/User, Password en texto plano, DeviceID).
+- [x] Persistencia de Token JWT.
+- [ ] Implementar Pantalla de Login y manejo de estado (Riverpod).
 
 ## 4. Funcionalidades de Partituras (Score)
 - [ ] **Visor de Imágenes:** Implementar visor con zoom (PhotoView).
