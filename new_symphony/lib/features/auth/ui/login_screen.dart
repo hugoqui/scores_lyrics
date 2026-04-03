@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/constants/app_styles.dart';
 import 'package:new_symphony/features/auth/providers/auth_provider.dart';
+import 'package:new_symphony/features/home/ui/home_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -12,8 +13,18 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Leemos el estado inicial del provider (que ya tiene las credenciales cargadas)
+    final authState = ref.read(authProvider);
+    _emailController = TextEditingController(text: authState.savedEmail);
+    _passwordController = TextEditingController(text: authState.savedPassword);
+  }
 
   @override
   void dispose() {
@@ -38,19 +49,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
+    final authState = ref.watch(authProvider.select((state) => state.loginStatus));
 
-    // Escuchamos cambios en el estado para mostrar errores o navegar
-    ref.listen(authProvider, (previous, next) {
-      next.whenOrNull(
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      next.loginStatus.whenOrNull(
         error: (error, _) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error al iniciar sesión: $error')),
           );
         },
         data: (_) {
-          // Aquí iría la navegación a la pantalla principal después del éxito
-        },
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        }
       );
     });
 
@@ -84,7 +96,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               obscureText: true,
             ),
             const SizedBox(height: AppDimensions.paddingLarge),
-            authState.isLoading
+            authState.isLoading 
                 ? const Center(child: CircularProgressIndicator())
                 : ElevatedButton(
                     onPressed: _onLogin,

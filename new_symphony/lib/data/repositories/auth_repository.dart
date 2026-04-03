@@ -18,6 +18,9 @@ class AuthRepository {
 
       final authResponse = AuthResponse.fromJson(response.data);
       await _prefs.setString('token', authResponse.token);
+      // Guardar email y password para "recordarme"
+      await _prefs.setString('saved_email', email);
+      await _prefs.setString('saved_password', password);
       return authResponse;
     } catch (e) {
       rethrow;
@@ -25,4 +28,18 @@ class AuthRepository {
   }
 
   bool isLoggedIn() => _prefs.getString('token') != null;
+
+  String? getSavedEmail() {
+    return _prefs.getString('saved_email');
+  }
+
+  String? getSavedPassword() {
+    return _prefs.getString('saved_password');
+  }
+
+  /// Elimina las credenciales guardadas y el token de sesión
+  Future<void> clearSavedCredentials() async {
+    await _prefs.remove('saved_email');
+    await _prefs.remove('saved_password');
+  }
 }

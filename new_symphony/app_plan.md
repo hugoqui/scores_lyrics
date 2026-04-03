@@ -25,7 +25,16 @@
 ## 3. Autenticación y Seguridad
 - [x] Migrar flujo de Login (Email/User, Password en texto plano, DeviceID).
 - [x] Persistencia de Token JWT.
-- [ ] Implementar Pantalla de Login y manejo de estado (Riverpod).
+- [x] Persistencia de credenciales (email/password) para "recordarme".
+- [x] Implementar Pantalla de Login y manejo de estado (Riverpod).
+
+## 3.1. Pantalla de Inicio (Menu Principal)
+- [x] Crear `HomeScreen` con acceso a las 4 áreas principales:
+    - [ ] **Sincronización en Vivo:** (Conexión al Socket).
+    - [ ] **Explorar/Descargar:** (Navegar por instrumentos y bajar partituras).
+    - [ ] **Mis Listas:** (Práctica personal y carpetas locales).
+    - [ ] **Ajustes:** (Cambiar host, cerrar sesión).
+- [x] **Diseño Responsivo:** Ajustar `GridView` para adaptarse a diferentes orientaciones y tamaños de pantalla.
 
 ## 4. Funcionalidades de Partituras (Score)
 - [ ] **Visor de Imágenes:** Implementar visor con zoom (PhotoView).

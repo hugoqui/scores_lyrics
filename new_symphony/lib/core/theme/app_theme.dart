@@ -23,6 +23,14 @@ class AppTheme {
       foregroundColor: AppColors.white,
       titleTextStyle: AppStyles.appBarTitle,
       iconTheme: IconThemeData(color: AppColors.white),
+      elevation: 0, // AppBar plano para más elegancia
+    ),
+    cardTheme: CardThemeData(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.lightGrey, width: 1),
+      ),
     ),
     textTheme: const TextTheme(
       headlineLarge: AppStyles.headlineLarge,
@@ -73,6 +81,15 @@ class AppTheme {
       foregroundColor: AppColors.white,
       titleTextStyle: AppStyles.appBarTitle, // Can be a dark specific style
       iconTheme: IconThemeData(color: AppColors.white),
+      elevation: 0,
+    ),
+    cardTheme: CardThemeData(
+      elevation: 0,
+      color: AppColors.primaryLight,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Colors.white10, width: 1), // Borde sutil en dark
+      ),
     ),
     textTheme: TextTheme(
       headlineLarge: AppStyles.headlineLarge.copyWith(color: AppColors.textLight), // Using dark specific style

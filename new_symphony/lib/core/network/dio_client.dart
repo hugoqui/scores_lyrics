@@ -18,7 +18,8 @@ class DioClient {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           // Obtenemos el host y el token dinámicamente de SharedPreferences
-          final host = _prefs.getString('host') ?? '';
+          // Agregamos la URL de tu API como valor por defecto para pruebas
+          final host = _prefs.getString('host') ?? 'https://api.iglesiacristianabelen.com/api';
           final token = _prefs.getString('token');
 
           options.baseUrl = host;
