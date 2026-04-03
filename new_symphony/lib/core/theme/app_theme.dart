@@ -23,6 +23,7 @@ class AppTheme {
       foregroundColor: AppColors.white,
       titleTextStyle: AppStyles.appBarTitle,
       iconTheme: IconThemeData(color: AppColors.white),
+      centerTitle: false,
       elevation: 0, // AppBar plano para más elegancia
     ),
     cardTheme: CardThemeData(
@@ -81,6 +82,7 @@ class AppTheme {
       foregroundColor: AppColors.white,
       titleTextStyle: AppStyles.appBarTitle, // Can be a dark specific style
       iconTheme: IconThemeData(color: AppColors.white),
+      centerTitle: false,
       elevation: 0,
     ),
     cardTheme: CardThemeData(

@@ -76,7 +76,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const Text(
               'Bienvenido a Symphony',
               style: AppStyles.headlineLarge,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
             ),
             const SizedBox(height: AppDimensions.paddingExtraLarge),
             TextField(

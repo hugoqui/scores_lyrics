@@ -44,6 +44,13 @@ class ScoreRepository {
     _prefs.setString('downloaded_files_v2', encoded);
   }
 
+  void addDownloadedFile(DownloadedFile file) {
+    // Evitamos duplicados: si ya existe, lo quitamos antes de insertar el nuevo
+    _downloadedFiles.removeWhere((f) => f.fileName == file.fileName && f.instrument == file.instrument);
+    _downloadedFiles.add(file);
+    _saveToNewStorage();
+  }
+
   List<DownloadedFile> getDownloadedFilesByInstrument(String instrument) {
     return _downloadedFiles.where((f) => f.instrument == instrument).toList();
   }

@@ -23,20 +23,60 @@ class DownloadableSong {
   }
 }
 
-final downloadProvider = StateNotifierProvider.family<DownloadNotifier, AsyncValue<List<DownloadableSong>>, String>((ref, instrument) {
+class DownloadState {
+  final AsyncValue<List<DownloadableSong>> songs;
+  final double downloadProgress; // 0.0 a 1.0
+  final bool isDownloadingAll;
+
+  DownloadState({
+    required this.songs,
+    this.downloadProgress = 0,
+    this.isDownloadingAll = false,
+  });
+
+  DownloadState copyWith({
+    AsyncValue<List<DownloadableSong>>? songs,
+    double? downloadProgress,
+    bool? isDownloadingAll,
+  }) {
+    return DownloadState(
+      songs: songs ?? this.songs,
+      downloadProgress: downloadProgress ?? this.downloadProgress,
+      isDownloadingAll: isDownloadingAll ?? this.isDownloadingAll,
+    );
+  }
+}
+
+final downloadProvider = StateNotifierProvider.family<DownloadNotifier, DownloadState, String>((ref, instrument) {
   return DownloadNotifier(getIt<ScoreRepository>(), instrument);
 });
 
-class DownloadNotifier extends StateNotifier<AsyncValue<List<DownloadableSong>>> {
+class DownloadNotifier extends StateNotifier<DownloadState> {
   final ScoreRepository _repository;
   final String instrument;
+  List<DownloadableSong> _allSongs = []; // Cache para el listado completo
+  String _lastQuery = '';
 
-  DownloadNotifier(this._repository, this.instrument) : super(const AsyncValue.loading()) {
+  DownloadNotifier(this._repository, this.instrument)
+      : super(DownloadState(songs: const AsyncValue.loading())) {
     loadSongs();
   }
 
+  void _updateSongsState() {
+    AsyncValue<List<DownloadableSong>> songsValue;
+    if (_lastQuery.isEmpty) {
+      songsValue = AsyncValue.data(_allSongs);
+    } else {
+      final filtered = _allSongs
+          .where((s) => s.fileName.toLowerCase().contains(_lastQuery.toLowerCase()))
+          .toList();
+      songsValue = AsyncValue.data(filtered);
+    }
+    state = state.copyWith(songs: songsValue);
+  }
+
   Future<void> loadSongs() async {
-    state = const AsyncValue.loading();
+    state = state.copyWith(songs: const AsyncValue.loading());
     try {
       final remoteFiles = await _repository.fetchRemoteAvailableFiles(instrument);
       final localFiles = _repository.getDownloadedFilesByInstrument(instrument);
@@ -46,15 +86,21 @@ class DownloadNotifier extends StateNotifier<AsyncValue<List<DownloadableSong>>>
         return DownloadableSong(fileName: fileName, isDownloaded: exists);
       }).toList();
       
-      state = AsyncValue.data(songs);
+      _allSongs = songs;
+      _updateSongsState();
     } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      state = state.copyWith(songs: AsyncValue.error(e, stack));
     }
   }
 
+  void filterSongs(String query) {
+    _lastQuery = query;
+    _updateSongsState();
+  }
+
   Future<void> download(String fileName) async {
-    final currentSongs = state.value ?? [];
-    state = AsyncValue.data(currentSongs.map((s) => s.fileName == fileName ? s.copyWith(isDownloading: true) : s).toList());
+    _allSongs = _allSongs.map((s) => s.fileName == fileName ? s.copyWith(isDownloading: true) : s).toList();
+    _updateSongsState();
 
     try {
       // 1. Descargar el archivo físico
@@ -64,16 +110,40 @@ class DownloadNotifier extends StateNotifier<AsyncValue<List<DownloadableSong>>>
       final chord = await _repository.getChordForSong(fileName, instrument);
       
       // 3. Registrar en la base de datos local
-      // Nota: Aquí asumimos que ScoreRepository tendrá un método para añadir a la lista. 
-      // Por ahora actualizamos el estado visual.
+      final newFile = DownloadedFile(
+        fileName: fileName,
+        instrument: instrument,
+        chord: chord,
+      );
+      _repository.addDownloadedFile(newFile);
       
-      state = AsyncValue.data(state.value!.map((s) => 
+      _allSongs = _allSongs.map((s) => 
         s.fileName == fileName ? s.copyWith(isDownloaded: true, isDownloading: false) : s
-      ).toList());
+      ).toList();
+      _updateSongsState();
     } catch (e) {
-      state = AsyncValue.data(state.value!.map((s) => 
+      _allSongs = _allSongs.map((s) => 
         s.fileName == fileName ? s.copyWith(isDownloading: false) : s
-      ).toList());
+      ).toList();
+      _updateSongsState();
     }
+  }
+
+  Future<void> downloadAll() async {
+    final toDownload = _allSongs.where((s) => !s.isDownloaded && !s.isDownloading).toList();
+    if (toDownload.isEmpty) return;
+
+    state = state.copyWith(isDownloadingAll: true, downloadProgress: 0);
+    
+    int total = toDownload.length;
+    int current = 0;
+
+    for (final song in toDownload) {
+      await download(song.fileName);
+      current++;
+      state = state.copyWith(downloadProgress: current / total);
+    }
+    
+    state = state.copyWith(isDownloadingAll: false, downloadProgress: 0);
   }
 }
