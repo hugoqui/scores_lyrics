@@ -5,6 +5,7 @@ import 'package:new_symphony/data/models/instrument.dart';
 import 'package:new_symphony/features/practice/providers/practice_provider.dart';
 import 'package:new_symphony/features/score/providers/score_provider.dart';
 import 'package:new_symphony/features/score/ui/widgets/score_image_view.dart';
+import 'package:new_symphony/features/score/ui/widgets/floating_player_card.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 
 class ScoreScreen extends ConsumerStatefulWidget {
@@ -44,14 +45,6 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
     super.dispose();
   }
 
-  bool _shouldShowToggle() {
-    // Piano y Trompeta no suelen tener switch de arreglo según lógica heredada
-    if (widget.instrument.path == 'piano' || widget.instrument.path == 'trumpet') return false;
-    
-    final song = widget.songs[_currentIndex];
-    return song.hasArrangementDownloaded;
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(scoreProvider);
@@ -88,30 +81,32 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
               );
             },
           ),
-          if (state.isUiVisible && _shouldShowToggle())
-            Positioned(
-              top: 10,
-              right: 10,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () => ref.read(scoreProvider.notifier).toggleScoreMode(),
-                child: Text(state.isArrangementMode ? 'Ver Melodía' : 'Ver Arreglo'),
-              ),
-            ),
           if (state.isUiVisible)
-            Positioned(
-              bottom: 20,
-              left: 20,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                color: Colors.black54,
-                child: Text(
-                  'Canto ${_currentIndex + 1} de ${widget.songs.length}',
-                  style: const TextStyle(color: Colors.white),
-                ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Canto ${_currentIndex + 1} de ${widget.songs.length}',
+                    style: const TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                  FloatingPlayerCard(
+                    isArrangementScore: state.isArrangementMode,
+                    isArrangementAudio: state.isArrangementMode, // Por ahora simplificado
+                    isLoopEnabled: false,
+                    playSpeed: 1.0,
+                    position: state.position,
+                    duration: state.duration,
+                    onToggleAudioMode: () {},
+                    onToggleScoreMode: () => ref.read(scoreProvider.notifier).toggleScoreMode(),
+                    onToggleLoop: () {},
+                    onChangeSpeed: (s) {},
+                    onSeek: (d) {},
+                    onPlayPause: () {},
+                    isPlaying: false,
+                  ),
+                ],
               ),
             ),
         ],

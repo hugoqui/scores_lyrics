@@ -44,6 +44,10 @@
     - [ ] Ocultar toggle de arreglo para instrumentos que no lo requieren (Piano, Trompeta).
     - [ ] Soporte para Swipe horizontal entre una lista de partituras (PageController).
     - [ ] Modo Inmersivo: Ocultar AppBar y controles al hacer tap en la partitura.
+    - [x] **Floating Player Card:** Diseñar interfaz flotante en la parte inferior para controles de audio.
+    - [x] **Lógica de Interfaz de Audio:** 
+        *   Si Score == Melodía: Bloquear/Ocultar switch de audio (Solo audio Melodía).
+        *   Si Score == Arreglo: Permitir switch entre audio Melodía y Arreglo.
 
 ## 5. Práctica y Biblioteca Local
 - [x] **5.1 Flujo de Selección:**
@@ -52,15 +56,15 @@
     - [x] Buscador local para filtrar canciones en el teléfono.
     - [ ] Al seleccionar, navegar a `ScoreScreen` pasando la lista filtrada (Pendiente implementar ScoreScreen).
 
-## 6. Audio y Reproducción (Próximamente)
-- [ ] Reproductor de Audio (Melodía vs Arreglo).
-- [ ] Grabación de práctica (M4A) y compartir.
-
-## 5. Audio y Reproducción
-- [ ] **Reproductor de Audio (just_audio):**
+## 6. Audio y Reproducción
+- [ ] **Integración de `just_audio`:**
     - [ ] Streaming desde URL y manejo de caché.
-    - [ ] Toggle entre audio de "Arreglo" y "Melodía" (Canto base).
-    - [ ] Indicadores de carga (Loading states).
+    - [ ] **Control de Velocidad:** Implementar cambio de *pitch/speed* (0.5x a 1.5x).
+    - [ ] **Modo Loop:** Botón para repetir el audio actual indefinidamente.
+    - [ ] **Lógica de Conmutación de Audio:**
+        *   Implementar cambio de URL en caliente (Melodía vs Arreglo).
+        *   Sincronizar tiempo actual al cambiar de fuente de audio (opcional/deseado).
+    - [ ] Manejo de estados de carga (Buffering/Loading).
 - [ ] **Grabadora (record):**
     - [ ] Grabación en formato M4A.
     - [ ] Funciones de Pausa, Reanudación y Detención.
