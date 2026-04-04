@@ -37,92 +37,95 @@ class FloatingPlayerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(AppDimensions.paddingMedium),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.7),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Barra de Progreso (Seek Bar)
-                Row(
-                  children: [
-                    Text(_formatDuration(position), style: const TextStyle(color: Colors.white70, fontSize: 10)),
-                    Expanded(
-                      child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 2,
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-                        ),
-                        child: Slider(
-                          value: position.inSeconds.toDouble(),
-                          max: duration.inSeconds.toDouble() > 0 ? duration.inSeconds.toDouble() : 1.0,
-                          activeColor: AppColors.accent,
-                          inactiveColor: Colors.white24,
-                          onChanged: (value) => onSeek(Duration(seconds: value.toInt())),
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 450),
+        margin: const EdgeInsets.all(AppDimensions.paddingMedium),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.7),
+                border: Border.all(color: Colors.white.withOpacity(0.2)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Barra de Progreso (Seek Bar)
+                  Row(
+                    children: [
+                      Text(_formatDuration(position), style: const TextStyle(color: Colors.white70, fontSize: 10)),
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 2,
+                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                          ),
+                          child: Slider(
+                            value: position.inSeconds.toDouble(),
+                            max: duration.inSeconds.toDouble() > 0 ? duration.inSeconds.toDouble() : 1.0,
+                            activeColor: AppColors.accent,
+                            inactiveColor: Colors.white24,
+                            onChanged: (value) => onSeek(Duration(seconds: value.toInt())),
+                          ),
                         ),
                       ),
-                    ),
-                    Text(_formatDuration(duration), style: const TextStyle(color: Colors.white70, fontSize: 10)),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Control de Velocidad
-                    _buildActionButton(
-                      icon: Icons.speed,
-                      label: '${playSpeed}x',
-                      onTap: () => _showSpeedMenu(context),
-                    ),
-                    
-                    // Toggle de Partitura (Melodía / Arreglo)
-                    _buildActionButton(
-                      icon: isArrangementScore ? Icons.auto_awesome_motion : Icons.description,
-                      label: isArrangementScore ? 'Ver Melodía' : 'Ver Arreglo',
-                      onTap: onToggleScoreMode,
-                      isActive: isArrangementScore,
-                    ),
-
-                    // Botón Play/Pause
-                    IconButton(
-                      iconSize: 44,
-                      padding: EdgeInsets.zero,
-                      icon: Icon(isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled, color: Colors.white),
-                      onPressed: onPlayPause,
-                    ),
-
-                    // Selector de Audio (Solo si la partitura es Arreglo)
-                    Opacity(
-                      opacity: isArrangementScore ? 1.0 : 0.3,
-                      child: _buildActionButton(
-                        icon: isArrangementAudio ? Icons.headphones : Icons.person,
-                        label: isArrangementAudio ? 'Audio: Arr.' : 'Audio: Base',
-                        onTap: isArrangementScore ? onToggleAudioMode : () {},
-                        isActive: isArrangementAudio && isArrangementScore,
+                      Text(_formatDuration(duration), style: const TextStyle(color: Colors.white70, fontSize: 10)),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Control de Velocidad
+                      _buildActionButton(
+                        icon: Icons.speed,
+                        label: '${playSpeed}x',
+                        onTap: () => _showSpeedMenu(context),
                       ),
-                    ),
-                    
-                    // Botón Loop
-                    _buildActionButton(
-                      icon: Icons.repeat,
-                      label: 'Loop',
-                      onTap: onToggleLoop,
-                      isActive: isLoopEnabled,
-                    ),
-                  ],
-                ),
-              ],
+                      
+                      // Toggle de Partitura (Melodía / Arreglo)
+                      _buildActionButton(
+                        icon: isArrangementScore ? Icons.auto_awesome_motion : Icons.description,
+                        label: isArrangementScore ? 'Ver Melodía' : 'Ver Arreglo',
+                        onTap: onToggleScoreMode,
+                        isActive: isArrangementScore,
+                      ),
+
+                      // Botón Play/Pause
+                      IconButton(
+                        iconSize: 44,
+                        padding: EdgeInsets.zero,
+                        icon: Icon(isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled, color: Colors.white),
+                        onPressed: onPlayPause,
+                      ),
+
+                      // Selector de Audio (Solo si la partitura es Arreglo)
+                      Opacity(
+                        opacity: isArrangementScore ? 1.0 : 0.3,
+                        child: _buildActionButton(
+                          icon: isArrangementAudio ? Icons.headphones : Icons.person,
+                          label: isArrangementAudio ? 'Audio: Arr.' : 'Audio: Base',
+                          onTap: isArrangementScore ? onToggleAudioMode : () {},
+                          isActive: isArrangementAudio && isArrangementScore,
+                        ),
+                      ),
+                      
+                      // Botón Loop
+                      _buildActionButton(
+                        icon: Icons.repeat,
+                        label: 'Loop',
+                        onTap: onToggleLoop,
+                        isActive: isLoopEnabled,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

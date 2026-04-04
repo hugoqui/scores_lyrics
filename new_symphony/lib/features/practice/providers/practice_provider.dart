@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
-import 'package:new_symphony/data/models/downloaded_file.dart';
 import 'package:new_symphony/data/repositories/score_repository.dart';
 
 class PracticeSong {
