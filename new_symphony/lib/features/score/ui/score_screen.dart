@@ -85,10 +85,13 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
                 fileToShow = song.arrangementFileName!;
               }
 
-              return ScoreImageView(
-                instrument: widget.instrument.path,
-                fileName: fileToShow,
-                onTap: () => ref.read(scoreProvider.notifier).toggleUiVisibility(),
+              return Align(
+                alignment: Alignment.topCenter,
+                child: ScoreImageView(
+                  instrument: widget.instrument.path,
+                  fileName: fileToShow,
+                  onTap: () => ref.read(scoreProvider.notifier).toggleUiVisibility(),
+                ),
               );
             },
           ),
@@ -97,11 +100,7 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
               alignment: Alignment.bottomCenter,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Canto ${_currentIndex + 1} de ${widget.songs.length}',
-                    style: const TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.bold),
-                  ),
+                children: [                  
                   FloatingPlayerCard(
                     isArrangementScore: state.isArrangementMode && currentSong.hasArrangementDownloaded,
                     isArrangementAudio: state.isAudioArrangement,

@@ -36,6 +36,7 @@ class ScoreImageView extends StatelessWidget {
         return GestureDetector(
           onTap: onTap,
           child: PhotoView(
+            basePosition: Alignment.topCenter,
             imageProvider: FileImage(file),
             backgroundDecoration: const BoxDecoration(color: AppColors.white),
             minScale: PhotoViewComputedScale.contained,

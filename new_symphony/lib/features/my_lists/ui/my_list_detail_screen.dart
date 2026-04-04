@@ -7,6 +7,7 @@ import 'package:new_symphony/features/practice/providers/practice_provider.dart'
 import 'package:new_symphony/features/score/ui/score_screen.dart';
 import 'package:new_symphony/core/services/instruments_service.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
+import 'package:new_symphony/data/repositories/score_repository.dart';
 
 class MyListDetailScreen extends ConsumerWidget {
   final String listId;
@@ -39,6 +40,8 @@ class MyListDetailScreen extends ConsumerWidget {
               itemCount: myList.songTitles.length,
               itemBuilder: (context, index) {
                 final title = myList.songTitles[index];
+                final chord = getIt<ScoreRepository>().getChordForSongSync(title, myList.instrument);
+
                 return Dismissible(
                   key: Key('${listId}_$title'),
                   direction: DismissDirection.endToStart,
@@ -58,6 +61,7 @@ class MyListDetailScreen extends ConsumerWidget {
                       side: BorderSide(color: AppColors.grey.withOpacity(0.2)),
                     ),
                     child: ListTile(
+                      leading: chord != null ? _ChordAvatar(chord: chord) : null,
                       title: Text(title),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
@@ -93,15 +97,21 @@ class MyListDetailScreen extends ConsumerWidget {
     songsAsync.whenData((songs) {
       List<String> selectedTitles = [];
       String searchQuery = "";
+      String? selectedChord;
 
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         builder: (context) => StatefulBuilder(
           builder: (context, setModalState) {
-            final filteredSongs = songs.where((s) => 
-              s.title.toLowerCase().contains(searchQuery.toLowerCase())
-            ).toList();
+            final filteredSongs = songs.where((s) {
+              final matchesSearch = s.title.toLowerCase().contains(searchQuery.toLowerCase());
+              final currentChord = getIt<ScoreRepository>().getChordForSongSync(s.title, instrument);
+              final matchesChord = selectedChord == null || currentChord == selectedChord;
+              return matchesSearch && matchesChord;
+            }).toList();
+
+            final chordOptions = ["C", "Eb", "F", "G", "Bb"];
 
             return DraggableScrollableSheet(
               initialChildSize: 0.8,
@@ -137,6 +147,28 @@ class MyListDetailScreen extends ConsumerWidget {
                       onChanged: (val) => setModalState(() => searchQuery = val),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        ChoiceChip(
+                          label: const Text("Todos"),
+                          selected: selectedChord == null,
+                          onSelected: (val) => setModalState(() => selectedChord = null),
+                        ),
+                        ...chordOptions.map((chord) => Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: ChoiceChip(
+                            label: Text(chord),
+                            selected: selectedChord == chord,
+                            onSelected: (val) => setModalState(() => selectedChord = val ? chord : null),
+                          ),
+                        )),
+                      ],
+                    ),
+                  ),
                   Expanded(
                     child: ListView.builder(
                       controller: scrollController,
@@ -145,6 +177,7 @@ class MyListDetailScreen extends ConsumerWidget {
                         final song = filteredSongs[index];
                         final isSelected = selectedTitles.contains(song.title);
                         return CheckboxListTile(
+                          secondary: _ChordAvatar(chord: getIt<ScoreRepository>().getChordForSongSync(song.title, instrument)),
                           title: Text(song.title),
                           value: isSelected,
                           onChanged: (val) {
@@ -167,5 +200,33 @@ class MyListDetailScreen extends ConsumerWidget {
         ),
       );
     });
+  }
+}
+
+class _ChordAvatar extends StatelessWidget {
+  final String chord;
+  const _ChordAvatar({required this.chord});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: AppColors.accent.withOpacity(0.1),
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.accent.withOpacity(0.4)),
+      ),
+      child: Center(
+        child: Text(
+          chord,
+          style: const TextStyle(
+            color: AppColors.accent,
+            fontWeight: FontWeight.bold,
+            fontSize: 11,
+          ),
+        ),
+      ),
+    );
   }
 }

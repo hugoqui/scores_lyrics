@@ -130,4 +130,17 @@ class ScoreRepository {
       return 'F';
     }
   }
+
+  String getChordForSongSync(String title, String instrument) {
+    final searchTitle = title.toLowerCase().replaceAll(' ', '_');
+    try {
+      final song = _apiSongs.firstWhere((s) {
+        final apiTitle = s.title.toLowerCase().replaceAll(' ', '_');
+        return apiTitle == searchTitle || '${apiTitle}_$instrument' == searchTitle;
+      });
+      return song.chord;
+    } catch (e) {
+      return 'F';
+    }
+  }
 }
