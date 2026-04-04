@@ -13,13 +13,18 @@ class AnnotationToolbar extends ConsumerWidget {
     final state = ref.watch(annotationProvider(noteKey));
     final notifier = ref.read(annotationProvider(noteKey).notifier);
 
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return Card(
       margin: const EdgeInsets.all(16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-        child: Column(
+        padding: isLandscape
+            ? const EdgeInsets.symmetric(horizontal: 4, vertical: 8) // Vertical
+            : const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Horizontal
+        child: isLandscape
+            ? Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
@@ -32,21 +37,35 @@ class AnnotationToolbar extends ConsumerWidget {
               _ColorButton(color: 0xFFFF0000, isSelected: state.selectedColor == 0xFFFF0000, onTap: () => notifier.setColor(0xFFFF0000)),
               _ColorButton(color: 0xFF0000FF, isSelected: state.selectedColor == 0xFF0000FF, onTap: () => notifier.setColor(0xFF0000FF)),
               _ColorButton(color: 0xFF000000, isSelected: state.selectedColor == 0xFF000000, onTap: () => notifier.setColor(0xFF000000)),
+              const SizedBox(height: 8, width: 24, child: Divider(height: 1)),
               IconButton(
                 icon: const Icon(Icons.delete_sweep, color: AppColors.error),
                 onPressed: () => _confirmClear(context, notifier),
                 tooltip: 'Borrar todo',
               ),
             ],
-            const SizedBox(width: 24, height: 8, child: Divider(height: 1)),
+            const SizedBox(height: 8, width: 24, child: Divider(height: 1)),
             IconButton(
               icon: Icon(state.isVisible ? Icons.visibility : Icons.visibility_off),
               color: AppColors.accent,
               onPressed: notifier.toggleVisibility,
               tooltip: 'Ver/Ocultar notas',
             ),
-          ],
-        ),
+          ],)
+            : Row( // Horizontal layout for portrait
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(icon: Icon(state.isDrawingMode ? Icons.edit : Icons.edit_outlined), color: state.isDrawingMode ? AppColors.accent : Colors.grey, onPressed: notifier.toggleDrawingMode, tooltip: 'Modo dibujo'),
+            if (state.isDrawingMode) ...[
+              _ColorButton(color: 0xFFFF0000, isSelected: state.selectedColor == 0xFFFF0000, onTap: () => notifier.setColor(0xFFFF0000)),
+              _ColorButton(color: 0xFF0000FF, isSelected: state.selectedColor == 0xFF0000FF, onTap: () => notifier.setColor(0xFF0000FF)),
+              _ColorButton(color: 0xFF000000, isSelected: state.selectedColor == 0xFF000000, onTap: () => notifier.setColor(0xFF000000)),
+              const SizedBox(width: 8, height: 24, child: VerticalDivider(width: 1)),
+              IconButton(icon: const Icon(Icons.delete_sweep, color: AppColors.error), onPressed: () => _confirmClear(context, notifier), tooltip: 'Borrar todo'),
+            ],
+            const SizedBox(width: 8, height: 24, child: VerticalDivider(width: 1)),
+            IconButton(icon: Icon(state.isVisible ? Icons.visibility : Icons.visibility_off), color: AppColors.accent, onPressed: notifier.toggleVisibility, tooltip: 'Ver/Ocultar notas'),
+          ],),
       ),
     );
   }
@@ -75,10 +94,14 @@ class _ColorButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
+        margin: isLandscape
+            ? const EdgeInsets.symmetric(vertical: 6)
+            : const EdgeInsets.symmetric(horizontal: 4),
         width: 24,
         height: 24,
         decoration: BoxDecoration(
