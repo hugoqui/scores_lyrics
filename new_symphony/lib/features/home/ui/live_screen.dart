@@ -7,6 +7,7 @@ import 'package:new_symphony/data/models/instrument.dart';
 import 'package:new_symphony/data/repositories/score_repository.dart';
 import 'package:new_symphony/features/live/providers/live_provider.dart';
 import 'package:new_symphony/features/practice/providers/practice_provider.dart';
+import 'package:new_symphony/features/score/providers/annotation_provider.dart';
 import 'package:new_symphony/features/score/ui/widgets/score_image_view.dart';
 
 class LiveScreen extends ConsumerStatefulWidget {
@@ -47,6 +48,19 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     final liveState = ref.watch(liveProvider);
     final songsAsync = ref.watch(practiceSongsProvider(widget.instrument.path));
 
+    // Determinamos si el swipe debe estar bloqueado por el modo dibujo
+    bool isDrawing = false;
+    if (liveState.liveSongList.isNotEmpty && liveState.currentIndex < liveState.liveSongList.length) {
+      final currentTitle = liveState.liveSongList[liveState.currentIndex];
+      final songs = songsAsync.value ?? [];
+      final currentSong = songs.where((s) => s.title.toLowerCase() == currentTitle.toLowerCase()).firstOrNull;
+      
+      if (currentSong != null) {
+        final noteKey = '${widget.instrument.path}_${currentSong.melodyFileName}';
+        isDrawing = ref.watch(annotationProvider(noteKey).select((s) => s.isDrawingMode));
+      }
+    }
+
     // Escuchar cambios de índice desde el servidor para mover el PageView
     ref.listen(liveProvider.select((s) => s.currentIndex), (prev, next) {
       if (_pageController.hasClients && _pageController.page?.round() != next) {
@@ -80,6 +94,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                   data: (songs) {
                     return PageView.builder(
                       controller: _pageController,
+                      physics: isDrawing ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
                       itemCount: liveState.liveSongList.length,
                       onPageChanged: (index) => ref.read(liveProvider.notifier).updateIndex(index),
                       itemBuilder: (context, index) {

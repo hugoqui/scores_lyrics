@@ -105,8 +105,16 @@
  - [x] **Paso 2: Reposicionamiento Dinámico en ScoreImageView**
     - [x] Mover `AnnotationToolbar` (Lápiz) a la izquierda en Landscape.
     - [x] Integrar `FloatingPlayerCard` en el Stack lateral derecho en Landscape.
-- [ ] **Paso 3: Sincronización y Pruebas**
-    - [ ] Verificar que el audio no se interrumpa al girar el dispositivo.
+- [x] **Paso 3: Sincronización y Pruebas**
+    - [x] Verificar que el audio no se interrumpa al girar el dispositivo.
+
+## 12. Compartir Listas vía QR
+- [ ] **Generación de QR:** Esquema compacto `{"n": "nombre", "s": ["t1", "t2"]}` para optimizar lectura.
+- [ ] **Visualización:** Botón "Compartir" en cada lista que genera y muestra el QR.
+- [ ] **Escaneo y Selección de Instrumento:** 
+    - [ ] Implementar lector de QR vía cámara.
+    - [ ] Al detectar datos, mostrar obligatoriamente el selector de instrumento (Sugerir el último usado).
+- [ ] **Importación:** Crear nueva lista local vinculando los cantos al instrumento elegido por el receptor.
 
 ## 9. Pruebas y Despliegue
 - [ ] Pruebas unitarias de servicios de lógica de nombres de archivos.
