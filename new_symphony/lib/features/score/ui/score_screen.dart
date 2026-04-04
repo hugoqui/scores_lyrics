@@ -56,6 +56,7 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(scoreProvider);
     final currentSong = widget.songs[_currentIndex];
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -97,29 +98,24 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
           ),
           if (state.isUiVisible)
             Align(
-              alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [                  
-                  FloatingPlayerCard(
-                    isArrangementScore: state.isArrangementMode && currentSong.hasArrangementDownloaded,
-                    isArrangementAudio: state.isAudioArrangement,
-                    isLoopEnabled: state.isLoopEnabled,
-                    playSpeed: state.playSpeed,
-                    position: state.position,
-                    duration: state.duration,
-                    onToggleAudioMode: () => ref.read(scoreProvider.notifier).toggleAudioMode(
-                      widget.instrument.path, 
-                      currentSong
-                    ),
-                    onToggleScoreMode: () => ref.read(scoreProvider.notifier).toggleScoreMode(),
-                    onToggleLoop: () => ref.read(scoreProvider.notifier).toggleLoop(),
-                    onChangeSpeed: (s) => ref.read(scoreProvider.notifier).setSpeed(s),
-                    onSeek: (d) => ref.read(scoreProvider.notifier).seek(d),
-                    onPlayPause: () => ref.read(scoreProvider.notifier).playPause(),
-                    isPlaying: state.isPlaying,
-                  ),
-                ],
+              alignment: isLandscape ? Alignment.centerRight : Alignment.bottomCenter,
+              child: FloatingPlayerCard(
+                isArrangementScore: state.isArrangementMode && currentSong.hasArrangementDownloaded,
+                isArrangementAudio: state.isAudioArrangement,
+                isLoopEnabled: state.isLoopEnabled,
+                playSpeed: state.playSpeed,
+                position: state.position,
+                duration: state.duration,
+                onToggleAudioMode: () => ref.read(scoreProvider.notifier).toggleAudioMode(
+                  widget.instrument.path, 
+                  currentSong
+                ),
+                onToggleScoreMode: () => ref.read(scoreProvider.notifier).toggleScoreMode(),
+                onToggleLoop: () => ref.read(scoreProvider.notifier).toggleLoop(),
+                onChangeSpeed: (s) => ref.read(scoreProvider.notifier).setSpeed(s),
+                onSeek: (d) => ref.read(scoreProvider.notifier).seek(d),
+                onPlayPause: () => ref.read(scoreProvider.notifier).playPause(),
+                isPlaying: state.isPlaying,
               ),
             ),
         ],

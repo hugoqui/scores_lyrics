@@ -13,12 +13,14 @@ class ScoreImageView extends ConsumerStatefulWidget {
   final String instrument;
   final String fileName;
   final VoidCallback onTap;
+  final Widget? player;
 
   const ScoreImageView({
     super.key,
     required this.instrument,
     required this.fileName,
     required this.onTap,
+    this.player,
   });
 
   @override
@@ -74,6 +76,7 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
   @override
   Widget build(BuildContext context) {
     final annotationState = ref.watch(annotationProvider(_noteKey));
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return FutureBuilder<File>(
       future: _getScoreFile(),
@@ -87,39 +90,53 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
           return const Center(child: Text('Archivo no encontrado', style: TextStyle(color: AppColors.error)));
         }
 
-        return Stack(
-          children: [
-            GestureDetector(
-              onTap: widget.onTap,
-              child: PhotoView.customChild(
-                backgroundDecoration: const BoxDecoration(color: AppColors.white),
-                minScale: PhotoViewComputedScale.contained,
-                maxScale: PhotoViewComputedScale.covered * 4,
-                childSize: _imageSize,
-                child: Stack(
-                  children: [
-                    Image.file(
-                      file,
-                      width: _imageSize!.width,
-                      height: _imageSize!.height,
-                      fit: BoxFit.contain,
-                    ),
-                    if (annotationState.isVisible)
-                      DrawingCanvas(
-                        noteKey: _noteKey,
-                        size: _imageSize!,
+        return SizedBox.expand(
+          child: Stack(
+            children: [
+              GestureDetector(
+                onTap: widget.onTap,
+                child: PhotoView.customChild(
+                  backgroundDecoration: const BoxDecoration(color: AppColors.white),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 4,
+                  childSize: _imageSize,
+                  child: Stack(
+                    children: [
+                      Image.file(
+                        file,
+                        width: _imageSize!.width,
+                        height: _imageSize!.height,
+                        fit: BoxFit.contain,
                       ),
-                  ],
+                      if (annotationState.isVisible)
+                        DrawingCanvas(
+                          noteKey: _noteKey,
+                          size: _imageSize!,
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            // La barra de herramientas flota sobre todo el visor
-            Positioned(
-              top: 100, // Debajo de la AppBar
-              right: 10,
-              child: AnnotationToolbar(noteKey: _noteKey),
-            ),
-          ],
+              // La barra de herramientas (Lápiz)
+              Positioned(
+                top: 100,
+                left: isLandscape ? 10 : null,
+                right: isLandscape ? null : 10,
+                child: AnnotationToolbar(noteKey: _noteKey),
+              ),
+              // El reproductor (Audio)
+              if (widget.player != null)
+                Positioned(
+                  top: isLandscape ? 100 : null,
+                  bottom: isLandscape ? null : 0,
+                  left: isLandscape ? null : 0,
+                  right: isLandscape ? 10 : 0,
+                  child: isLandscape 
+                    ? widget.player!
+                    : Center(child: widget.player!),
+                ),
+            ],
+          ),
         );
       },
     );

@@ -96,6 +96,18 @@
 - [x] **Herramientas:** Menú flotante con selección de colores, borrador y toggle de visibilidad.
 - [ ] **Sincronización de Zoom:** Asegurar que las notas se escalen y desplacen junto con la partitura.
 
+## 11. Reproductor y Herramientas Camaleónicas (Orientación)
+- [x] **Paso 1: Refactorización de FloatingPlayerCard**
+    - [x] Implementar detección de orientación.
+    - [x] Crear Layout Vertical (Column) para modo Landscape.
+    - [x] Implementar Barra de Progreso Vertical (`RotatedBox`).
+    - [x] Adaptar etiquetas de texto a versiones cortas (ej: "Mel.", "Arr.").
+ - [x] **Paso 2: Reposicionamiento Dinámico en ScoreImageView**
+    - [x] Mover `AnnotationToolbar` (Lápiz) a la izquierda en Landscape.
+    - [x] Integrar `FloatingPlayerCard` en el Stack lateral derecho en Landscape.
+- [ ] **Paso 3: Sincronización y Pruebas**
+    - [ ] Verificar que el audio no se interrumpa al girar el dispositivo.
+
 ## 9. Pruebas y Despliegue
 - [ ] Pruebas unitarias de servicios de lógica de nombres de archivos.
 - [ ] Configuración de permisos (Micrófono, Almacenamiento, Internet).
