@@ -92,7 +92,15 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                   final song = songs[index];
                   return ListTile(
                     leading: _buildLeading(song),
-                    title: Text(song.fileName.replaceAll('.png', '').replaceAll('_', ' ')),
+                    title: Text(
+                      song.fileName
+                          .replaceAll('.png', '')
+                          .replaceAll('_', ' ')
+                          .split(' ')
+                          .where((word) => word.isNotEmpty)
+                          .map((word) => '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
+                          .join(' '),
+                    ),
                     trailing: IconButton(
                       icon: const Icon(Icons.download, color: AppColors.primary),
                       onPressed: () => ref.read(downloadProvider(widget.instrument.path).notifier).download(song.fileName),

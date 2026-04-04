@@ -69,7 +69,10 @@ class HomeScreen extends StatelessWidget {
                     title: 'Practicar',
                     icon: Icons.music_note,
                     onTap: () {
-                      // Navegar a explorador local
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const InstrumentSelectionScreen(isPractice: true)),
+                      );
                     },
                   ),
                   _MenuCard(

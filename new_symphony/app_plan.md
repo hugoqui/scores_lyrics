@@ -20,7 +20,7 @@
     - [x] Lógica de descarga de binarios (PNG/MP3).
     - [x] Gestión de carpetas por instrumento.
     - [x] Mapeo de tonalidades (Chords) desde la API.
-    - [ ] **Lógica de agrupación local:** Método para obtener "Canciones" únicas agrupando Melodía y Arreglo para la vista de Práctica.
+    - [x] **Lógica de agrupación local (PracticeProvider):** Implementar escaneo de archivos para identificar pares Melodía/Arreglo basado en el sufijo del instrumento.
     - [x] **Nota:** Esta implementación será reemplazada cuando el backend mejore, pero la interfaz del `ScoreRepository` debe permanecer estable.
 
 ## 3. Autenticación y Seguridad
@@ -37,19 +37,24 @@
     - [ ] **Ajustes:** (Cambiar host, cerrar sesión).
 - [x] **Diseño Responsivo:** Ajustar `GridView` para adaptarse a diferentes orientaciones y tamaños de pantalla.
 
-## 4. Funcionalidades de Partituras y Práctica
-- [ ] **4.1 Flujo de Práctica (Local Explorer):**
-    - [ ] Reutilizar `InstrumentGrid` para la selección inicial.
-    - [ ] Crear `PracticeLibraryScreen`: Lista de cantos filtrada (solo archivos de melodía/base descargados).
-    - [ ] Buscador local dentro de la biblioteca de práctica.
-- [ ] **4.2 Visor de Partituras Reutilizable (ScoreScreen):**
-    - [ ] Crear componente `ScoreView` que acepte una lista de canciones y un índice inicial.
-    - [ ] **Visor de Imágenes:** Integrar `photo_view` para soporte de zoom y gestos.
-    - [ ] **Lógica de Switch:** Implementar toggle Melodía/Arreglo basado en la existencia del archivo con sufijo `_instrumento`.
-    - [ ] **Lógica por instrumento:** Ocultar switch de arreglo para Piano y Trompeta.
-    - [ ] **Gestos de Navegación:** Swipe horizontal para cambiar entre las partituras de la lista actual.
-    - [ ] **Modo Inmersivo:** Implementar "Immersive Sticky" (Android) y Fade (iOS) al tocar la pantalla para ocultar UI.
-    - [ ] **Persistencia de Preferencia:** Recordar si el usuario prefiere ver "Arreglo" o "Melodía" durante la sesión.
+## 4. Funcionalidades de Partituras (Módulo Reutilizable)
+- [ ] **4.1 Visor de Partituras (ScoreScreen):**
+    - [ ] Implementar `ScoreImageView` usando `photo_view` para zoom fluido.
+    - [ ] Lógica de Swapping Melodía/Arreglo: Detectar presencia de archivo `_instrumento.png`.
+    - [ ] Ocultar toggle de arreglo para instrumentos que no lo requieren (Piano, Trompeta).
+    - [ ] Soporte para Swipe horizontal entre una lista de partituras (PageController).
+    - [ ] Modo Inmersivo: Ocultar AppBar y controles al hacer tap en la partitura.
+
+## 5. Práctica y Biblioteca Local
+- [x] **5.1 Flujo de Selección:**
+    - [x] Reutilizar `InstrumentGrid` para filtrar por instrumento.
+    - [x] `PracticeLibraryScreen`: Listar solo archivos base (melodía) descargados.
+    - [x] Buscador local para filtrar canciones en el teléfono.
+    - [ ] Al seleccionar, navegar a `ScoreScreen` pasando la lista filtrada (Pendiente implementar ScoreScreen).
+
+## 6. Audio y Reproducción (Próximamente)
+- [ ] Reproductor de Audio (Melodía vs Arreglo).
+- [ ] Grabación de práctica (M4A) y compartir.
 
 ## 5. Audio y Reproducción
 - [ ] **Reproductor de Audio (just_audio):**
