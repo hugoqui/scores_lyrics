@@ -45,7 +45,7 @@
     - [x] Soporte para Swipe horizontal entre una lista de partituras (PageController).
     - [x] Modo Inmersivo: Ocultar AppBar y controles al hacer tap en la partitura.
     - [x] **Floating Player Card:** Diseño minimalista con desenfoque y controles unificados.
-    - [ ] **Ajuste de Responsividad:** Implementar `maxWidth` (600px) para el reproductor en modo horizontal/tablets.
+    - [x] **Ajuste de Responsividad:** Implementar `maxWidth` para el reproductor en modo horizontal/tablets.
     - [x] **Lógica de Interfaz de Audio:** 
         *   Si Score == Melodía: Bloquear switch de audio (Solo Melodía).
         *   Si Score == Arreglo: Permitir switch entre audio Melodía y Arreglo.
@@ -55,6 +55,7 @@
     - [x] Reutilizar `InstrumentGrid` para filtrar por instrumento.
     - [x] `PracticeLibraryScreen`: Listar solo archivos base (melodía) descargados.
     - [x] Buscador local para filtrar canciones en el teléfono.
+    - [x] **Filtrado por Tonalidad:** Chips de selección (C, Eb, F, G, Bb) y Avatars visuales.
     - [x] Al seleccionar, navegar a `ScoreScreen` pasando la lista filtrada.
 
 ## 6. Audio y Reproducción (Práctica)
@@ -65,7 +66,7 @@
     - [x] **Barra de Progreso (Seek):** Slider interactivo con visualización de tiempo.
     - [x] Manejo de estados de carga (Buffering/Loading).
 - [ ] **6.2 Grabadora de Práctica (`record`):**
-    - [ ] Grabación en formato M4A.
+    - [ ] **Postergado:** Grabación en formato M4A para una versión posterior.
     - [ ] **Lógica de acompañamiento opcional:** Permitir elegir si se reproduce el audio de base/arreglo durante la grabación.
     - [ ] Gestión de permisos nativos y archivos temporales.
     - [ ] Flujo de exportación rápida vía `share_plus`.
@@ -78,9 +79,9 @@
 - [ ] **Manejo de Estado de Conexión:** Offline, Online, Reconnecting.
 
 ## 7. Gestión de Listas (My Lists)
-- [ ] CRUD de listas locales.
-- [ ] Persistencia de canciones seleccionadas por lista.
-- [ ] Filtrado por tonalidad (C, Eb, F, G, Bb, etc.).
+- [x] **CRUD de listas locales:** Con acciones de swipe (Editar/Eliminar) estilo WhatsApp.
+- [x] **Persistencia:** Guardado local mediante SharedPreferences.
+- [x] **Filtrado por tonalidad:** Buscador integrado con selección de nota y Avatars.
 
 ## 8. UI/UX Mejorado
 - [ ] Rediseñar la navegación (GoRouter).

@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
+import 'package:new_symphony/features/live/services/socket_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:new_symphony/core/services/migration_service.dart';
 import 'package:new_symphony/core/services/instruments_service.dart';
@@ -16,7 +17,8 @@ Future<void> setupLocator() async {
   // Servicios
   getIt.registerLazySingleton<MigrationService>(() => MigrationService(getIt<SharedPreferences>()));
   getIt.registerLazySingleton<InstrumentsService>(() => InstrumentsService());
-  
+  getIt.registerLazySingleton<SocketService>(() => SocketService());
+
   // Network
   getIt.registerLazySingleton<DioClient>(() => DioClient(getIt<SharedPreferences>()));
   getIt.registerLazySingleton<Dio>(() => getIt<DioClient>().dio);
