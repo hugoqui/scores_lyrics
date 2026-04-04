@@ -38,15 +38,16 @@
 - [x] **Diseño Responsivo:** Ajustar `GridView` para adaptarse a diferentes orientaciones y tamaños de pantalla.
 
 ## 4. Funcionalidades de Partituras (Módulo Reutilizable)
-- [ ] **4.1 Visor de Partituras (ScoreScreen):**
-    - [ ] Implementar `ScoreImageView` usando `photo_view` para zoom fluido.
-    - [ ] Lógica de Swapping Melodía/Arreglo: Detectar presencia de archivo `_instrumento.png`.
-    - [ ] Ocultar toggle de arreglo para instrumentos que no lo requieren (Piano, Trompeta).
-    - [ ] Soporte para Swipe horizontal entre una lista de partituras (PageController).
-    - [ ] Modo Inmersivo: Ocultar AppBar y controles al hacer tap en la partitura.
-    - [x] **Floating Player Card:** Diseñar interfaz flotante en la parte inferior para controles de audio.
+- [x] **4.1 Visor de Partituras (ScoreScreen):**
+    - [x] Implementar `ScoreImageView` usando `photo_view` para zoom fluido.
+    - [x] Lógica de Swapping Melodía/Arreglo: Detectar presencia de archivo `_instrumento.png`.
+    - [x] Ocultar toggle de arreglo para instrumentos que no lo requieren (Piano, Trompeta).
+    - [x] Soporte para Swipe horizontal entre una lista de partituras (PageController).
+    - [x] Modo Inmersivo: Ocultar AppBar y controles al hacer tap en la partitura.
+    - [x] **Floating Player Card:** Diseño minimalista con desenfoque y controles unificados.
+    - [ ] **Ajuste de Responsividad:** Implementar `maxWidth` (600px) para el reproductor en modo horizontal/tablets.
     - [x] **Lógica de Interfaz de Audio:** 
-        *   Si Score == Melodía: Bloquear/Ocultar switch de audio (Solo audio Melodía).
+        *   Si Score == Melodía: Bloquear switch de audio (Solo Melodía).
         *   Si Score == Arreglo: Permitir switch entre audio Melodía y Arreglo.
 
 ## 5. Práctica y Biblioteca Local
@@ -54,21 +55,20 @@
     - [x] Reutilizar `InstrumentGrid` para filtrar por instrumento.
     - [x] `PracticeLibraryScreen`: Listar solo archivos base (melodía) descargados.
     - [x] Buscador local para filtrar canciones en el teléfono.
-    - [ ] Al seleccionar, navegar a `ScoreScreen` pasando la lista filtrada (Pendiente implementar ScoreScreen).
+    - [x] Al seleccionar, navegar a `ScoreScreen` pasando la lista filtrada.
 
-## 6. Audio y Reproducción
-- [ ] **Integración de `just_audio`:**
-    - [ ] Streaming desde URL y manejo de caché.
-    - [ ] **Control de Velocidad:** Implementar cambio de *pitch/speed* (0.5x a 1.5x).
-    - [ ] **Modo Loop:** Botón para repetir el audio actual indefinidamente.
-    - [ ] **Lógica de Conmutación de Audio:**
-        *   Implementar cambio de URL en caliente (Melodía vs Arreglo).
-        *   Sincronizar tiempo actual al cambiar de fuente de audio (opcional/deseado).
-    - [ ] Manejo de estados de carga (Buffering/Loading).
-- [ ] **Grabadora (record):**
+## 6. Audio y Reproducción (Práctica)
+- [x] **6.1 Motor de Audio (`just_audio`):**
+    - [x] Streaming desde URL y lógica de Hot-Swap sincronizada.
+    - [x] **Control de Velocidad:** Implementado cambio de speed (0.5x a 1.5x).
+    - [x] **Modo Loop:** Repetición de track infinito.
+    - [x] **Barra de Progreso (Seek):** Slider interactivo con visualización de tiempo.
+    - [x] Manejo de estados de carga (Buffering/Loading).
+- [ ] **6.2 Grabadora de Práctica (`record`):**
     - [ ] Grabación en formato M4A.
-    - [ ] Funciones de Pausa, Reanudación y Detención.
-    - [ ] Integración con `share_plus` para compartir el archivo grabado.
+    - [ ] **Lógica de acompañamiento opcional:** Permitir elegir si se reproduce el audio de base/arreglo durante la grabación.
+    - [ ] Gestión de permisos nativos y archivos temporales.
+    - [ ] Flujo de exportación rápida vía `share_plus`.
 
 ## 6. Sincronización en Vivo (Live)
 - [ ] **Socket.io Client:** Implementar conexión persistente.

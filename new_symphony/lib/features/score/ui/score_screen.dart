@@ -33,8 +33,15 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
-    // Ocultar barra de estado al entrar si es necesario
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    // Cargar audio inicial
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(scoreProvider.notifier).loadSong(
+        widget.instrument.path, 
+        widget.songs[_currentIndex]
+      );
+    });
   }
 
   @override
@@ -65,6 +72,10 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
             itemCount: widget.songs.length,
             onPageChanged: (index) {
               setState(() => _currentIndex = index);
+              ref.read(scoreProvider.notifier).loadSong(
+                widget.instrument.path, 
+                widget.songs[index]
+              );
             },
             itemBuilder: (context, index) {
               final song = widget.songs[index];
@@ -92,19 +103,22 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
                     style: const TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                   FloatingPlayerCard(
-                    isArrangementScore: state.isArrangementMode,
-                    isArrangementAudio: state.isArrangementMode, // Por ahora simplificado
-                    isLoopEnabled: false,
-                    playSpeed: 1.0,
+                    isArrangementScore: state.isArrangementMode && currentSong.hasArrangementDownloaded,
+                    isArrangementAudio: state.isAudioArrangement,
+                    isLoopEnabled: state.isLoopEnabled,
+                    playSpeed: state.playSpeed,
                     position: state.position,
                     duration: state.duration,
-                    onToggleAudioMode: () {},
+                    onToggleAudioMode: () => ref.read(scoreProvider.notifier).toggleAudioMode(
+                      widget.instrument.path, 
+                      currentSong
+                    ),
                     onToggleScoreMode: () => ref.read(scoreProvider.notifier).toggleScoreMode(),
-                    onToggleLoop: () {},
-                    onChangeSpeed: (s) {},
-                    onSeek: (d) {},
-                    onPlayPause: () {},
-                    isPlaying: false,
+                    onToggleLoop: () => ref.read(scoreProvider.notifier).toggleLoop(),
+                    onChangeSpeed: (s) => ref.read(scoreProvider.notifier).setSpeed(s),
+                    onSeek: (d) => ref.read(scoreProvider.notifier).seek(d),
+                    onPlayPause: () => ref.read(scoreProvider.notifier).playPause(),
+                    isPlaying: state.isPlaying,
                   ),
                 ],
               ),
