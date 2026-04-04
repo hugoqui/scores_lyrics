@@ -47,17 +47,32 @@ class DownloadState {
   }
 }
 
+/// Notificador global para la lista de archivos descargados
+class DownloadedFilesNotifier extends StateNotifier<List<DownloadedFile>> {
+  final ScoreRepository _repository;
+  DownloadedFilesNotifier(this._repository) : super(_repository.downloadedFiles);
+
+  void refresh() {
+    state = [..._repository.downloadedFiles];
+  }
+}
+
+final downloadedFilesProvider = StateNotifierProvider<DownloadedFilesNotifier, List<DownloadedFile>>((ref) {
+  return DownloadedFilesNotifier(getIt<ScoreRepository>());
+});
+
 final downloadProvider = StateNotifierProvider.family<DownloadNotifier, DownloadState, String>((ref, instrument) {
-  return DownloadNotifier(getIt<ScoreRepository>(), instrument);
+  return DownloadNotifier(ref, getIt<ScoreRepository>(), instrument);
 });
 
 class DownloadNotifier extends StateNotifier<DownloadState> {
+  final Ref _ref;
   final ScoreRepository _repository;
   final String instrument;
   List<DownloadableSong> _allSongs = []; // Cache para el listado completo
   String _lastQuery = '';
 
-  DownloadNotifier(this._repository, this.instrument)
+  DownloadNotifier(this._ref, this._repository, this.instrument)
       : super(DownloadState(songs: const AsyncValue.loading())) {
     loadSongs();
   }
@@ -116,6 +131,9 @@ class DownloadNotifier extends StateNotifier<DownloadState> {
         chord: chord,
       );
       _repository.addDownloadedFile(newFile);
+
+      // Notificamos al estado global que hay un nuevo archivo
+      _ref.read(downloadedFilesProvider.notifier).refresh();
       
       _allSongs = _allSongs.map((s) => 
         s.fileName == fileName ? s.copyWith(isDownloaded: true, isDownloading: false) : s

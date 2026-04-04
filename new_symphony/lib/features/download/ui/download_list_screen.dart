@@ -110,14 +110,14 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
   Widget _buildLeading(DownloadableSong song) {
     if (song.isDownloading) {
       return const SizedBox(
-        width: 24,
-        height: 24,
+        width: 20,
+        height: 20,
         child: CircularProgressIndicator(strokeWidth: 3),
       );
     }
     if (song.isDownloaded) {
       return const Icon(Icons.check, color: AppColors.accent);
     }
-    return const Icon(Icons.check_box_outline_blank, color: AppColors.lightGrey);
+    return const Icon(Icons.check_box_outline_blank, color: AppColors.grey);
   }
 }

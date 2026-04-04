@@ -16,11 +16,12 @@
 - [x] **Local Storage:** Implementado con `shared_preferences` y registrado en el locator.
 - [x] **Servicio de Instrumentos:** Migrado a `InstrumentsService`.
 - [x] **Capa de Abstracción de Partituras (ScoreRepository):** Estructura base y persistencia local creadas.
-    - [ ] **Implementación actual:** Replicar la lógica de `ScoresDownloaderService` para obtener la lista de cantos (actualmente desde un JSON) y URLs de descarga (actualmente parseando HTML).
-    - [ ] Lógica de descarga de binarios (PNG/MP3).
-    - [ ] Gestión de carpetas por instrumento.
-    - [ ] Mapeo de tonalidades (Chords) desde la API.
-    - [ ] **Nota:** Esta implementación será reemplazada cuando el backend mejore, pero la interfaz del `ScoreRepository` debe permanecer estable.
+    - [x] **Implementación actual:** Replicar la lógica de `ScoresDownloaderService` para obtener la lista de cantos.
+    - [x] Lógica de descarga de binarios (PNG/MP3).
+    - [x] Gestión de carpetas por instrumento.
+    - [x] Mapeo de tonalidades (Chords) desde la API.
+    - [ ] **Lógica de agrupación local:** Método para obtener "Canciones" únicas agrupando Melodía y Arreglo para la vista de Práctica.
+    - [x] **Nota:** Esta implementación será reemplazada cuando el backend mejore, pero la interfaz del `ScoreRepository` debe permanecer estable.
 
 ## 3. Autenticación y Seguridad
 - [x] Migrar flujo de Login (Email/User, Password en texto plano, DeviceID).
@@ -36,14 +37,19 @@
     - [ ] **Ajustes:** (Cambiar host, cerrar sesión).
 - [x] **Diseño Responsivo:** Ajustar `GridView` para adaptarse a diferentes orientaciones y tamaños de pantalla.
 
-## 4. Funcionalidades de Partituras (Score)
-- [ ] **Visor de Imágenes:** Implementar visor con zoom (PhotoView).
-- [ ] **Lógica de Archivos:**
-    - [ ] Swapping entre Melodía (`song.png`) y Arreglo (`song_instrument.png`).
-    - [ ] Fallbacks de archivos no encontrados.
-- [ ] **Lógica por instrumento:** Ocultar switch de partitura para Piano y Trompeta (heredado de `shouldShowScoreSwitch`).
-- [ ] **Gestos:** Implementar Swipe horizontal para navegar entre canciones de la lista.
-- [ ] **Modo Inmersivo:** Implementar "Immersive Sticky" (Android) y Fade (iOS) al tocar la pantalla.
+## 4. Funcionalidades de Partituras y Práctica
+- [ ] **4.1 Flujo de Práctica (Local Explorer):**
+    - [ ] Reutilizar `InstrumentGrid` para la selección inicial.
+    - [ ] Crear `PracticeLibraryScreen`: Lista de cantos filtrada (solo archivos de melodía/base descargados).
+    - [ ] Buscador local dentro de la biblioteca de práctica.
+- [ ] **4.2 Visor de Partituras Reutilizable (ScoreScreen):**
+    - [ ] Crear componente `ScoreView` que acepte una lista de canciones y un índice inicial.
+    - [ ] **Visor de Imágenes:** Integrar `photo_view` para soporte de zoom y gestos.
+    - [ ] **Lógica de Switch:** Implementar toggle Melodía/Arreglo basado en la existencia del archivo con sufijo `_instrumento`.
+    - [ ] **Lógica por instrumento:** Ocultar switch de arreglo para Piano y Trompeta.
+    - [ ] **Gestos de Navegación:** Swipe horizontal para cambiar entre las partituras de la lista actual.
+    - [ ] **Modo Inmersivo:** Implementar "Immersive Sticky" (Android) y Fade (iOS) al tocar la pantalla para ocultar UI.
+    - [ ] **Persistencia de Preferencia:** Recordar si el usuario prefiere ver "Arreglo" o "Melodía" durante la sesión.
 
 ## 5. Audio y Reproducción
 - [ ] **Reproductor de Audio (just_audio):**

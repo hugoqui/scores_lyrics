@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
-import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/data/models/instrument.dart';
-import 'package:new_symphony/data/repositories/score_repository.dart';
+import 'package:new_symphony/features/download/providers/download_provider.dart';
 
-class InstrumentGrid extends StatelessWidget {
+class InstrumentGrid extends ConsumerWidget {
   final List<Instrument> instruments;
   final Function(Instrument) onInstrumentSelected;
 
@@ -16,7 +16,10 @@ class InstrumentGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Observamos la lista global de archivos descargados
+    final allDownloaded = ref.watch(downloadedFilesProvider);
+
     return ListView.separated(
       padding: const EdgeInsets.all(AppDimensions.paddingMedium),
       itemCount: instruments.length,
@@ -27,9 +30,10 @@ class InstrumentGrid extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final instrument = instruments[index];
-        // Obtenemos el conteo real de archivos descargados para este instrumento
-        final int downloadedCount = getIt<ScoreRepository>()
-            .getDownloadedFilesByInstrument(instrument.path)
+
+        // Filtramos desde la lista reactiva del provider
+        final int downloadedCount = allDownloaded
+            .where((f) => f.instrument == instrument.path)
             .length;
 
         return ListTile(
