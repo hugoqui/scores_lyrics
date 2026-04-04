@@ -161,7 +161,8 @@ class LiveNotifier extends StateNotifier<LiveState> {
 
   void disconnect() {
     _socketService.disconnect();
-    state = state.copyWith(status: 'offline', liveSongList: [], currentSongTitle: null);
+    // Solo actualizamos el status, mantenemos la lista para que el usuario pueda seguir navegando
+    state = state.copyWith(status: 'offline');
   }
 
   @override

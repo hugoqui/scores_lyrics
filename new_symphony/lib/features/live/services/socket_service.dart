@@ -27,6 +27,7 @@ class SocketService {
       .setTransports(['websocket'])
       .enableAutoConnect()
       .enableReconnection()
+      .enableForceNewConnection() // Asegura una conexión limpia cada vez
       .setReconnectionAttempts(5)
       .setReconnectionDelay(5000)
       .build());

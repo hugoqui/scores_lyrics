@@ -73,10 +73,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
               _ConnectionStatusIndicator(status: liveState.status),
             ],
           ),
-      body: liveState.status != 'online' && liveState.status != 'reconnecting'
-          ? const Center(child: Text('Desconectado del servidor de transmisión'))
-          : liveState.liveSongList.isEmpty
-              ? const Center(child: Text('Esperando que el administrador seleccione un canto...'))
+      body: liveState.liveSongList.isEmpty
+              ? const Center(child: Text('Esperando lista de cantos...'))
               : songsAsync.when(
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (err, _) => Center(child: Text('Error: $err')),
