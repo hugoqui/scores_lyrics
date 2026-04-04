@@ -48,9 +48,12 @@ class SocketService {
 
     // Escucha de eventos de negocio
     _socket!.on('text_change', (data) {
-      // El servidor envía el título de la canción actual: { "title": "Canto..." }
-      if (data != null && data['title'] != null) {
-        _songController.add(data['title'].toString());
+      if (data != null) {
+        if (data is Map && data['title'] != null) {
+          _songController.add(data['title'].toString());
+        } else if (data is String) {
+          _songController.add(data);
+        }
       }
     });
 
