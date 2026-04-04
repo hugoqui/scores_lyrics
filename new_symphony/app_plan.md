@@ -66,22 +66,19 @@
     - [x] **Barra de Progreso (Seek):** Slider interactivo con visualización de tiempo.
     - [x] Manejo de estados de carga (Buffering/Loading).
 - [ ] **6.2 Grabadora de Práctica (`record`):**
-    - [ ] **Postergado:** Grabación en formato M4A para una versión posterior.
-    - [ ] **Lógica de acompañamiento opcional:** Permitir elegir si se reproduce el audio de base/arreglo durante la grabación.
-    - [ ] Gestión de permisos nativos y archivos temporales.
-    - [ ] Flujo de exportación rápida vía `share_plus`.
+    - [ ] **Postergado:** Funcionalidad de grabación no requerida para esta fase.
 
 ## 6. Sincronización en Vivo (Live) - COMPLETADO
-
-## 6.2 Grabadora de Práctica
-- [ ] **Grabadora de Práctica (`record`):**
-    - [ ] Grabación en formato M4A.
-    - [ ] Lógica de acompañamiento opcional (reproducir audio base mientras se graba).
-    - [ ] Gestión de permisos nativos.
-    - [ ] Exportación vía `share_plus`.
-    - [x] Escuchar `listChange` para actualizar lista de adoración automáticamente.
-    - [x] **Navegación automática:** Implementada reactivamente en `LiveScreen`.
-- [x] **Manejo de Estado de Conexión:** Offline, Online, Reconnecting con indicador visual.
+- [x] **Socket.io Client:** Implementado en `SocketService`.
+- [x] **Eventos:**
+    - [x] Escuchar `text_change` para navegación automática.
+    - [x] Escuchar `listChange` para actualizar lista de sesión.
+    - [x] **Carga Inicial:** Peticiones HTTP a `lastSong` y `songList` al conectar.
+- [x] **Interfaz LiveScreen:**
+    - [x] PageView para navegación entre cantos.
+    - [x] Buscador avanzado con filtrado por tonalidad (Chord Avatars).
+    - [x] Persistencia de Host e Instrumento sugerido.
+- [x] **Manejo de Estado de Conexión:** Indicador visual (punto de color) y auto-desconexión al salir.
 
 ## 7. Gestión de Listas (My Lists)
 - [x] **CRUD de listas locales:** Con acciones de swipe (Editar/Eliminar) estilo WhatsApp.
@@ -89,9 +86,15 @@
 - [x] **Filtrado por tonalidad:** Buscador integrado con selección de nota y Avatars.
 
 ## 8. UI/UX Mejorado
-- [ ] Rediseñar la navegación (GoRouter).
-- [ ] Modal de búsqueda global (SearchModal).
+- [x] Rediseñar la navegación (GoRouter).
+- [x] Modal de búsqueda global (Opcional).
 - [ ] Feedback visual (Snackbars, Activity Indicators).
+
+## 10. Sistema de Anotaciones (Notas)
+- [ ] **Capa de Dibujo:** Implementar un `CustomPainter` sobre el visor de partituras.
+- [ ] **Persistencia:** Guardar trazos por canción e instrumento en `SharedPreferences`.
+- [ ] **Herramientas:** Menú flotante con selección de colores, borrador y toggle de visibilidad.
+- [ ] **Sincronización de Zoom:** Asegurar que las notas se escalen y desplacen junto con la partitura.
 
 ## 9. Pruebas y Despliegue
 - [ ] Pruebas unitarias de servicios de lógica de nombres de archivos.
