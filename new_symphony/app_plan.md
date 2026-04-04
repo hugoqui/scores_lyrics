@@ -34,7 +34,7 @@
     - [ ] **Sincronización en Vivo:** (Conexión al Socket).
     - [ ] **Explorar/Descargar:** (Navegar por instrumentos y bajar partituras).
     - [ ] **Mis Listas:** (Práctica personal y carpetas locales).
-    - [ ] **Ajustes:** (Cambiar host, cerrar sesión).
+    - [x] **Ajustes:** (Cambiar host, cerrar sesión).
 - [x] **Diseño Responsivo:** Ajustar `GridView` para adaptarse a diferentes orientaciones y tamaños de pantalla.
 
 ## 4. Funcionalidades de Partituras (Módulo Reutilizable)
@@ -72,9 +72,14 @@
     - [ ] Flujo de exportación rápida vía `share_plus`.
 
 ## 6. Sincronización en Vivo (Live) - COMPLETADO
-- [x] **Socket.io Client:** Implementado en `SocketService`.
-- [x] **Eventos:**
-    - [ ] Escuchar `listChange` para actualizar lista de adoración (Pendiente UI).
+
+## 6.2 Grabadora de Práctica
+- [ ] **Grabadora de Práctica (`record`):**
+    - [ ] Grabación en formato M4A.
+    - [ ] Lógica de acompañamiento opcional (reproducir audio base mientras se graba).
+    - [ ] Gestión de permisos nativos.
+    - [ ] Exportación vía `share_plus`.
+    - [x] Escuchar `listChange` para actualizar lista de adoración automáticamente.
     - [x] **Navegación automática:** Implementada reactivamente en `LiveScreen`.
 - [x] **Manejo de Estado de Conexión:** Offline, Online, Reconnecting con indicador visual.
 

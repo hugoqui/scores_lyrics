@@ -10,6 +10,7 @@ import 'package:new_symphony/features/download/ui/instrument_selection_screen.da
 import 'package:new_symphony/features/home/ui/live_screen.dart';
 import 'package:new_symphony/features/live/providers/live_provider.dart';
 import 'package:new_symphony/features/my_lists/ui/my_lists_screen.dart';
+import 'package:new_symphony/features/settings/ui/settings_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -33,7 +34,10 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // Navegar a ajustes
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
             },
           ),
         ],
@@ -105,10 +109,15 @@ class HomeScreen extends ConsumerWidget {
   }
 
   void _showConnectDialog(BuildContext context, WidgetRef ref) {
-    final lastHost = ref.read(liveProvider).lastHost;
+    final liveState = ref.read(liveProvider);
+    final lastHost = liveState.lastHost;
+    final lastInstrumentPath = liveState.lastInstrumentPath;
     final controller = TextEditingController(text: lastHost);
     final instruments = getIt<InstrumentsService>().instruments();
-    Instrument? selectedInstrument;
+
+    Instrument? selectedInstrument = lastInstrumentPath != null
+        ? instruments.where((i) => i.path == lastInstrumentPath).firstOrNull
+        : null;
 
     showDialog(
       context: context,
@@ -154,7 +163,7 @@ class HomeScreen extends ConsumerWidget {
               onPressed: selectedInstrument == null ? null : () {
                 final host = controller.text.trim();
                 if (host.isNotEmpty) {
-                  ref.read(liveProvider.notifier).connect(host);
+                  ref.read(liveProvider.notifier).connect(host, selectedInstrument!.path);
                   Navigator.pop(context);
                   Navigator.push(
                     context,

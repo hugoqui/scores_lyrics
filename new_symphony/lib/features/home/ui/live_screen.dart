@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
-import 'package:new_symphony/core/constants/app_styles.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/data/models/instrument.dart';
 import 'package:new_symphony/data/repositories/score_repository.dart';

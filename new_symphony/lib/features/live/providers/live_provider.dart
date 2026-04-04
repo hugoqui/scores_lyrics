@@ -11,6 +11,7 @@ class LiveState {
   final String lastHost;
   final List<String> liveSongList;
   final int currentIndex;
+  final String? lastInstrumentPath;
 
   LiveState({
     required this.status,
@@ -18,6 +19,7 @@ class LiveState {
     required this.lastHost,
     this.liveSongList = const [],
     this.currentIndex = 0,
+    this.lastInstrumentPath,
   });
 
   LiveState copyWith({
@@ -26,6 +28,7 @@ class LiveState {
     String? lastHost,
     List<String>? liveSongList,
     int? currentIndex,
+    String? lastInstrumentPath,
   }) {
     return LiveState(
       status: status ?? this.status,
@@ -33,6 +36,7 @@ class LiveState {
       lastHost: lastHost ?? this.lastHost,
       liveSongList: liveSongList ?? this.liveSongList,
       currentIndex: currentIndex ?? this.currentIndex,
+      lastInstrumentPath: lastInstrumentPath ?? this.lastInstrumentPath,
     );
   }
 }
@@ -49,6 +53,7 @@ class LiveNotifier extends StateNotifier<LiveState> {
       : super(LiveState(
           status: 'offline',
           lastHost: _prefs.getString('last_live_host') ?? '192.168.5.1:3014',
+          lastInstrumentPath: _prefs.getString('last_live_instrument_path'),
         )) {
     _listenToSocket();
   }
@@ -70,7 +75,7 @@ class LiveNotifier extends StateNotifier<LiveState> {
     });
   }
 
-  void connect(String host) {
+  void connect(String host, String instrumentPath) {
     // Aseguramos que el host tenga el protocolo http
     String formattedHost = host.trim();
     if (!formattedHost.startsWith('http')) {
@@ -78,7 +83,9 @@ class LiveNotifier extends StateNotifier<LiveState> {
     }
     
     _prefs.setString('last_live_host', host.trim());
-    state = state.copyWith(lastHost: host.trim());
+    _prefs.setString('last_live_instrument_path', instrumentPath);
+    
+    state = state.copyWith(lastHost: host.trim(), lastInstrumentPath: instrumentPath);
     _socketService.connect(formattedHost);
   }
 

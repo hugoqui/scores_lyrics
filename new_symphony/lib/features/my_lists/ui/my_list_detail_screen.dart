@@ -61,7 +61,7 @@ class MyListDetailScreen extends ConsumerWidget {
                       side: BorderSide(color: AppColors.grey.withOpacity(0.2)),
                     ),
                     child: ListTile(
-                      leading: chord != null ? _ChordAvatar(chord: chord) : null,
+                      leading: _ChordAvatar(chord: chord),
                       title: Text(title),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
