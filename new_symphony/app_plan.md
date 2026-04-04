@@ -71,12 +71,12 @@
     - [ ] Gestión de permisos nativos y archivos temporales.
     - [ ] Flujo de exportación rápida vía `share_plus`.
 
-## 6. Sincronización en Vivo (Live)
-- [ ] **Socket.io Client:** Implementar conexión persistente.
-- [ ] **Eventos:**
-    - [ ] Escuchar `listChange` para actualizar lista de adoración.
-    - [ ] **Navegación automática:** Actualizar `currentSong` y `scorePath` mediante `effect` reactivo al recibir cambio del socket.
-- [ ] **Manejo de Estado de Conexión:** Offline, Online, Reconnecting.
+## 6. Sincronización en Vivo (Live) - COMPLETADO
+- [x] **Socket.io Client:** Implementado en `SocketService`.
+- [x] **Eventos:**
+    - [ ] Escuchar `listChange` para actualizar lista de adoración (Pendiente UI).
+    - [x] **Navegación automática:** Implementada reactivamente en `LiveScreen`.
+- [x] **Manejo de Estado de Conexión:** Offline, Online, Reconnecting con indicador visual.
 
 ## 7. Gestión de Listas (My Lists)
 - [x] **CRUD de listas locales:** Con acciones de swipe (Editar/Eliminar) estilo WhatsApp.
