@@ -29,10 +29,26 @@ class MyListsNotifier extends StateNotifier<List<MyList>> {
     _prefs.setString(_storageKey, encoded);
   }
 
+  String generateDefaultName() {
+    int count = state.length + 1;
+    String name = 'Lista $count';
+    while (state.any((l) => l.name.toLowerCase() == name.toLowerCase())) {
+      count++;
+      name = 'Lista $count';
+    }
+    return name;
+  }
+
+  bool isNameAvailable(String name, {String? excludeId}) {
+    return !state.any((l) => 
+      l.name.toLowerCase() == name.trim().toLowerCase() && l.id != excludeId
+    );
+  }
+
   void createList(String name, String instrument) {
     final newList = MyList(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name,
+      name: name.trim(),
       instrument: instrument,
     );
     state = [...state, newList];
@@ -42,7 +58,7 @@ class MyListsNotifier extends StateNotifier<List<MyList>> {
   void renameList(String id, String newName) {
     state = [
       for (final list in state)
-        if (list.id == id) list.copyWith(name: newName) else list
+        if (list.id == id) list.copyWith(name: newName.trim()) else list
     ];
     _saveLists();
   }
@@ -52,11 +68,16 @@ class MyListsNotifier extends StateNotifier<List<MyList>> {
     _saveLists();
   }
 
-  void addSongToList(String listId, String songTitle) {
+  void addSongsToList(String listId, List<String> titles) {
     state = [
       for (final list in state)
-        if (list.id == listId && !list.songTitles.contains(songTitle))
-          list.copyWith(songTitles: [...list.songTitles, songTitle])
+        if (list.id == listId)
+          list.copyWith(
+            songTitles: {
+              ...list.songTitles,
+              ...titles,
+            }.toList(),
+          )
         else
           list
     ];

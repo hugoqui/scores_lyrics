@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
+import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/features/my_lists/providers/my_lists_provider.dart';
 import 'package:new_symphony/features/practice/providers/practice_provider.dart';
 import 'package:new_symphony/features/score/ui/score_screen.dart';
@@ -22,16 +23,19 @@ class MyListDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(myList.name),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            onPressed: () => _showAddSongPicker(context, ref, myList.instrument, availableSongsAsync),
-          ),
-        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        onPressed: () => _showAddSongPicker(context, ref, myList.instrument, availableSongsAsync),
+        child: const Icon(Icons.add),
       ),
       body: myList.songTitles.isEmpty
           ? const Center(child: Text('La lista está vacía'))
           : ListView.builder(
+              padding: const EdgeInsets.all(AppDimensions.paddingSmall),
               itemCount: myList.songTitles.length,
               itemBuilder: (context, index) {
                 final title = myList.songTitles[index];
@@ -47,30 +51,37 @@ class MyListDetailScreen extends ConsumerWidget {
                   onDismissed: (_) {
                     ref.read(myListsProvider.notifier).removeSongFromList(listId, title);
                   },
-                  child: ListTile(
-                    title: Text(title),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // Navegar al visor de partitura con el contexto de la lista
-                      availableSongsAsync.whenData((allSongs) {
-                        final songsInList = allSongs.where((s) => myList.songTitles.contains(s.title)).toList();
-                        final songIndex = songsInList.indexWhere((s) => s.title == title);
-                        
-                        final instrumentObj = getIt<InstrumentsService>().instruments()
-                            .firstWhere((i) => i.path == myList.instrument);
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
+                      side: BorderSide(color: AppColors.grey.withOpacity(0.2)),
+                    ),
+                    child: ListTile(
+                      title: Text(title),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        // Navegar al visor de partitura con el contexto de la lista
+                        availableSongsAsync.whenData((allSongs) {
+                          final songsInList = allSongs.where((s) => myList.songTitles.contains(s.title)).toList();
+                          final songIndex = songsInList.indexWhere((s) => s.title == title);
+                          
+                          final instrumentObj = getIt<InstrumentsService>().instruments()
+                              .firstWhere((i) => i.path == myList.instrument);
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ScoreScreen(
-                              instrument: instrumentObj,
-                              songs: songsInList,
-                              initialIndex: songIndex,
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ScoreScreen(
+                                instrument: instrumentObj,
+                                songs: songsInList,
+                                initialIndex: songIndex,
+                              ),
                             ),
-                          ),
-                        );
-                      });
-                    },
+                          );
+                        });
+                      },
+                    ),
                   ),
                 );
               },
@@ -80,30 +91,79 @@ class MyListDetailScreen extends ConsumerWidget {
 
   void _showAddSongPicker(BuildContext context, WidgetRef ref, String instrument, AsyncValue<List<PracticeSong>> songsAsync) {
     songsAsync.whenData((songs) {
+      List<String> selectedTitles = [];
+      String searchQuery = "";
+
       showModalBottomSheet(
         context: context,
-        builder: (context) => Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Agregar a la lista', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: songs.length,
-                itemBuilder: (context, index) {
-                  final song = songs[index];
-                  return ListTile(
-                    title: Text(song.title),
-                    onTap: () {
-                      ref.read(myListsProvider.notifier).addSongToList(listId, song.title);
-                      Navigator.pop(context);
-                    },
-                  );
-                },
+        isScrollControlled: true,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setModalState) {
+            final filteredSongs = songs.where((s) => 
+              s.title.toLowerCase().contains(searchQuery.toLowerCase())
+            ).toList();
+
+            return DraggableScrollableSheet(
+              initialChildSize: 0.8,
+              minChildSize: 0.5,
+              maxChildSize: 0.95,
+              expand: false,
+              builder: (_, scrollController) => Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        const Text('Agregar Cantos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: selectedTitles.isEmpty ? null : () {
+                            ref.read(myListsProvider.notifier).addSongsToList(listId, selectedTitles);
+                            Navigator.pop(context);
+                          },
+                          child: Text('Agregar (${selectedTitles.length})'),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        hintText: 'Buscar canto...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (val) => setModalState(() => searchQuery = val),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: filteredSongs.length,
+                      itemBuilder: (context, index) {
+                        final song = filteredSongs[index];
+                        final isSelected = selectedTitles.contains(song.title);
+                        return CheckboxListTile(
+                          title: Text(song.title),
+                          value: isSelected,
+                          onChanged: (val) {
+                            setModalState(() {
+                              if (val == true) {
+                                selectedTitles.add(song.title);
+                              } else {
+                                selectedTitles.remove(song.title);
+                              }
+                            });
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            );
+          },
         ),
       );
     });

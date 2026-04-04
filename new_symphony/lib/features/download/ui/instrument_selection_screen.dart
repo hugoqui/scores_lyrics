@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:new_symphony/core/services/instrument_grid.dart';
+import 'package:new_symphony/core/widgets/instrument_grid.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/core/services/instruments_service.dart';
 import 'package:new_symphony/features/download/ui/download_list_screen.dart';

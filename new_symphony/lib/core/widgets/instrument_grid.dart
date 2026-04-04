@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/data/models/instrument.dart';
+import 'package:new_symphony/features/download/providers/download_provider.dart';
 
-class InstrumentGrid extends StatelessWidget {
+class InstrumentGrid extends ConsumerWidget {
   final List<Instrument> instruments;
   final Function(Instrument) onInstrumentSelected;
 
@@ -14,46 +16,49 @@ class InstrumentGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final bool isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Observamos la lista global de archivos descargados
+    final allDownloaded = ref.watch(downloadedFilesProvider);
 
-    return GridView.builder(
+    return ListView.separated(
       padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 200, // Tamaño ideal para que quepan varios en horizontal
-        mainAxisExtent: isPortrait ? 100 : 120, 
-        crossAxisSpacing: AppDimensions.paddingMedium,
-        mainAxisSpacing: AppDimensions.paddingMedium,
-      ),
       itemCount: instruments.length,
+      separatorBuilder: (context, index) => const Divider(
+        height: 1,
+        indent: 72, // Alinea el divisor con el inicio del texto
+        color: AppColors.lightGrey,
+      ),
       itemBuilder: (context, index) {
         final instrument = instruments[index];
-        return Card(
-          child: InkWell(
-            onTap: () => onInstrumentSelected(instrument),
-            borderRadius: BorderRadius.circular(12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Usamos la imagen del asset con un color de tinte dorado si es necesario, 
-                // o la imagen original si ya tiene color.
-                Image.asset(
-                  instrument.iconPath,
-                  height: 40,
-                  errorBuilder: (context, error, stackTrace) => 
-                      const Icon(Icons.music_note, color: AppColors.accent),
-                ),
-                const SizedBox(height: AppDimensions.spacingSmall),
-                Text(
-                  instrument.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+
+        // Filtramos desde la lista reactiva del provider
+        final int downloadedCount = allDownloaded
+            .where((f) => f.instrument == instrument.path)
+            .length;
+
+        return ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: AppDimensions.paddingSmall,
+            horizontal: AppDimensions.paddingMedium,
           ),
+          leading: Image.asset(
+            instrument.iconPath,
+            width: 48,
+            height: 48,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.music_note, color: AppColors.accent, size: 32),
+          ),
+          title: Text(
+            instrument.name,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          subtitle: Text(
+            '$downloadedCount partituras descargadas',
+            style: const TextStyle(color: AppColors.grey, fontSize: 13),
+          ),
+          trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.grey),
+          onTap: () => onInstrumentSelected(instrument),
         );
       },
     );
