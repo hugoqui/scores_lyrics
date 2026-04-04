@@ -3,6 +3,7 @@ import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/constants/app_styles.dart';
 import 'package:new_symphony/features/download/ui/instrument_selection_screen.dart';
+import 'package:new_symphony/features/my_lists/ui/my_lists_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -62,7 +63,10 @@ class HomeScreen extends StatelessWidget {
                     title: 'Mis Listas',
                     icon: Icons.list,
                     onTap: () {
-                      // Navegar a listas locales
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const MyListsScreen()),
+                      );
                     },
                   ),
                   _MenuCard(
