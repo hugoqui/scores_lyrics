@@ -91,9 +91,9 @@
 - [ ] Feedback visual (Snackbars, Activity Indicators).
 
 ## 10. Sistema de Anotaciones (Notas)
-- [ ] **Capa de Dibujo:** Implementar un `CustomPainter` sobre el visor de partituras.
-- [ ] **Persistencia:** Guardar trazos por canción e instrumento en `SharedPreferences`.
-- [ ] **Herramientas:** Menú flotante con selección de colores, borrador y toggle de visibilidad.
+- [x] **Capa de Dibujo:** Implementar un `CustomPainter` sobre el visor de partituras.
+- [x] **Persistencia:** Guardar trazos por canción e instrumento en `SharedPreferences`.
+- [x] **Herramientas:** Menú flotante con selección de colores, borrador y toggle de visibilidad.
 - [ ] **Sincronización de Zoom:** Asegurar que las notas se escalen y desplacen junto con la partitura.
 
 ## 9. Pruebas y Despliegue
