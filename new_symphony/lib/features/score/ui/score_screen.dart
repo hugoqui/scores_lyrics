@@ -71,12 +71,12 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
       appBar: state.isUiVisible
           ? AppBar(
               title: Text(currentSong.title),
-              // Cambiamos a transparente o color sólido según el diseño
               backgroundColor: AppColors.primary,
             )
           : null,
       body: Stack(
         children: [
+          // 1. Capa de la Partitura (Fondo)
           PageView.builder(
             controller: _pageController,
             itemCount: widget.songs.length,
@@ -90,42 +90,49 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
             },
             itemBuilder: (context, index) {
               final song = widget.songs[index];
-              // Determinar qué archivo mostrar basado en el modo y disponibilidad
               String fileToShow = song.melodyFileName;
               if (state.isArrangementMode && song.hasArrangementDownloaded) {
                 fileToShow = song.arrangementFileName!;
               }
 
-              return Align(
-                alignment: Alignment.topCenter,
-                child: ScoreImageView(
-                  instrument: widget.instrument.path,
-                  fileName: fileToShow,
-                  onTap: () => ref.read(scoreProvider.notifier).toggleUiVisibility(),
-                  player: state.isUiVisible 
-                    ? FloatingPlayerCard(
-                        isArrangementScore: state.isArrangementMode && currentSong.hasArrangementDownloaded,
-                        isArrangementAudio: state.isAudioArrangement,
-                        isLoopEnabled: state.isLoopEnabled,
-                        playSpeed: state.playSpeed,
-                        position: state.position,
-                        duration: state.duration,
-                        onToggleAudioMode: () => ref.read(scoreProvider.notifier).toggleAudioMode(
-                          widget.instrument.path, 
-                          currentSong
-                        ),
-                        onToggleScoreMode: () => ref.read(scoreProvider.notifier).toggleScoreMode(),
-                        onToggleLoop: () => ref.read(scoreProvider.notifier).toggleLoop(),
-                        onChangeSpeed: (s) => ref.read(scoreProvider.notifier).setSpeed(s),
-                        onSeek: (d) => ref.read(scoreProvider.notifier).seek(d),
-                        onPlayPause: () => ref.read(scoreProvider.notifier).playPause(),
-                        isPlaying: state.isPlaying,
-                      )
-                    : null,
-                ),
+              return ScoreImageView(
+                instrument: widget.instrument.path,
+                fileName: fileToShow,
+                onTap: () => ref.read(scoreProvider.notifier).toggleUiVisibility(),
+                // Importante: Quita el parámetro 'player' de ScoreImageView si lo tenías ahí
               );
             },
           ),
+
+          // 2. Capa del Reproductor (Encima)
+          if (state.isUiVisible)
+            SafeArea(
+              left: false,
+              bottom: false,
+              child: Align(
+                alignment: MediaQuery.of(context).orientation == Orientation.landscape
+                    ? Alignment.centerRight
+                    : Alignment.bottomCenter,
+                child: FloatingPlayerCard(
+                  isArrangementScore: state.isArrangementMode && currentSong.hasArrangementDownloaded,
+                  isArrangementAudio: state.isAudioArrangement,
+                  isLoopEnabled: state.isLoopEnabled,
+                  playSpeed: state.playSpeed,
+                  position: state.position,
+                  duration: state.duration,
+                  onToggleAudioMode: () => ref.read(scoreProvider.notifier).toggleAudioMode(
+                        widget.instrument.path,
+                        currentSong,
+                      ),
+                  onToggleScoreMode: () => ref.read(scoreProvider.notifier).toggleScoreMode(),
+                  onToggleLoop: () => ref.read(scoreProvider.notifier).toggleLoop(),
+                  onChangeSpeed: (s) => ref.read(scoreProvider.notifier).setSpeed(s),
+                  onSeek: (d) => ref.read(scoreProvider.notifier).seek(d),
+                  onPlayPause: () => ref.read(scoreProvider.notifier).playPause(),
+                  isPlaying: state.isPlaying,
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -42,10 +42,16 @@ class FloatingPlayerCard extends StatelessWidget {
 
     return Container(
       constraints: isLandscape
-          ? const BoxConstraints(maxHeight: 480, maxWidth: 75) // Vertical layout constraints
-          : const BoxConstraints(maxWidth: 450), // Horizontal layout constraints
+          ? BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.9,
+              maxWidth: 65, // Reducido de 80 a 65 para que sea más esbelto
+            )
+          : const BoxConstraints(maxWidth: 450),
       margin: isLandscape
-          ? const EdgeInsets.symmetric(vertical: AppDimensions.paddingMedium, horizontal: 10)
+          ? const EdgeInsets.symmetric(
+              vertical: AppDimensions.paddingMedium,
+              horizontal: 4, // Reducido para que no flote tan lejos del borde
+            )
           : const EdgeInsets.all(AppDimensions.paddingMedium),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -60,47 +66,57 @@ class FloatingPlayerCard extends StatelessWidget {
               border: Border.all(color: Colors.white.withOpacity(0.2)),
             ),
             child: isLandscape
-                ? Column( // Vertical layout for landscape
+                ? Column(
+                    // Vertical layout for landscape
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Botón Play/Pause
+                      // Botón Play/Pause siempre visible
                       IconButton(
                         iconSize: 40,
                         padding: EdgeInsets.zero,
                         icon: Icon(
-                            isPlaying
-                                ? Icons.pause_circle_filled
-                                : Icons.play_circle_filled,
-                            color: Colors.white),
+                          isPlaying
+                              ? Icons.pause_circle_filled
+                              : Icons.play_circle_filled,
+                          color: Colors.white,
+                        ),
                         onPressed: onPlayPause,
                       ),
-                      const SizedBox(height: 8),
-                      // Barra de Progreso (Seek Bar) - Rotada
-                      Expanded(
-                        child: RotatedBox(
-                          quarterTurns: 3, // Rotar 270 grados para que sea vertical
-                          child: SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              trackHeight: 2,
-                              thumbShape: const RoundSliderThumbShape(
-                                  enabledThumbRadius: 6),
-                              overlayShape: const RoundSliderOverlayShape(
-                                  overlayRadius: 14),
-                            ),
-                            child: Slider(
-                              value: position.inSeconds.toDouble(),
-                              max: duration.inSeconds.toDouble() > 0
-                                  ? duration.inSeconds.toDouble()
-                                  : 1.0,
-                              activeColor: AppColors.accent,
-                              inactiveColor: Colors.white24,
-                              onChanged: (value) =>
-                                  onSeek(Duration(seconds: value.toInt())),
+                      
+                      // Si la altura es mayor a 500px (Tablet), mostramos la barra de progreso
+                      if (MediaQuery.of(context).size.height > 500) ...[
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: RotatedBox(
+                            quarterTurns: 3, // Rotar para que sea vertical
+                            child: SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 2,
+                                thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 6,
+                                ),
+                                overlayShape: const RoundSliderOverlayShape(
+                                  overlayRadius: 14,
+                                ),
+                              ),
+                              child: Slider(
+                                value: position.inSeconds.toDouble(),
+                                max: duration.inSeconds.toDouble() > 0
+                                    ? duration.inSeconds.toDouble()
+                                    : 1.0,
+                                activeColor: AppColors.accent,
+                                inactiveColor: Colors.white24,
+                                onChanged: (value) =>
+                                    onSeek(Duration(seconds: value.toInt())),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
+                      ] else 
+                        // En móviles con poca altura, solo agregamos un pequeño espacio flexible
+                        const SizedBox(height: 12),
+
                       // Control de Velocidad
                       _buildActionButton(
                         icon: Icons.speed,
@@ -108,29 +124,32 @@ class FloatingPlayerCard extends StatelessWidget {
                         onTap: () => _showSpeedMenu(context),
                         isVertical: true,
                       ),
+                      
                       // Toggle de Partitura (Melodía / Arreglo)
                       _buildActionButton(
                         icon: isArrangementScore
                             ? Icons.auto_awesome_motion
                             : Icons.description,
-                        label: isArrangementScore ? 'Arr.' : 'Mel.', // Labels más cortos para vertical
+                        label: isArrangementScore ? 'Arr.' : 'Mel.',
                         onTap: onToggleScoreMode,
                         isActive: isArrangementScore,
                         isVertical: true,
                       ),
-                      // Selector de Audio (Solo si la partitura es Arreglo)
+                      
+                      // Selector de Audio
                       Opacity(
                         opacity: isArrangementScore ? 1.0 : 0.3,
                         child: _buildActionButton(
                           icon: isArrangementAudio
                               ? Icons.headphones
                               : Icons.person,
-                          label: isArrangementAudio ? 'Arr.' : 'Base', // Labels más cortos para vertical
+                          label: isArrangementAudio ? 'Arr.' : 'Base',
                           onTap: isArrangementScore ? onToggleAudioMode : () {},
                           isActive: isArrangementAudio && isArrangementScore,
                           isVertical: true,
                         ),
                       ),
+                      
                       // Botón Loop
                       _buildActionButton(
                         icon: Icons.repeat,
@@ -141,23 +160,30 @@ class FloatingPlayerCard extends StatelessWidget {
                       ),
                     ],
                   )
-                : Column( // Horizontal layout for portrait
+                : Column(
+                    // Horizontal layout for portrait
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Barra de Progreso (Seek Bar)
                       Row(
                         children: [
-                          Text(_formatDuration(position),
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 10)),
+                          Text(
+                            _formatDuration(position),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 10,
+                            ),
+                          ),
                           Expanded(
                             child: SliderTheme(
                               data: SliderTheme.of(context).copyWith(
                                 trackHeight: 2,
                                 thumbShape: const RoundSliderThumbShape(
-                                    enabledThumbRadius: 6),
+                                  enabledThumbRadius: 6,
+                                ),
                                 overlayShape: const RoundSliderOverlayShape(
-                                    overlayRadius: 14),
+                                  overlayRadius: 14,
+                                ),
                               ),
                               child: Slider(
                                 value: position.inSeconds.toDouble(),
@@ -167,13 +193,17 @@ class FloatingPlayerCard extends StatelessWidget {
                                 activeColor: AppColors.accent,
                                 inactiveColor: Colors.white24,
                                 onChanged: (value) =>
-                                  onSeek(Duration(seconds: value.toInt())),
+                                    onSeek(Duration(seconds: value.toInt())),
                               ),
                             ),
                           ),
-                          Text(_formatDuration(duration),
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 10)),
+                          Text(
+                            _formatDuration(duration),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 10,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 5),
@@ -203,10 +233,11 @@ class FloatingPlayerCard extends StatelessWidget {
                             iconSize: 44,
                             padding: EdgeInsets.zero,
                             icon: Icon(
-                                isPlaying
-                                    ? Icons.pause_circle_filled
-                                    : Icons.play_circle_filled,
-                                color: Colors.white),
+                              isPlaying
+                                  ? Icons.pause_circle_filled
+                                  : Icons.play_circle_filled,
+                              color: Colors.white,
+                            ),
                             onPressed: onPlayPause,
                           ),
                           // Selector de Audio (Solo si la partitura es Arreglo)
@@ -222,7 +253,8 @@ class FloatingPlayerCard extends StatelessWidget {
                               onTap: isArrangementScore
                                   ? onToggleAudioMode
                                   : () {},
-                              isActive: isArrangementAudio && isArrangementScore,
+                              isActive:
+                                  isArrangementAudio && isArrangementScore,
                             ),
                           ),
                           // Botón Loop
@@ -265,10 +297,15 @@ class FloatingPlayerCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                color: isActive ? AppColors.accent : Colors.white, size: 24),
-            Text(label,
-                style: const TextStyle(color: Colors.white, fontSize: 10)),
+            Icon(
+              icon,
+              color: isActive ? AppColors.accent : Colors.white,
+              size: 24,
+            ),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white, fontSize: 10),
+            ),
           ],
         ),
       ),
@@ -282,13 +319,15 @@ class FloatingPlayerCard extends StatelessWidget {
       builder: (context) => ListView(
         shrinkWrap: true,
         children: speeds
-            .map((s) => ListTile(
-                  title: Text('${s}x'),
-                  onTap: () {
-                    onChangeSpeed(s);
-                    Navigator.pop(context);
-                  },
-                ))
+            .map(
+              (s) => ListTile(
+                title: Text('${s}x'),
+                onTap: () {
+                  onChangeSpeed(s);
+                  Navigator.pop(context);
+                },
+              ),
+            )
             .toList(),
       ),
     );
