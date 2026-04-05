@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
-import 'package:new_symphony/core/constants/app_styles.dart';
 import 'package:new_symphony/features/auth/providers/auth_provider.dart';
 import 'package:new_symphony/features/home/ui/home_screen.dart';
 
@@ -67,44 +67,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLarge),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Bienvenido a Symphony',
-              style: AppStyles.headlineLarge,
-              textAlign: TextAlign.left,
-            ),
-            const SizedBox(height: AppDimensions.paddingExtraLarge),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email o Usuario',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: AppDimensions.paddingMedium),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Contraseña',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(height: AppDimensions.paddingLarge),
-            authState.isLoading 
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: _onLogin,
-                    child: const Text('Iniciar Sesión'),
+      backgroundColor: AppColors.backgroundLight,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppDimensions.paddingLarge),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Logo Elegante
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: AppDimensions.paddingExtraLarge),
+                
+                const Text(
+                  'Inicia sesión para continuar',
+                  style: TextStyle(color: AppColors.textSecondary),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email o Usuario',
+                    prefixIcon: Icon(Icons.person_outline, color: AppColors.accent),
                   ),
-          ],
-        ),
-      ),
+                ),
+                const SizedBox(height: AppDimensions.paddingMedium),
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Contraseña',
+                    prefixIcon: Icon(Icons.lock_outline, color: AppColors.accent),
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 40),
+                authState.isLoading 
+                    ? const Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: _onLogin,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text('ENTRAR'),
+                      ),
+              ]),
+            ),
+          ),
+        ),      
     );
   }
 }

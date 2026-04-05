@@ -118,6 +118,8 @@
 
 ## 9. Pruebas y Despliegue
 - [ ] Pruebas unitarias de servicios de lógica de nombres de archivos.
+- [x] **Configurar Identificadores:** Establecer `org.nativescript.symphony` en Gradle y Xcode.
+- [ ] **Icono de la App:** Generar iconos para Android e iOS usando `assets/icons/icon_app.png`.
 - [ ] Configuración de permisos (Micrófono, Almacenamiento, Internet).
 - [ ] Build para Android (App Bundle).
 - [ ] Build para iOS.

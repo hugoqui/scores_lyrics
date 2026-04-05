@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
+import 'package:new_symphony/features/auth/ui/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -39,11 +41,17 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.all(AppDimensions.paddingLarge),
-            child: Text(
-              'Versión 1.0.0',
-              style: TextStyle(color: AppColors.grey, fontSize: 12),
+          Padding(
+            padding: const EdgeInsets.all(AppDimensions.paddingLarge),
+            child: FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                final version = snapshot.data?.version ?? '...';
+                return Text(
+                  'Versión $version',
+                  style: const TextStyle(color: AppColors.grey, fontSize: 12),
+                );
+              },
             ),
           ),
         ],
@@ -95,8 +103,11 @@ class SettingsScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               getIt<SharedPreferences>().remove('token');
-              // Navegamos al inicio (Login) eliminando el historial de navegación
-              Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              // Navegamos al Login eliminando todo el stack de pantallas anterior
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Cerrar Sesión', style: TextStyle(color: Colors.white)),
