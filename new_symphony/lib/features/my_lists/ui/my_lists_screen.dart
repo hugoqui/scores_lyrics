@@ -96,7 +96,15 @@ class MyListsScreen extends ConsumerWidget {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+            ),
             ElevatedButton(
               onPressed: () {
                 final name = nameController.text.trim();
@@ -255,12 +263,13 @@ class _SlidableListItemState extends State<_SlidableListItem> {
             child: Transform.translate(
               offset: Offset(_offset, 0),
               child: Card(
+                color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF313542): null,                
                 margin: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
                   side: BorderSide(color: AppColors.grey.withOpacity(0.2)),
                 ),
-                child: ListTile(
+                child: ListTile(                  
                   leading: const Icon(Icons.playlist_play, color: AppColors.accent),
                   title: Text(
                     widget.name, 

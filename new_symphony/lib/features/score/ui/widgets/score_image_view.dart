@@ -76,8 +76,7 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
   @override
   Widget build(BuildContext context) {
     final annotationState = ref.watch(annotationProvider(_noteKey));
-    final orientation = MediaQuery.of(context).orientation;
-    final isLandscape = orientation == Orientation.landscape;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return FutureBuilder<File>(
       future: _getScoreFile(),
@@ -118,32 +117,23 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
                   ),
                 ),
               ),
-              
               // La barra de herramientas (Lápiz)
-              // Ajustamos la posición para que esté centrada verticalmente en landscape
-              Align(
-                alignment: isLandscape ? Alignment.centerLeft : Alignment.topRight,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    top: isLandscape ? 0 : 100, // En vertical bajarla un poco de la AppBar
-                    left: isLandscape ? 4 : 0,  // Pegada a la izquierda en landscape
-                    right: isLandscape ? 0 : 10, // Un poco de margen en vertical
-                  ),
-                  child: AnnotationToolbar(noteKey: _noteKey),
-                ),
+              Positioned(
+                top: 100,
+                left: isLandscape ? 10 : null,
+                right: isLandscape ? null : 10,
+                child: AnnotationToolbar(noteKey: _noteKey),
               ),
-
               // El reproductor (Audio)
               if (widget.player != null)
-                Align(
-                  alignment: isLandscape ? Alignment.centerRight : Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: isLandscape ? 4 : 0, // Pegado a la derecha en landscape
-                      bottom: isLandscape ? 0 : 10, // Margen abajo en vertical
-                    ),
-                    child: widget.player!,
-                  ),
+                Positioned(
+                  top: isLandscape ? 100 : null,
+                  bottom: isLandscape ? null : 0,
+                  left: isLandscape ? null : 0,
+                  right: isLandscape ? 10 : 0,
+                  child: isLandscape 
+                    ? widget.player!
+                    : Center(child: widget.player!),
                 ),
             ],
           ),

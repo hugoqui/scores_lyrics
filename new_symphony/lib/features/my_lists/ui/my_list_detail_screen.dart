@@ -55,6 +55,7 @@ class MyListDetailScreen extends ConsumerWidget {
                     ref.read(myListsProvider.notifier).removeSongFromList(listId, title);
                   },
                   child: Card(
+                    color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF313542): null,                
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),

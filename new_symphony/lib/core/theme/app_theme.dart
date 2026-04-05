@@ -112,6 +112,21 @@ class AppTheme {
         ),
       ),
     ),
+    // Dentro de AppTheme.darkTheme
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.primaryLight.withOpacity(0.5), // Fondo sutil azulado
+      labelStyle: const TextStyle(color: AppColors.grey),
+      hintStyle: const TextStyle(color: AppColors.grey),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.white10),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: AppColors.accent), // Dorado al escribir
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
     // Add more dark theme properties as needed
   );
 }
