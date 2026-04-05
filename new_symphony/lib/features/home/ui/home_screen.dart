@@ -154,7 +154,9 @@ class HomeScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child:  Text('Cancelar', style: TextStyle(      
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),),
             ),
             ElevatedButton(
               onPressed: selectedInstrument == null ? null : () {
