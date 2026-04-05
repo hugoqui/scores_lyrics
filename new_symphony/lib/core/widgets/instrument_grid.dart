@@ -47,6 +47,12 @@ class InstrumentGrid extends ConsumerWidget {
             width: 48,
             height: 48,
             fit: BoxFit.contain,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.accentLight // O AppColors.accent si prefieres dorado
+                  : AppColors.primary, // Color original o primario en light
+              BlendMode.srcIn,
+            ),
             placeholderBuilder: (BuildContext context) =>
                 const Icon(Icons.music_note, color: AppColors.accent, size: 32),
           ),

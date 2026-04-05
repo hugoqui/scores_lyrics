@@ -52,7 +52,7 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingMedium),
-            child: Row(
+            child: Row(              
               children: [
                 ChoiceChip(
                   label: const Text("Todos"),
@@ -97,6 +97,7 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
                     final chord = getIt<ScoreRepository>().getChordForSongSync(song.title, widget.instrument.path);
                     
                     return Card(
+                      color: Theme.of(context).brightness == Brightness.dark ? AppColors.lightGrey.withOpacity(0.1): null,
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
@@ -142,8 +143,8 @@ class _ChordAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 32,
-      height: 32,
+      width: 42,
+      height: 42,
       decoration: BoxDecoration(
         color: AppColors.accent.withOpacity(0.1),
         shape: BoxShape.circle,
@@ -155,7 +156,7 @@ class _ChordAvatar extends StatelessWidget {
           style: const TextStyle(
             color: AppColors.accent,
             fontWeight: FontWeight.bold,
-            fontSize: 11,
+            fontSize: 16,
           ),
         ),
       ),

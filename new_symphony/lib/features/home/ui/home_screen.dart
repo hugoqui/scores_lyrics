@@ -26,6 +26,7 @@ class HomeScreen extends ConsumerWidget {
     // Si el ancho de la columna supera los 500px, el Grid creará automáticamente otra columna.
     // Esto actúa como el "Wrap" que mencionabas pero manteniendo alineación.
     const double maxColumnWidth = 500;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -44,13 +45,9 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          const SizedBox(height: AppDimensions.paddingExtraLarge),
-          Image.asset(
-            'assets/images/logo.png',
-            height: 100,
-            fit: BoxFit.contain,
-          ),
           const SizedBox(height: AppDimensions.paddingMedium),
+          const SizedBox(height: AppDimensions.paddingExtraLarge),
+          Image.asset('assets/images/logo.png',height: 100,fit: BoxFit.contain,color: isDarkMode ? AppColors.white : null),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(AppDimensions.paddingMedium),
@@ -196,6 +193,7 @@ class _MenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card( // El estilo ahora viene del CardTheme definido en AppTheme
+      color: Theme.of(context).brightness == Brightness.dark ? AppColors.lightGrey.withOpacity(0.1): null,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
@@ -210,7 +208,7 @@ class _MenuCard extends StatelessWidget {
                   children: [
                     Icon(icon, size: 28, color: AppColors.accent),
                     const SizedBox(width: AppDimensions.paddingLarge),
-                    Text(title, style: AppStyles.headlineSmall.copyWith(fontSize: 16)),
+                    Text(title, style: AppStyles.headlineSmall.copyWith(fontSize: 16, color: Theme.of(context).colorScheme.onSurface,)),
                     const Spacer(),
                     const Icon(Icons.arrow_forward_ios, color: AppColors.grey, size: 16),
                   ],

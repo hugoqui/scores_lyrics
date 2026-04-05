@@ -49,6 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider.select((state) => state.loginStatus));
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     ref.listen<AuthState>(authProvider, (previous, next) {
       next.loginStatus.whenOrNull(
@@ -65,8 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     });
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+    return Scaffold(      
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -81,12 +81,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     'assets/images/logo.png',
                     height: 120,
                     fit: BoxFit.contain,
+                    color: isDarkMode ? AppColors.white : null,
                   ),
-                  const SizedBox(height: AppDimensions.paddingExtraLarge),
-                  
-                  const Text(
+                  const SizedBox(height: AppDimensions.paddingExtraLarge),                  
+                  Text(
                     'Inicia sesión para continuar',
-                    style: TextStyle(color: AppColors.textSecondary),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),

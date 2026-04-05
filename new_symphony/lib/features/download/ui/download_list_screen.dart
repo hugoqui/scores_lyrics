@@ -140,7 +140,7 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                     trailing: IconButton(
                       icon: Icon(
                         song.isDownloaded ? Icons.refresh : Icons.download, 
-                        color: AppColors.primary
+                        color: Theme.of(context).colorScheme.onSurface
                       ),
                       onPressed: () => ref.read(downloadProvider(widget.instrument.path).notifier).download(song.fileName),
                     ),
@@ -156,10 +156,10 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
 
   Widget _buildLeading(DownloadableSong song) {
     if (song.isDownloading) {
-      return const SizedBox(
+      return SizedBox(
         width: 20,
         height: 20,
-        child: CircularProgressIndicator(strokeWidth: 3),
+        child: CircularProgressIndicator(strokeWidth: 3, color: Theme.of(context).colorScheme.onSurface,),        
       );
     }
     if (song.isDownloaded) {
