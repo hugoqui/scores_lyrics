@@ -22,6 +22,41 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
     super.dispose();
   }
 
+  // Método para mostrar la confirmación
+  Future<void> _confirmDownloadAll(DownloadState state) async {
+    final songs = state.songs.asData?.value ?? [];
+    if (songs.isEmpty) return;
+
+    final count = songs.length;
+    // Cálculo aproximado: asumiendo un promedio de 250kb por imagen/archivo
+    final totalSizeMb = (count * 0.25).toStringAsFixed(1);
+
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Descargar todo'),
+        content: Text(
+          'Se descargarán $count archivos (aprox. $totalSizeMb MB).\n\n'
+          'Si ya tienes archivos descargados, se sobreescribirán con la versión más reciente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCELAR', style: TextStyle(color: AppColors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('DESCARGAR'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      ref.read(downloadProvider(widget.instrument.path).notifier).downloadAll();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final downloadState = ref.watch(downloadProvider(widget.instrument.path));
@@ -33,9 +68,10 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
           TextButton.icon(
             icon: const Icon(Icons.download_for_offline, color: AppColors.white),
             label: const Text('Descargar todo', style: TextStyle(color: AppColors.white)),
+            // Ahora siempre está habilitado a menos que ya esté descargando
             onPressed: downloadState.isDownloadingAll 
                 ? null 
-                : () => ref.read(downloadProvider(widget.instrument.path).notifier).downloadAll(),
+                : () => _confirmDownloadAll(downloadState),
           ),
         ],
       ),
@@ -102,7 +138,10 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                           .join(' '),
                     ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.download, color: AppColors.primary),
+                      icon: Icon(
+                        song.isDownloaded ? Icons.refresh : Icons.download, 
+                        color: AppColors.primary
+                      ),
                       onPressed: () => ref.read(downloadProvider(widget.instrument.path).notifier).download(song.fileName),
                     ),
                   );
@@ -126,6 +165,6 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
     if (song.isDownloaded) {
       return const Icon(Icons.check, color: AppColors.accent);
     }
-    return const Icon(Icons.check_box_outline_blank, color: AppColors.grey);
+    return const SizedBox.shrink();
   }
 }
