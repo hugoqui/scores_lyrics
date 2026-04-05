@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/data/models/instrument.dart';
@@ -41,12 +42,12 @@ class InstrumentGrid extends ConsumerWidget {
             vertical: AppDimensions.paddingSmall,
             horizontal: AppDimensions.paddingMedium,
           ),
-          leading: Image.asset(
+          leading: SvgPicture.asset(
             instrument.iconPath,
             width: 48,
             height: 48,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
+            placeholderBuilder: (BuildContext context) =>
                 const Icon(Icons.music_note, color: AppColors.accent, size: 32),
           ),
           title: Text(
@@ -57,7 +58,11 @@ class InstrumentGrid extends ConsumerWidget {
             '$downloadedCount partituras descargadas',
             style: const TextStyle(color: AppColors.grey, fontSize: 13),
           ),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.grey),
+          trailing: const Icon(
+            Icons.arrow_forward_ios,
+            size: 14,
+            color: AppColors.grey,
+          ),
           onTap: () => onInstrumentSelected(instrument),
         );
       },
