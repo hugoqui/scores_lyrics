@@ -18,3 +18,4 @@ samples, guidance on mobile development, and a full API reference.
 
 # Build
 flutter build ipa --release
+flutter build appbundle --release

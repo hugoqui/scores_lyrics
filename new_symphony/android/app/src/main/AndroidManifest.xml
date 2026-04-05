@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.nativescript.symphony">
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="new_symphony"
         android:name="${applicationName}"
