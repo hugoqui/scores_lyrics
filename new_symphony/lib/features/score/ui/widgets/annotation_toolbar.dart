@@ -12,62 +12,75 @@ class AnnotationToolbar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(annotationProvider(noteKey));
     final notifier = ref.read(annotationProvider(noteKey).notifier);
-
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final orientation = MediaQuery.of(context).orientation;
+    final isLandscape = orientation == Orientation.landscape;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Card(
       margin: const EdgeInsets.all(16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       elevation: 4,
-      child: Padding(
+      // Color semitransparente para que no tape totalmente la partitura
+      color: Colors.white.withOpacity(0.9), 
+      child: Container(
+        constraints: isLandscape 
+            ? BoxConstraints(maxHeight: screenHeight * 0.8, maxWidth: 55) 
+            : null,
         padding: isLandscape
-            ? const EdgeInsets.symmetric(horizontal: 4, vertical: 8) // Vertical
-            : const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Horizontal
-        child: isLandscape
-            ? Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(state.isDrawingMode ? Icons.edit : Icons.edit_outlined),
-              color: state.isDrawingMode ? AppColors.accent : Colors.grey,
-              onPressed: notifier.toggleDrawingMode,
-              tooltip: 'Modo dibujo',
-            ),
-            if (state.isDrawingMode) ...[
-              _ColorButton(color: 0xFFFF0000, isSelected: state.selectedColor == 0xFFFF0000, onTap: () => notifier.setColor(0xFFFF0000)),
-              _ColorButton(color: 0xFF0000FF, isSelected: state.selectedColor == 0xFF0000FF, onTap: () => notifier.setColor(0xFF0000FF)),
-              _ColorButton(color: 0xFF000000, isSelected: state.selectedColor == 0xFF000000, onTap: () => notifier.setColor(0xFF000000)),
-              const SizedBox(height: 8, width: 24, child: Divider(height: 1)),
-              IconButton(
-                icon: const Icon(Icons.delete_sweep, color: AppColors.error),
-                onPressed: () => _confirmClear(context, notifier),
-                tooltip: 'Borrar todo',
-              ),
-            ],
-            const SizedBox(height: 8, width: 24, child: Divider(height: 1)),
-            IconButton(
-              icon: Icon(state.isVisible ? Icons.visibility : Icons.visibility_off),
-              color: AppColors.accent,
-              onPressed: notifier.toggleVisibility,
-              tooltip: 'Ver/Ocultar notas',
-            ),
-          ],)
-            : Row( // Horizontal layout for portrait
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(icon: Icon(state.isDrawingMode ? Icons.edit : Icons.edit_outlined), color: state.isDrawingMode ? AppColors.accent : Colors.grey, onPressed: notifier.toggleDrawingMode, tooltip: 'Modo dibujo'),
-            if (state.isDrawingMode) ...[
-              _ColorButton(color: 0xFFFF0000, isSelected: state.selectedColor == 0xFFFF0000, onTap: () => notifier.setColor(0xFFFF0000)),
-              _ColorButton(color: 0xFF0000FF, isSelected: state.selectedColor == 0xFF0000FF, onTap: () => notifier.setColor(0xFF0000FF)),
-              _ColorButton(color: 0xFF000000, isSelected: state.selectedColor == 0xFF000000, onTap: () => notifier.setColor(0xFF000000)),
-              const SizedBox(width: 8, height: 24, child: VerticalDivider(width: 1)),
-              IconButton(icon: const Icon(Icons.delete_sweep, color: AppColors.error), onPressed: () => _confirmClear(context, notifier), tooltip: 'Borrar todo'),
-            ],
-            const SizedBox(width: 8, height: 24, child: VerticalDivider(width: 1)),
-            IconButton(icon: Icon(state.isVisible ? Icons.visibility : Icons.visibility_off), color: AppColors.accent, onPressed: notifier.toggleVisibility, tooltip: 'Ver/Ocultar notas'),
-          ],),
+            ? const EdgeInsets.symmetric(horizontal: 2, vertical: 8)
+            : const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        child: SingleChildScrollView( // <--- CRÍTICO: Permite que quepa en móviles landscape
+          scrollDirection: isLandscape ? Axis.vertical : Axis.horizontal,
+          child: isLandscape
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildToolbarItems(context, state, notifier, true),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildToolbarItems(context, state, notifier, false),
+                ),
+        ),
       ),
     );
+  }
+
+  List<Widget> _buildToolbarItems(
+    BuildContext context, 
+    AnnotationState state, 
+    AnnotationNotifier notifier, 
+    bool isVertical
+  ) {
+    final spacer = isVertical 
+        ? const SizedBox(height: 8, width: 24, child: Divider(height: 1))
+        : const SizedBox(width: 8, height: 24, child: VerticalDivider(width: 1));
+
+    return [
+      IconButton(
+        icon: Icon(state.isDrawingMode ? Icons.check : Icons.edit_outlined),
+        color: state.isDrawingMode ? AppColors.accent : Colors.grey,
+        onPressed: notifier.toggleDrawingMode,
+        tooltip: 'Modo dibujo',
+      ),
+      if (state.isDrawingMode) ...[
+        _ColorButton(color: 0xFFFF0000, isSelected: state.selectedColor == 0xFFFF0000, onTap: () => notifier.setColor(0xFFFF0000)),
+        _ColorButton(color: 0xFF0000FF, isSelected: state.selectedColor == 0xFF0000FF, onTap: () => notifier.setColor(0xFF0000FF)),
+        _ColorButton(color: 0xFF000000, isSelected: state.selectedColor == 0xFF000000, onTap: () => notifier.setColor(0xFF000000)),
+        spacer,
+        IconButton(
+          icon: const Icon(Icons.delete_sweep, color: AppColors.error),
+          onPressed: () => _confirmClear(context, notifier),
+          tooltip: 'Borrar todo',
+        ),
+      ],
+      spacer,
+      IconButton(
+        icon: Icon(state.isVisible ? Icons.visibility : Icons.visibility_off),
+        color: AppColors.accent,
+        onPressed: notifier.toggleVisibility,
+        tooltip: 'Ver/Ocultar notas',
+      ),
+    ];
   }
 
   void _confirmClear(BuildContext context, AnnotationNotifier notifier) {
