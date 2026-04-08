@@ -29,6 +29,19 @@ class ScoreRepository {
     } else {
       _loadFromStorage();
     }
+    _loadApiSongsCache();
+  }
+
+  void _loadApiSongsCache() {
+    final String? cachedData = _prefs.getString('api_songs_cache');
+    if (cachedData != null) {
+      try {
+        final List<dynamic> decoded = jsonDecode(cachedData);
+        _apiSongs = decoded.map((json) => ApiSong.fromJson(json)).toList();
+      } catch (e) {
+        print('Error loading API songs cache: $e');
+      }
+    }
   }
 
   void _loadFromStorage() {
@@ -81,11 +94,13 @@ class ScoreRepository {
 
   /// Replica getDbSongs: Obtiene el JSON de cantos
   Future<void> fetchApiSongs() async {
-    if (_apiSongs.isNotEmpty) return;
     try {
       final response = await _dio.get('https://api.iglesiacristianabelen.com/api/cantos');
       final List<dynamic> data = response.data;
       _apiSongs = data.map((json) => ApiSong.fromJson(json)).toList();
+      
+      // Guardamos en caché para que persista al cerrar la app
+      _prefs.setString('api_songs_cache', jsonEncode(data));
     } catch (e) {
       print('Error fetching API songs: $e');
     }
