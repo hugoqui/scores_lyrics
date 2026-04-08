@@ -30,6 +30,10 @@ class ScoreRepository {
       _loadFromStorage();
     }
     _loadApiSongsCache();
+    // Si el caché está vacío (ej. primer inicio o error), intentamos descargar la lista de inmediato
+    if (_apiSongs.isEmpty) {
+      fetchApiSongs();
+    }
   }
 
   void _loadApiSongsCache() {
@@ -130,15 +134,31 @@ class ScoreRepository {
     }
   }
 
+  /// Limpia el texto de acentos, espacios y caracteres especiales para comparaciones seguras
+  String _normalize(String text) {
+    return text
+        .toLowerCase()
+        .trim()
+        .replaceAll(RegExp(r'[áàäâ]'), 'a')
+        .replaceAll(RegExp(r'[éèëê]'), 'e')
+        .replaceAll(RegExp(r'[íìïî]'), 'i')
+        .replaceAll(RegExp(r'[óòöô]'), 'o')
+        .replaceAll(RegExp(r'[úùüû]'), 'u')
+        .replaceAll('ñ', 'n')
+        .replaceAll(RegExp(r'[^a-z0-9]'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+  }
+
   /// Replica getSongChord: Busca la tonalidad en la lista de la API
   Future<String> getChordForSong(String fileName, String instrument) async {
-    await fetchApiSongs();
-    final searchTitle = fileName.replaceAll('.png', '').toLowerCase();
+    if (_apiSongs.isEmpty) await fetchApiSongs();
+    final searchTitle = _normalize(fileName.replaceAll('.png', ''));
     
     try {
       final song = _apiSongs.firstWhere((s) {
-        final title = s.title.toLowerCase().replaceAll(' ', '_');
-        return title == searchTitle || '${title}_$instrument' == searchTitle;
+        final apiTitle = _normalize(s.title);
+        return apiTitle == searchTitle || '${apiTitle}_$instrument' == searchTitle;
       });
       return song.chord;
     } catch (e) {
@@ -147,10 +167,10 @@ class ScoreRepository {
   }
 
   String getChordForSongSync(String title, String instrument) {
-    final searchTitle = title.toLowerCase().replaceAll(' ', '_');
+    final searchTitle = _normalize(title);
     try {
       final song = _apiSongs.firstWhere((s) {
-        final apiTitle = s.title.toLowerCase().replaceAll(' ', '_');
+        final apiTitle = _normalize(s.title);
         return apiTitle == searchTitle || '${apiTitle}_$instrument' == searchTitle;
       });
       return song.chord;
