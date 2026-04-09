@@ -124,6 +124,11 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
                   minScale: PhotoViewComputedScale.contained,
                   maxScale: PhotoViewComputedScale.covered * 4,
                   disableGestures: annotationState.isDrawingMode, // Deshabilitar gestos de PhotoView al dibujar
+                  onTapUp: (context, details, controllerValue) {
+                    if (!annotationState.isDrawingMode) {
+                      widget.onTap(); // Toggle UI visibility only if not in drawing mode
+                    }
+                  },
                   childSize: _imageSize,
                   child: Image.file(
                     file,
@@ -134,11 +139,13 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
                 ),
                 // El DrawingCanvas ahora es un overlay de pantalla completa
                 if (annotationState.isVisible && _imageSize != null)
-                  DrawingCanvas(
-                    noteKey: _noteKey,
-                    imageSize: _imageSize!,
-                    photoViewController: _photoViewController,
-                    onTap: widget.onTap, // Pasamos el onTap para el toggle de UI
+                  IgnorePointer(
+                    ignoring: !annotationState.isDrawingMode, // Ignore pointer events if NOT in drawing mode
+                    child: DrawingCanvas(
+                      noteKey: _noteKey,
+                      imageSize: _imageSize!,
+                      photoViewController: _photoViewController,
+                    ),
                   ),
 
                 // La barra de herramientas (Lápiz)

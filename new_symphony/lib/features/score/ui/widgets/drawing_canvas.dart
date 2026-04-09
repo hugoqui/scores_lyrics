@@ -10,9 +10,8 @@ class DrawingCanvas extends ConsumerStatefulWidget {
   final String noteKey;
   final Size imageSize; // Tamaño original de la imagen
   final PhotoViewController photoViewController; // Controlador de PhotoView
-  final VoidCallback onTap; // Para el toggle de UI
 
-  const DrawingCanvas({super.key, required this.noteKey, required this.imageSize, required this.photoViewController, required this.onTap});
+  const DrawingCanvas({super.key, required this.noteKey, required this.imageSize, required this.photoViewController});
 
   @override
   ConsumerState<DrawingCanvas> createState() => _DrawingCanvasState();
@@ -68,8 +67,9 @@ class _DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final notifier = ref.read(annotationProvider(widget.noteKey).notifier);
 
     return GestureDetector(
-      // El DrawingCanvas siempre ocupa toda la pantalla
-      behavior: HitTestBehavior.opaque,
+      // El DrawingCanvas ocupa toda la pantalla, pero su comportamiento de detección de gestos
+      // depende de si estamos en modo dibujo.
+      behavior: annotationState.isDrawingMode ? HitTestBehavior.opaque : HitTestBehavior.translucent,
       onPanStart: annotationState.isDrawingMode ? (details) {
         setState(() {
           _currentPoints = [OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition))];
@@ -100,7 +100,7 @@ class _DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         }
       } : null,
       // Bloqueamos el tap para que no dispare el modo pantalla completa al dibujar
-      onTap: annotationState.isDrawingMode ? () {} : widget.onTap, // Usamos el onTap del widget
+      // onTap: annotationState.isDrawingMode ? () {} : widget.onTap, // REMOVED: onTap is now handled by PhotoView
       child: CustomPaint(
         size: Size.infinite, // Ocupa todo el espacio disponible
         painter: _CanvasPainter(
