@@ -122,6 +122,7 @@ class _ColorButton extends StatelessWidget {
           shape: BoxShape.circle,
           border: isSelected ? Border.all(color: Colors.white, width: 2) : Border.all(color: Colors.grey.shade300),
         ),
+        child: isSelected ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
       ),
     );
   }
