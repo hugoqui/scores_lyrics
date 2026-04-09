@@ -93,7 +93,8 @@
 ## 10. Sistema de Anotaciones (Notas)
 - [x] **Capa de Dibujo:** Implementar un `CustomPainter` sobre el visor de partituras.
 - [x] **Persistencia:** Guardar trazos por canción e instrumento en `SharedPreferences`.
-- [x] **Herramientas:** Menú flotante con selección de colores, borrador y toggle de visibilidad.
+- [x] **Herramientas:** Menú flotante con selección de colores y toggle de visibilidad.
+- [ ] **Flujo de Sesión:** Implementar botones de Confirmar/Cancelar para evitar guardados accidentales.
 - [ ] **Sincronización de Zoom:** Asegurar que las notas se escalen y desplacen junto con la partitura.
 
 ## 11. Reproductor y Herramientas Camaleónicas (Orientación)

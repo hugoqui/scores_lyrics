@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:path_provider/path_provider.dart';
@@ -68,6 +69,16 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
     if (mounted) setState(() => _imageSize = size);
   }
 
+  void _handleSystemUI(bool isDrawingMode) {
+    if (isDrawingMode) {
+      // Ocultar barras del sistema para modo inmersivo
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      // Restaurar barras del sistema
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
+  }
+
   Future<File> _getScoreFile() async {
     final directory = await getApplicationDocumentsDirectory();
     return File('${directory.path}/${widget.instrument}/${widget.fileName}');
@@ -77,6 +88,9 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
   Widget build(BuildContext context) {
     final annotationState = ref.watch(annotationProvider(_noteKey));
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // Gestionar UI del sistema basándose en el modo de dibujo
+    _handleSystemUI(annotationState.isDrawingMode);
 
     return FutureBuilder<File>(
       future: _getScoreFile(),
@@ -90,52 +104,57 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
           return const Center(child: Text('Archivo no encontrado', style: TextStyle(color: AppColors.error)));
         }
 
-        return SizedBox.expand(
-          child: Stack(
-            children: [
-              GestureDetector(
-                onTap: widget.onTap,
-                child: PhotoView.customChild(
-                  backgroundDecoration: const BoxDecoration(color: AppColors.white),
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.covered * 4,
-                  childSize: _imageSize,
-                  child: Stack(
-                    children: [
-                      Image.file(
-                        file,
-                        width: _imageSize!.width,
-                        height: _imageSize!.height,
-                        fit: BoxFit.contain,
-                      ),
-                      if (annotationState.isVisible)
-                        DrawingCanvas(
-                          noteKey: _noteKey,
-                          size: _imageSize!,
+        return PopScope(
+          // Bloquear el gesto de "atrás" nativo si estamos dibujando
+          canPop: !annotationState.isDrawingMode,
+          child: SizedBox.expand(
+            child: Stack(
+              children: [
+                GestureDetector(
+                  onTap: widget.onTap,
+                  child: PhotoView.customChild(
+                    backgroundDecoration: const BoxDecoration(color: AppColors.white),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.covered * 4,
+                    disableGestures: annotationState.isDrawingMode,
+                    childSize: _imageSize,
+                    child: Stack(
+                      children: [
+                        Image.file(
+                          file,
+                          width: _imageSize!.width,
+                          height: _imageSize!.height,
+                          fit: BoxFit.contain,
                         ),
-                    ],
+                        if (annotationState.isVisible)
+                          DrawingCanvas(
+                            noteKey: _noteKey,
+                            size: _imageSize!,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              // La barra de herramientas (Lápiz)
-              Positioned(
-                top: 100,
-                left: isLandscape ? 10 : null,
-                right: isLandscape ? null : 10,
-                child: AnnotationToolbar(noteKey: _noteKey),
-              ),
-              // El reproductor (Audio)
-              if (widget.player != null)
+                // La barra de herramientas (Lápiz)
                 Positioned(
-                  top: isLandscape ? 100 : null,
-                  bottom: isLandscape ? null : 0,
-                  left: isLandscape ? null : 0,
-                  right: isLandscape ? 10 : 0,
-                  child: isLandscape 
-                    ? widget.player!
-                    : Center(child: widget.player!),
+                  top: isLandscape ? 20 : 100,
+                  left: isLandscape ? 10 : null,
+                  right: isLandscape ? null : 10,
+                  child: AnnotationToolbar(noteKey: _noteKey),
                 ),
-            ],
+                // El reproductor (Audio) - Se oculta en modo dibujo
+                if (widget.player != null && !annotationState.isDrawingMode)
+                  Positioned(
+                    top: isLandscape ? 100 : null,
+                    bottom: isLandscape ? null : 0,
+                    left: isLandscape ? null : 0,
+                    right: isLandscape ? 10 : 0,
+                    child: isLandscape 
+                      ? widget.player!
+                      : Center(child: widget.player!),
+                  ),
+              ],
+            ),
           ),
         );
       },

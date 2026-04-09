@@ -21,64 +21,152 @@ class AnnotationToolbar extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       elevation: 4,
       // Color semitransparente para que no tape totalmente la partitura
-      color: Colors.white.withOpacity(0.9), 
+      color: Colors.white.withOpacity(0.9),
       child: Container(
-        constraints: isLandscape 
-            ? BoxConstraints(maxHeight: screenHeight * 0.8, maxWidth: 55) 
+        constraints: isLandscape
+            ? BoxConstraints(maxHeight: screenHeight * 0.8, maxWidth: 110)
             : null,
         padding: isLandscape
-            ? const EdgeInsets.symmetric(horizontal: 2, vertical: 8)
+            ? const EdgeInsets.symmetric(horizontal: 4, vertical: 8)
             : const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        child: SingleChildScrollView( // <--- CRÍTICO: Permite que quepa en móviles landscape
+        child: SingleChildScrollView(
+          // Permite scroll si hay demasiados elementos en pantallas muy pequeñas
           scrollDirection: isLandscape ? Axis.vertical : Axis.horizontal,
-          child: isLandscape
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: _buildToolbarItems(context, state, notifier, true),
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: _buildToolbarItems(context, state, notifier, false),
-                ),
+          child: _buildLayout(context, state, notifier, isLandscape),
         ),
       ),
     );
   }
 
-  List<Widget> _buildToolbarItems(
-    BuildContext context, 
-    AnnotationState state, 
-    AnnotationNotifier notifier, 
-    bool isVertical
+  Widget _buildLayout(
+    BuildContext context,
+    AnnotationState state,
+    AnnotationNotifier notifier,
+    bool isLandscape,
   ) {
-    final spacer = isVertical 
+    final groupA = _buildGroupA(context, state, notifier, isLandscape);
+    final groupB = _buildGroupB(context, state, notifier, isLandscape);
+
+    if (!state.isDrawingMode) {
+      // Si no estamos dibujando, solo mostramos el grupo A en una sola línea
+      return isLandscape
+          ? Column(mainAxisSize: MainAxisSize.min, children: groupA)
+          : Row(mainAxisSize: MainAxisSize.min, children: groupA);
+    }
+
+    // Si estamos dibujando, aplicamos la lógica de dos bloques (filas o columnas)
+    if (isLandscape) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(mainAxisSize: MainAxisSize.min, children: groupA),
+          const SizedBox(width: 4),
+          Column(mainAxisSize: MainAxisSize.min, children: groupB),
+        ],
+      );
+    } else {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(mainAxisSize: MainAxisSize.min, children: groupA),
+          const SizedBox(height: 4),
+          Row(mainAxisSize: MainAxisSize.min, children: groupB),
+        ],
+      );
+    }
+  }
+
+  Widget _getSpacer(bool isVertical) {
+    return isVertical
         ? const SizedBox(height: 8, width: 24, child: Divider(height: 1))
         : const SizedBox(width: 8, height: 24, child: VerticalDivider(width: 1));
+  }
 
-    return [
-      IconButton(
-        icon: Icon(state.isDrawingMode ? Icons.check : Icons.edit_outlined),
-        color: state.isDrawingMode ? AppColors.accent : Colors.grey,
-        onPressed: notifier.toggleDrawingMode,
-        tooltip: 'Modo dibujo',
-      ),
-      if (state.isDrawingMode) ...[
-        _ColorButton(color: 0xFFFF0000, isSelected: state.selectedColor == 0xFFFF0000, onTap: () => notifier.setColor(0xFFFF0000)),
-        _ColorButton(color: 0xFF0000FF, isSelected: state.selectedColor == 0xFF0000FF, onTap: () => notifier.setColor(0xFF0000FF)),
-        _ColorButton(color: 0xFF000000, isSelected: state.selectedColor == 0xFF000000, onTap: () => notifier.setColor(0xFF000000)),
+  /// Grupo A: Acciones principales (Cerrar, Confirmar) y Herramientas de Formas
+  List<Widget> _buildGroupA(
+    BuildContext context,
+    AnnotationState state,
+    AnnotationNotifier notifier,
+    bool isVertical
+  ) {
+    final spacer = _getSpacer(isVertical);
+
+    if (!state.isDrawingMode) {
+      return [
+        IconButton(
+          icon: const Icon(Icons.edit_outlined),
+          color: Colors.grey,
+          onPressed: notifier.toggleDrawingMode,
+          tooltip: 'Modo dibujo',
+        ),
         spacer,
         IconButton(
-          icon: const Icon(Icons.delete_sweep, color: AppColors.error),
-          onPressed: () => _confirmClear(context, notifier),
-          tooltip: 'Borrar todo',
+          icon: Icon(state.isVisible ? Icons.visibility : Icons.visibility_off),
+          color: AppColors.accent,
+          onPressed: notifier.toggleVisibility,
+          tooltip: 'Ver/Ocultar notas',
         ),
-      ],
+      ];
+    }
+
+    return [
+        IconButton(
+          icon: const Icon(Icons.close, color: AppColors.error),
+          onPressed: notifier.cancelChanges,
+          tooltip: 'Cancelar cambios',
+        ),
+        IconButton(
+          icon: const Icon(Icons.check),
+          color: AppColors.accent,
+          onPressed: notifier.confirmChanges,
+          tooltip: 'Confirmar notas',
+        ),
+        spacer,
+        IconButton(
+          icon: const Icon(Icons.gesture),
+          color: state.activeTool == AnnotationTool.pencil ? AppColors.accent : Colors.grey,
+          onPressed: () => notifier.setTool(AnnotationTool.pencil),
+          tooltip: 'Lápiz',
+        ),
+        IconButton(
+          icon: const Icon(Icons.trending_flat),
+          color: state.activeTool == AnnotationTool.arrow ? AppColors.accent : Colors.grey,
+          onPressed: () => notifier.setTool(AnnotationTool.arrow),
+        ),
+        IconButton(
+          icon: const Icon(Icons.panorama_fish_eye),
+          color: state.activeTool == AnnotationTool.circle ? AppColors.accent : Colors.grey,
+          onPressed: () => notifier.setTool(AnnotationTool.circle),
+        ),
+        IconButton(
+          icon: const Icon(Icons.crop_square),
+          color: state.activeTool == AnnotationTool.square ? AppColors.accent : Colors.grey,
+          onPressed: () => notifier.setTool(AnnotationTool.square),
+        ),
+    ];
+  }
+
+  /// Grupo B: Bloque de Colores y Borrado total
+  List<Widget> _buildGroupB(
+    BuildContext context,
+    AnnotationState state,
+    AnnotationNotifier notifier,
+    bool isVertical
+  ) {
+    if (!state.isDrawingMode) return [];
+    final spacer = _getSpacer(isVertical);
+
+    return [
+      _ColorButton(color: 0xFFFF0000, isSelected: state.selectedColor == 0xFFFF0000, onTap: () => notifier.setColor(0xFFFF0000)),
+      _ColorButton(color: 0xFF0000FF, isSelected: state.selectedColor == 0xFF0000FF, onTap: () => notifier.setColor(0xFF0000FF)),
+      _ColorButton(color: 0xFF000000, isSelected: state.selectedColor == 0xFF000000, onTap: () => notifier.setColor(0xFF000000)),
       spacer,
       IconButton(
-        icon: Icon(state.isVisible ? Icons.visibility : Icons.visibility_off),
-        color: AppColors.accent,
-        onPressed: notifier.toggleVisibility,
-        tooltip: 'Ver/Ocultar notas',
+        icon: const Icon(Icons.delete_sweep, color: AppColors.error),
+        onPressed: () => _confirmClear(context, notifier),
+        tooltip: 'Borrar todo',
       ),
     ];
   }
@@ -120,7 +208,7 @@ class _ColorButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: Color(color),
           shape: BoxShape.circle,
-          border: isSelected ? Border.all(color: Colors.white, width: 2) : Border.all(color: Colors.grey.shade300),
+          border: isSelected ? Border.all(color: Colors.grey, width: 2) : Border.all(color: Colors.grey.shade300),
         ),
         child: isSelected ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
       ),
