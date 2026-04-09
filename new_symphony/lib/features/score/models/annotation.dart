@@ -11,6 +11,8 @@ class OffsetPoint {
   factory OffsetPoint.fromJson(Map<String, dynamic> json) => 
       OffsetPoint((json['x'] as num).toDouble(), (json['y'] as num).toDouble());
   
+  factory OffsetPoint.fromOffset(Offset offset) => OffsetPoint(offset.dx, offset.dy);
+
   Offset toOffset() => Offset(x, y);
 }
 
@@ -26,6 +28,7 @@ class DrawingStroke {
     'points': points.map((p) => p.toJson()).toList(),
     'color': color,
     'weight': weight,
+    'tool': tool.index, // Aseguramos que el índice de la herramienta se guarde
   };
 
   factory DrawingStroke.fromJson(Map<String, dynamic> json) => DrawingStroke(

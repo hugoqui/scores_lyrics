@@ -32,10 +32,13 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
   Size? _imageSize;
   late String _noteKey;
 
+  late PhotoViewController _photoViewController;
+
   @override
   void initState() {
     super.initState();
     _noteKey = '${widget.instrument}_${widget.fileName}';
+    _photoViewController = PhotoViewController();
     _calculateImageSize();
   }
 
@@ -44,8 +47,15 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fileName != widget.fileName || oldWidget.instrument != widget.instrument) {
       _noteKey = '${widget.instrument}_${widget.fileName}';
+      _photoViewController.reset(); // Resetear el controlador al cambiar de canción
       _calculateImageSize();
     }
+  }
+
+  @override
+  void dispose() {
+    _photoViewController.dispose();
+    super.dispose();
   }
 
   Future<void> _calculateImageSize() async {
@@ -68,17 +78,6 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
     final size = await completer.future;
     if (mounted) setState(() => _imageSize = size);
   }
-
-  void _handleSystemUI(bool isDrawingMode) {
-    if (isDrawingMode) {
-      // Ocultar barras del sistema para modo inmersivo
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    } else {
-      // Restaurar barras del sistema
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    }
-  }
-
   Future<File> _getScoreFile() async {
     final directory = await getApplicationDocumentsDirectory();
     return File('${directory.path}/${widget.instrument}/${widget.fileName}');
@@ -89,8 +88,16 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
     final annotationState = ref.watch(annotationProvider(_noteKey));
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
-    // Gestionar UI del sistema basándose en el modo de dibujo
-    _handleSystemUI(annotationState.isDrawingMode);
+    // Escuchamos cambios en el modo de dibujo para activar/desactivar modo inmersivo
+    ref.listen(annotationProvider(_noteKey).select((s) => s.isDrawingMode), (prev, next) {
+      if (next != prev) {
+        if (next) {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        } else {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        }
+      }
+    });
 
     return FutureBuilder<File>(
       future: _getScoreFile(),
@@ -104,54 +111,60 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
           return const Center(child: Text('Archivo no encontrado', style: TextStyle(color: AppColors.error)));
         }
 
+        // El PhotoView ahora solo muestra la imagen, sin el DrawingCanvas dentro
         return PopScope(
           // Bloquear el gesto de "atrás" nativo si estamos dibujando
           canPop: !annotationState.isDrawingMode,
           child: SizedBox.expand(
             child: Stack(
               children: [
-                GestureDetector(
-                  onTap: widget.onTap,
-                  child: PhotoView.customChild(
-                    backgroundDecoration: const BoxDecoration(color: AppColors.white),
-                    minScale: PhotoViewComputedScale.contained,
-                    maxScale: PhotoViewComputedScale.covered * 4,
-                    disableGestures: annotationState.isDrawingMode,
-                    childSize: _imageSize,
-                    child: Stack(
-                      children: [
-                        Image.file(
-                          file,
-                          width: _imageSize!.width,
-                          height: _imageSize!.height,
-                          fit: BoxFit.contain,
-                        ),
-                        if (annotationState.isVisible)
-                          DrawingCanvas(
-                            noteKey: _noteKey,
-                            size: _imageSize!,
-                          ),
-                      ],
-                    ),
+                PhotoView.customChild(
+                  controller: _photoViewController, // Pasamos el controlador
+                  backgroundDecoration: const BoxDecoration(color: AppColors.white),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 4,
+                  disableGestures: annotationState.isDrawingMode, // Deshabilitar gestos de PhotoView al dibujar
+                  childSize: _imageSize,
+                  child: Image.file(
+                    file,
+                    width: _imageSize!.width,
+                    height: _imageSize!.height,
+                    fit: BoxFit.contain,
                   ),
                 ),
+                // El DrawingCanvas ahora es un overlay de pantalla completa
+                if (annotationState.isVisible && _imageSize != null)
+                  DrawingCanvas(
+                    noteKey: _noteKey,
+                    imageSize: _imageSize!,
+                    photoViewController: _photoViewController,
+                    onTap: widget.onTap, // Pasamos el onTap para el toggle de UI
+                  ),
+
                 // La barra de herramientas (Lápiz)
                 Positioned(
-                  top: isLandscape ? 20 : 100,
+                  top: annotationState.isDrawingMode ? 20 : (isLandscape ? 20 : 100),
                   left: isLandscape ? 10 : null,
                   right: isLandscape ? null : 10,
                   child: AnnotationToolbar(noteKey: _noteKey),
                 ),
-                // El reproductor (Audio) - Se oculta en modo dibujo
-                if (widget.player != null && !annotationState.isDrawingMode)
-                  Positioned(
-                    top: isLandscape ? 100 : null,
-                    bottom: isLandscape ? null : 0,
-                    left: isLandscape ? null : 0,
-                    right: isLandscape ? 10 : 0,
-                    child: isLandscape 
-                      ? widget.player!
-                      : Center(child: widget.player!),
+                // El reproductor (Audio) - Ocultación animada y bloqueo de toques
+                if (widget.player != null)
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: annotationState.isDrawingMode ? 0.0 : 1.0,
+                    child: IgnorePointer(
+                      ignoring: annotationState.isDrawingMode,
+                      child: Positioned(
+                        top: isLandscape ? 100 : null,
+                        bottom: isLandscape ? null : 0,
+                        left: isLandscape ? null : 0,
+                        right: isLandscape ? 10 : 0,
+                        child: isLandscape 
+                          ? widget.player!
+                          : Center(child: widget.player!),
+                      ),
+                    ),
                   ),
               ],
             ),

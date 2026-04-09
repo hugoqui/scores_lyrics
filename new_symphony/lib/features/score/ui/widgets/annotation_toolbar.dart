@@ -162,6 +162,8 @@ class AnnotationToolbar extends ConsumerWidget {
       _ColorButton(color: 0xFFFF0000, isSelected: state.selectedColor == 0xFFFF0000, onTap: () => notifier.setColor(0xFFFF0000)),
       _ColorButton(color: 0xFF0000FF, isSelected: state.selectedColor == 0xFF0000FF, onTap: () => notifier.setColor(0xFF0000FF)),
       _ColorButton(color: 0xFF000000, isSelected: state.selectedColor == 0xFF000000, onTap: () => notifier.setColor(0xFF000000)),
+      _ColorButton(color: 0xFF00FF00, isSelected: state.selectedColor == 0xFF00FF00, onTap: () => notifier.setColor(0xFF00FF00)), // Verde
+      _ColorButton(color: 0xFFFFFF00, isSelected: state.selectedColor == 0xFFFFFF00, onTap: () => notifier.setColor(0xFFFFFF00)), // Amarillo
       spacer,
       IconButton(
         icon: const Icon(Icons.delete_sweep, color: AppColors.error),

@@ -68,7 +68,7 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: state.isUiVisible
+      appBar: (state.isUiVisible && !isDrawing) // Ocultar AppBar si estamos dibujando
           ? AppBar(
               title: Text(currentSong.title),
               backgroundColor: AppColors.primary,
