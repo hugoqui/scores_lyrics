@@ -101,8 +101,10 @@ class MyListDetailScreen extends ConsumerWidget {
   }
 
   void _showAddSongPicker(BuildContext context, WidgetRef ref, String instrument, AsyncValue<List<PracticeSong>> songsAsync) {
+    final myList = ref.read(myListsProvider).firstWhere((l) => l.id == listId);
+
     songsAsync.whenData((songs) {
-      List<String> selectedTitles = [];
+      List<String> selectedTitles = List.from(myList.songTitles);
       String searchQuery = "";
       String? selectedChord;
       Timer? debounce;

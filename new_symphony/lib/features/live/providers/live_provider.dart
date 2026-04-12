@@ -118,7 +118,11 @@ class LiveNotifier extends StateNotifier<LiveState> {
       }).where((t) => t.isNotEmpty).toList();
       
       // Mantenemos los que el usuario agregó a mano si no están en la lista del servidor
-      final manualSongs = state.liveSongList.where((t) => !serverTitles.contains(t)).toList();
+      // Usamos una comparación insensible a mayúsculas/espacios para evitar duplicados
+      final manualSongs = state.liveSongList.where((localTitle) => 
+        !serverTitles.any((serverTitle) => 
+          serverTitle.toLowerCase().trim() == localTitle.toLowerCase().trim())
+      ).toList();
       
       state = state.copyWith(liveSongList: [...serverTitles, ...manualSongs]);
     } catch (_) {}
@@ -129,6 +133,15 @@ class LiveNotifier extends StateNotifier<LiveState> {
       state = state.copyWith(liveSongList: [...state.liveSongList, title]);
     }
     _updateCurrentSong(title);
+  }
+
+  void updateLiveSongList(List<String> titles) {
+    state = state.copyWith(liveSongList: titles);
+    // Si el canto actual ya no está en la nueva lista, intentamos mantener la posición o ir al inicio
+    if (state.currentSongTitle != null) {
+      int index = titles.indexOf(state.currentSongTitle!);
+      state = state.copyWith(currentIndex: index >= 0 ? index : 0);
+    }
   }
 
   void _updateCurrentSong(String title) {

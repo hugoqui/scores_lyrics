@@ -234,10 +234,11 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   }
 
   void _showAddSongSearch(BuildContext context, WidgetRef ref) {
+    final liveState = ref.read(liveProvider);
     final songsAsync = ref.read(practiceSongsProvider(widget.instrument.path));
 
     songsAsync.whenData((songs) {
-      List<String> selectedTitles = [];
+      List<String> selectedTitles = List.from(liveState.liveSongList);
       String searchQuery = "";
       String? selectedChord;
       Timer? debounce;
@@ -286,9 +287,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                               foregroundColor: Theme.of(context).colorScheme.onSurface,
                             ),
                             onPressed: selectedTitles.isEmpty ? null : () {
-                              for (final title in selectedTitles) {
-                                ref.read(liveProvider.notifier).addSongManual(title);
-                              }
+                              ref.read(liveProvider.notifier).updateLiveSongList(selectedTitles);
                               Navigator.pop(context);
                             },
                             child: Text('Agregar (${selectedTitles.length})'),                          
@@ -340,7 +339,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                         itemCount: filteredSongs.length,
                         itemBuilder: (context, index) {
                           final song = filteredSongs[index];
-                          final isSelected = selectedTitles.contains(song.title);
+                          // IMPORTANTE: Usamos normalización para comparar contra la lista de la sesión
+                          // Esto permite que el check aparezca aunque el servidor mande títulos sin tildes.
+                          final isSelected = selectedTitles.any((t) => normalize(t) == normalize(song.title));
                           final chord = getIt<ScoreRepository>().getChordForSongSync(song.title, widget.instrument.path);
                           
                           return CheckboxListTile(
@@ -350,9 +351,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                             onChanged: (val) {
                               setModalState(() {
                                 if (val == true) {
-                                  selectedTitles.add(song.title);
+                                  if (!isSelected) selectedTitles.add(song.title);
                                 } else {
-                                  selectedTitles.remove(song.title);
+                                  selectedTitles.removeWhere((t) => normalize(t) == normalize(song.title));
                                 }
                               });
                             },
