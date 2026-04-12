@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
@@ -18,12 +20,15 @@ class PracticeLibraryScreen extends ConsumerStatefulWidget {
 
 class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
   final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  Timer? _debounce;
   String? _selectedChord;
   final List<String> _chordOptions = ["C", "Eb", "F", "G", "Bb"];
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -44,9 +49,24 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
               decoration: InputDecoration(
                 hintText: 'Buscar en mi biblioteca...',
                 prefixIcon: const Icon(Icons.search, color: AppColors.accent),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          _debounce?.cancel();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
                 border: const OutlineInputBorder(),
               ),
-              onChanged: (value) => ref.read(practiceSongsProvider(widget.instrument.path).notifier).filterSongs(value),
+              onChanged: (value) {
+                if (_debounce?.isActive ?? false) _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  setState(() => _searchQuery = value);
+                });
+              },
             ),
           ),
           SingleChildScrollView(
@@ -76,13 +96,22 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text('Error: $err')),
               data: (songs) {
-                // Aplicamos el filtro de tonalidad sobre los resultados
-                final filteredSongs = _selectedChord == null 
-                    ? songs 
-                    : songs.where((s) {
-                        final chord = getIt<ScoreRepository>().getChordForSongSync(s.title, widget.instrument.path);
-                        return chord == _selectedChord;
-                      }).toList();
+                String normalize(String text) => text.toLowerCase()
+                    .replaceAll('á', 'a')
+                    .replaceAll('é', 'e')
+                    .replaceAll('í', 'i')
+                    .replaceAll('ó', 'o')
+                    .replaceAll('ú', 'u')
+                    .replaceAll('ü', 'u');
+
+                // Aplicamos filtros de búsqueda (normalizada) y tonalidad
+                final filteredSongs = songs.where((s) {
+                  final matchesSearch = normalize(s.title).contains(normalize(_searchQuery));
+                  final currentChord = getIt<ScoreRepository>().getChordForSongSync(s.title, widget.instrument.path);
+                  final matchesChord = _selectedChord == null || currentChord == _selectedChord;
+                  
+                  return matchesSearch && matchesChord;
+                }).toList();
 
                 if (filteredSongs.isEmpty) {
                   return const Center(

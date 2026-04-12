@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
@@ -238,14 +240,23 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
       List<String> selectedTitles = [];
       String searchQuery = "";
       String? selectedChord;
+      Timer? debounce;
 
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,        
         builder: (context) => StatefulBuilder(
           builder: (context, setModalState) {
+            String normalize(String text) => text.toLowerCase()
+                .replaceAll('á', 'a')
+                .replaceAll('é', 'e')
+                .replaceAll('í', 'i')
+                .replaceAll('ó', 'o')
+                .replaceAll('ú', 'u')
+                .replaceAll('ü', 'u');
+
             final filteredSongs = songs.where((s) {
-              final matchesSearch = s.title.toLowerCase().contains(searchQuery.toLowerCase());
+              final matchesSearch = normalize(s.title).contains(normalize(searchQuery));
               final currentChord = getIt<ScoreRepository>().getChordForSongSync(s.title, widget.instrument.path);
               final matchesChord = selectedChord == null || currentChord == selectedChord;
               return matchesSearch && matchesChord;
@@ -293,7 +304,12 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                           prefixIcon: Icon(Icons.search),
                           border: OutlineInputBorder(),
                         ),
-                        onChanged: (val) => setModalState(() => searchQuery = val),
+                        onChanged: (val) {
+                          if (debounce?.isActive ?? false) debounce?.cancel();
+                          debounce = Timer(const Duration(milliseconds: 500), () {
+                            setModalState(() => searchQuery = val);
+                          });
+                        },
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -350,7 +366,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
             );
           },
         ),
-      );
+      ).then((_) => debounce?.cancel());
     });
   }
 

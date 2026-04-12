@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/data/models/instrument.dart';
@@ -15,10 +17,13 @@ class DownloadListScreen extends ConsumerStatefulWidget {
 
 class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  Timer? _debounce;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -65,13 +70,31 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
       appBar: AppBar(
         title: Text(widget.instrument.name),
         actions: [
-          TextButton.icon(
-            icon: const Icon(Icons.download_for_offline, color: AppColors.white),
-            label: const Text('Descargar todo', style: TextStyle(color: AppColors.white)),
-            // Ahora siempre está habilitado a menos que ya esté descargando
-            onPressed: downloadState.isDownloadingAll 
+          InkWell(
+            onTap: downloadState.isDownloadingAll 
                 ? null 
                 : () => _confirmDownloadAll(downloadState),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.download_for_offline, 
+                    color: downloadState.isDownloadingAll ? AppColors.white.withOpacity(0.5) : AppColors.white,
+                    size: 20,
+                  ),
+                  Text(
+                    'Descargar Todo',
+                    style: TextStyle(
+                      fontSize: 9, 
+                      color: downloadState.isDownloadingAll ? AppColors.white.withOpacity(0.5) : AppColors.white
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -89,13 +112,19 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _searchController.clear();
-                          ref.read(downloadProvider(widget.instrument.path).notifier).filterSongs('');
+                          _debounce?.cancel();
+                          setState(() => _searchQuery = '');
                         },
                       )
                     : null,
                 border: const OutlineInputBorder(),
               ),
-              onChanged: (value) => ref.read(downloadProvider(widget.instrument.path).notifier).filterSongs(value),
+              onChanged: (value) {
+                if (_debounce?.isActive ?? false) _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  setState(() => _searchQuery = value);
+                });
+              },
             ),
           ),
           if (downloadState.isDownloadingAll)
@@ -122,31 +151,47 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
             child: downloadState.songs.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text('Error: $err')),
-              data: (songs) => ListView.builder(
-                itemCount: songs.length,
-                itemBuilder: (context, index) {
-                  final song = songs[index];
-                  return ListTile(
-                    leading: _buildLeading(song),
-                    title: Text(
-                      song.fileName
-                          .replaceAll('.png', '')
-                          .replaceAll('_', ' ')
-                          .split(' ')
-                          .where((word) => word.isNotEmpty)
-                          .map((word) => '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
-                          .join(' '),
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(
-                        song.isDownloaded ? Icons.refresh : Icons.download, 
-                        color: Theme.of(context).colorScheme.onSurface
+              data: (songs) {
+                String normalize(String text) => text.toLowerCase()
+                    .replaceAll('á', 'a')
+                    .replaceAll('é', 'e')
+                    .replaceAll('í', 'i')
+                    .replaceAll('ó', 'o')
+                    .replaceAll('ú', 'u')
+                    .replaceAll('ü', 'u');
+
+                // Filtramos localmente usando la misma lógica de visualización
+                final filteredSongs = songs.where((song) {
+                  final cleanTitle = song.fileName.replaceAll('.png', '').replaceAll('_', ' ');
+                  return normalize(cleanTitle).contains(normalize(_searchQuery));
+                }).toList();
+
+                return ListView.builder(
+                  itemCount: filteredSongs.length,
+                  itemBuilder: (context, index) {
+                    final song = filteredSongs[index];
+                    return ListTile(
+                      leading: _buildLeading(song),
+                      title: Text(
+                        song.fileName
+                            .replaceAll('.png', '')
+                            .replaceAll('_', ' ')
+                            .split(' ')
+                            .where((word) => word.isNotEmpty)
+                            .map((word) => '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
+                            .join(' '),
                       ),
-                      onPressed: () => ref.read(downloadProvider(widget.instrument.path).notifier).download(song.fileName),
-                    ),
-                  );
-                },
-              ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          song.isDownloaded ? Icons.refresh : Icons.download, 
+                          color: Theme.of(context).colorScheme.onSurface
+                        ),
+                        onPressed: () => ref.read(downloadProvider(widget.instrument.path).notifier).download(song.fileName),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
