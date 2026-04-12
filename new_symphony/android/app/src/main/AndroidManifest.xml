@@ -2,7 +2,7 @@
     package="org.nativescript.symphony">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="new_symphony"
+        android:label="Symphony"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
