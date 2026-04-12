@@ -32,15 +32,18 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: widget.initialIndex);
+    // Inicialización con un offset grande para permitir loop infinito circular
+    final int virtualInitialPage = (widget.songs.length * 100) + widget.initialIndex;
+    _currentIndex = virtualInitialPage;
+    _pageController = PageController(initialPage: virtualInitialPage);
+    
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     // Cargar audio inicial
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(scoreProvider.notifier).loadSong(
         widget.instrument.path, 
-        widget.songs[_currentIndex]
+        widget.songs[_currentIndex % widget.songs.length]
       );
     });
   }
@@ -56,7 +59,10 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(scoreProvider);
-    final currentSong = widget.songs[_currentIndex];
+    if (widget.songs.isEmpty) return const Scaffold(body: Center(child: Text('No hay cantos')));
+
+    final int realIndex = _currentIndex % widget.songs.length;
+    final currentSong = widget.songs[realIndex];
 
     // Calculamos la noteKey del canto visible actualmente para saber si se está dibujando
     String fileForNoteKey = currentSong.melodyFileName;
@@ -79,17 +85,18 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
           // 1. Capa de la Partitura (Fondo)
           PageView.builder(
             controller: _pageController,
-            itemCount: widget.songs.length,
             physics: isDrawing ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
             onPageChanged: (index) {
+              final int newRealIndex = index % widget.songs.length;
               setState(() => _currentIndex = index);
               ref.read(scoreProvider.notifier).loadSong(
                 widget.instrument.path, 
-                widget.songs[index]
+                widget.songs[newRealIndex]
               );
             },
             itemBuilder: (context, index) {
-              final song = widget.songs[index];
+              final int itemRealIndex = index % widget.songs.length;
+              final song = widget.songs[itemRealIndex];
               String fileToShow = song.melodyFileName;
               if (state.isArrangementMode && song.hasArrangementDownloaded) {
                 fileToShow = song.arrangementFileName!;

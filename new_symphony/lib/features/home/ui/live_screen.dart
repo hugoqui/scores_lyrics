@@ -23,6 +23,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   late PageController _pageController;
   bool _isFullScreen = false;
   bool _isArrangementMode = false;
+  bool _isFirstLoad = true;
 
   @override
   void initState() {
@@ -32,9 +33,12 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
 
   @override
   void deactivate() {
-    // Nos desconectamos aquí porque 'ref' aún es válido. 
-    // En 'dispose' a veces ya es tarde debido al ciclo de vida de Riverpod.
-    ref.read(liveProvider.notifier).disconnect();
+    // Usamos Future.microtask para evitar el error de "modificar durante el build".
+    // Capturamos el notifier antes de que el widget se desmonte completamente.
+    final notifier = ref.read(liveProvider.notifier);
+    Future.microtask(() {
+      notifier.disconnect();
+    });
     super.deactivate();
   }
 
@@ -72,9 +76,22 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
 
     // Escuchar cambios de índice desde el servidor para mover el PageView
     ref.listen(liveProvider.select((s) => s.currentIndex), (prev, next) {
-      if (_pageController.hasClients && _pageController.page?.round() != next) {
+      if (_pageController.hasClients) {
+        final listLength = liveState.liveSongList.length;
+        if (listLength <= 1) return;
+
+        final currentPage = _pageController.page?.round() ?? 0;
+        final currentRealIndex = currentPage % listLength;
+
+        if (currentRealIndex == next) return;
+
+        // Encontrar el salto más corto para el loop circular
+        int diff = next - currentRealIndex;
+        if (diff > listLength / 2) diff -= listLength;
+        if (diff < -listLength / 2) diff += listLength;
+
         _pageController.animateToPage(
-          next,
+          currentPage + diff,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
@@ -82,6 +99,14 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     });
 
     final bool canHaveArrangement = widget.instrument.path != 'piano' && widget.instrument.path != 'trompeta';
+
+    // Inicialización del PageController con un offset grande para permitir loop infinito
+    if (_isFirstLoad && liveState.liveSongList.isNotEmpty) {
+      _isFirstLoad = false;
+      final length = liveState.liveSongList.length;
+      final initialVirtualPage = (length * 100) + liveState.currentIndex;
+      _pageController = PageController(initialPage: initialVirtualPage);
+    }
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -154,12 +179,19 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                   error: (err, _) => Center(child: Text('Error: $err')),
                   data: (songs) {
                     return PageView.builder(
+                      key: ValueKey('live_page_view_${liveState.liveSongList.length}'), 
                       controller: _pageController,
                       physics: isDrawing ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
-                      itemCount: liveState.liveSongList.length,
-                      onPageChanged: (index) => ref.read(liveProvider.notifier).updateIndex(index),
+                      // Sin itemCount para permitir scroll infinito
+                      onPageChanged: (index) {
+                        if (liveState.liveSongList.isNotEmpty) {
+                          ref.read(liveProvider.notifier).updateIndex(index % liveState.liveSongList.length);
+                        }
+                      },
                       itemBuilder: (context, index) {
-                        final songTitle = liveState.liveSongList[index];
+                        if (liveState.liveSongList.isEmpty) return const SizedBox.shrink();
+                        final realIndex = index % liveState.liveSongList.length;
+                        final songTitle = liveState.liveSongList[realIndex];
                         final song = songs.where((s) => 
                           s.title.toLowerCase() == songTitle.toLowerCase()
                         ).firstOrNull;

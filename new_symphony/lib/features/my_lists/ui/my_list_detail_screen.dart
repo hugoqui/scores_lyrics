@@ -68,7 +68,11 @@ class MyListDetailScreen extends ConsumerWidget {
                       onTap: () {
                         // Navegar al visor de partitura con el contexto de la lista
                         availableSongsAsync.whenData((allSongs) {
-                          final songsInList = allSongs.where((s) => myList.songTitles.contains(s.title)).toList();
+                          // Mapeamos sobre songTitles para preservar el orden en que el usuario 
+                          // agregó los cantos a la lista, en lugar del orden alfabético de la DB.
+                          final songsInList = myList.songTitles
+                              .map((title) => allSongs.firstWhere((s) => s.title == title))
+                              .toList();
                           final songIndex = songsInList.indexWhere((s) => s.title == title);
                           
                           final instrumentObj = getIt<InstrumentsService>().instruments()
