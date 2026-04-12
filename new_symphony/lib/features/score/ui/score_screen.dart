@@ -99,7 +99,6 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
                 instrument: widget.instrument.path,
                 fileName: fileToShow,
                 onTap: () => ref.read(scoreProvider.notifier).toggleUiVisibility(),
-                // Importante: Quita el parámetro 'player' de ScoreImageView si lo tenías ahí
               );
             },
           ),

@@ -22,6 +22,7 @@ class LiveScreen extends ConsumerStatefulWidget {
 class _LiveScreenState extends ConsumerState<LiveScreen> {
   late PageController _pageController;
   bool _isFullScreen = false;
+  bool _isArrangementMode = false;
 
   @override
   void initState() {
@@ -30,12 +31,16 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   }
 
   @override
+  void deactivate() {
+    // Nos desconectamos aquí porque 'ref' aún es válido. 
+    // En 'dispose' a veces ya es tarde debido al ciclo de vida de Riverpod.
+    ref.read(liveProvider.notifier).disconnect();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
-    // Nos desconectamos automáticamente del servidor al salir de la pantalla
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(liveProvider.notifier).disconnect();
-    });
     super.dispose();
   }
 
@@ -56,7 +61,11 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
       final currentSong = songs.where((s) => s.title.toLowerCase() == currentTitle.toLowerCase()).firstOrNull;
       
       if (currentSong != null) {
-        final noteKey = '${widget.instrument.path}_${currentSong.melodyFileName}';
+        final displayFileName = (_isArrangementMode && currentSong.arrangementFileName != null)
+            ? currentSong.arrangementFileName!
+            : currentSong.melodyFileName;
+            
+        final noteKey = '${widget.instrument.path}_$displayFileName';
         isDrawing = ref.watch(annotationProvider(noteKey).select((s) => s.isDrawingMode));
       }
     }
@@ -72,13 +81,24 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
       }
     });
 
+    final bool canHaveArrangement = widget.instrument.path != 'piano' && widget.instrument.path != 'trompeta';
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _isFullScreen 
         ? null 
         : AppBar(
-            title: Text('En Vivo: ${widget.instrument.name}'),
+            title: Text(widget.instrument.name),
             actions: [
+              if (canHaveArrangement)
+                IconButton(
+                  tooltip: _isArrangementMode ? 'Ver Melodía' : 'Ver Arreglo',
+                  icon: Icon(
+                    _isArrangementMode ? Icons.description : Icons.description_outlined,
+                    color: _isArrangementMode ? AppColors.accent : null,
+                  ),
+                  onPressed: () => setState(() => _isArrangementMode = !_isArrangementMode),
+                ),
               IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () => _showAddSongSearch(context, ref),
@@ -120,9 +140,15 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                           );
                         }
 
+                        // Lógica de selección de archivo: Arreglo (si existe y está activo) o Melodía
+                        final displayFileName = (_isArrangementMode && song.arrangementFileName != null)
+                            ? song.arrangementFileName!
+                            : song.melodyFileName;
+
                         return ScoreImageView(
+                          key: ValueKey('${widget.instrument.path}_$displayFileName'),
                           instrument: widget.instrument.path,
-                          fileName: song.melodyFileName,
+                          fileName: displayFileName,
                           onTap: _toggleFullScreen,
                         );
                       },
@@ -181,7 +207,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                               }
                               Navigator.pop(context);
                             },
-                            child: Text('Agregar (${selectedTitles.length})', style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),                          
+                            child: Text('Agregar (${selectedTitles.length})'),                          
                           )
                         ],
                       ),

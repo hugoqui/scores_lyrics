@@ -13,15 +13,13 @@ import 'package:new_symphony/features/score/ui/widgets/annotation_toolbar.dart';
 class ScoreImageView extends ConsumerStatefulWidget {
   final String instrument;
   final String fileName;
-  final VoidCallback onTap;
-  final Widget? player;
+  final VoidCallback onTap;  
 
   const ScoreImageView({
     super.key,
     required this.instrument,
     required this.fileName,
-    required this.onTap,
-    this.player,
+    required this.onTap,    
   });
 
   @override
@@ -154,25 +152,7 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
                   left: isLandscape ? 10 : null,
                   right: isLandscape ? null : 10,
                   child: AnnotationToolbar(noteKey: _noteKey),
-                ),
-                // El reproductor (Audio) - Ocultación animada y bloqueo de toques
-                if (widget.player != null)
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: annotationState.isDrawingMode ? 0.0 : 1.0,
-                    child: IgnorePointer(
-                      ignoring: annotationState.isDrawingMode,
-                      child: Positioned(
-                        top: isLandscape ? 100 : null,
-                        bottom: isLandscape ? null : 0,
-                        left: isLandscape ? null : 0,
-                        right: isLandscape ? 10 : 0,
-                        child: isLandscape 
-                          ? widget.player!
-                          : Center(child: widget.player!),
-                      ),
-                    ),
-                  ),
+                ),                
               ],
             ),
           ),
