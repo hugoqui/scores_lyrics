@@ -91,17 +91,58 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
             title: Text(widget.instrument.name),
             actions: [
               if (canHaveArrangement)
-                IconButton(
-                  tooltip: _isArrangementMode ? 'Ver Melodía' : 'Ver Arreglo',
-                  icon: Icon(
-                    _isArrangementMode ? Icons.description : Icons.description_outlined,
-                    color: _isArrangementMode ? AppColors.accent : null,
+                InkWell(
+                  onTap: () => setState(() => _isArrangementMode = !_isArrangementMode),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _isArrangementMode ? Icons.description : Icons.description_outlined,
+                          color: _isArrangementMode ? AppColors.accent : null,
+                          size: 20,
+                        ),
+                        Text(
+                          _isArrangementMode ? 'Arreglo' : 'Melodía',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: _isArrangementMode ? FontWeight.bold : FontWeight.normal,
+                            color: _isArrangementMode ? AppColors.accent : null,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  onPressed: () => setState(() => _isArrangementMode = !_isArrangementMode),
                 ),
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () => _showAddSongSearch(context, ref),
+              InkWell(
+                onTap: () => _showSongListSheet(context, ref),
+                borderRadius: BorderRadius.circular(8),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.format_list_bulleted, size: 20),
+                      Text('Lista', style: TextStyle(fontSize: 9)),
+                    ],
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () => _showAddSongSearch(context, ref),
+                borderRadius: BorderRadius.circular(8),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search, size: 20),
+                      Text('Buscar', style: TextStyle(fontSize: 9)),
+                    ],
+                  ),
+                ),
               ),
               _ConnectionStatusIndicator(status: liveState.status),
             ],
@@ -279,6 +320,80 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
         ),
       );
     });
+  }
+
+  void _showSongListSheet(BuildContext context, WidgetRef ref) {
+    final liveState = ref.read(liveProvider);
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (_, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppDimensions.borderRadiusLarge)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.grey.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 8),
+                child: Text('Lista de la Sesión', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: liveState.liveSongList.length,
+                  itemBuilder: (context, index) {
+                    final title = liveState.liveSongList[index];
+                    final isCurrent = index == liveState.currentIndex;
+                    final chord = getIt<ScoreRepository>().getChordForSongSync(title, widget.instrument.path);
+
+                    return ListTile(
+                      leading: _ChordAvatar(chord: chord),
+                      title: Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                          color: isCurrent ? AppColors.accent : null,
+                        ),
+                      ),
+                      trailing: isCurrent 
+                          ? const Icon(Icons.play_circle_fill, color: AppColors.accent)
+                          : Text('${index + 1}', style: const TextStyle(color: AppColors.grey, fontSize: 12)),
+                      selected: isCurrent,
+                      onTap: () {
+                        ref.read(liveProvider.notifier).updateIndex(index);
+                        Navigator.pop(context);
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
