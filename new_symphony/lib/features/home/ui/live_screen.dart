@@ -142,8 +142,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
 
       showModalBottomSheet(
         context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
+        isScrollControlled: true,        
         builder: (context) => StatefulBuilder(
           builder: (context, setModalState) {
             final filteredSongs = songs.where((s) {
@@ -162,7 +161,6 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
               expand: false,
               builder: (_, scrollController) => Container(
                 decoration: const BoxDecoration(
-                  color: AppColors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.borderRadiusLarge)),
                 ),
                 child: Column(
@@ -174,13 +172,16 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                           const Text('Agregar Cantos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                           const Spacer(),
                           TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.onSurface,
+                            ),
                             onPressed: selectedTitles.isEmpty ? null : () {
                               for (final title in selectedTitles) {
                                 ref.read(liveProvider.notifier).addSongManual(title);
                               }
                               Navigator.pop(context);
                             },
-                            child: Text('Agregar (${selectedTitles.length})'),
+                            child: Text('Agregar (${selectedTitles.length})', style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),                          
                           )
                         ],
                       ),

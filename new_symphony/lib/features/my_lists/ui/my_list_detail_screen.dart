@@ -128,6 +128,9 @@ class MyListDetailScreen extends ConsumerWidget {
                         const Text('Agregar Cantos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                         const Spacer(),
                         TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Theme.of(context).colorScheme.onSurface,
+                          ),
                           onPressed: selectedTitles.isEmpty ? null : () {
                             ref.read(myListsProvider.notifier).addSongsToList(listId, selectedTitles);
                             Navigator.pop(context);

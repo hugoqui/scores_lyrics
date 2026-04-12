@@ -19,3 +19,18 @@ samples, guidance on mobile development, and a full API reference.
 # Build
 flutter build ipa --release
 flutter build appbundle --release
+
+# Clean scores for ios simulator
+
+cd ios
+rm -rf Pods Podfile.lock
+pod deintegrate
+pod cache clean --all
+cd ..
+
+rm -rf ~/Library/Developer/Xcode/DerivedData
+
+flutter pub get
+cd ios
+pod install --repo-update
+cd ..
