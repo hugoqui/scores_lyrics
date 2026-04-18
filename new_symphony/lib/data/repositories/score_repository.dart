@@ -74,6 +74,21 @@ class ScoreRepository {
     return _downloadedFiles.where((f) => f.instrument == instrument).toList();
   }
 
+  /// Verifica si un archivo existe localmente basándose solo en su nombre e instrumento,
+  /// ignorando si el acorde ha cambiado en el servidor.
+  bool isFileDownloaded(String fileName, String instrument) {
+    // 1. Verificación exacta por nombre de archivo
+    if (_downloadedFiles.any((f) => f.fileName == fileName && f.instrument == instrument)) return true;
+
+    // 2. Verificación por similitud de título (para manejar cambios de nombre en el servidor)
+    final searchTitle = normalizeTitle(fileName.replaceAll('.png', ''));
+    return _downloadedFiles.any((f) {
+      if (f.instrument != instrument) return false;
+      final localTitle = normalizeTitle(f.fileName.replaceAll('.png', ''));
+      return localTitle.contains(searchTitle) || searchTitle.contains(localTitle);
+    });
+  }
+
   /// Replica getFileNames: Parsea el HTML del listado de archivos
   Future<List<String>> fetchRemoteAvailableFiles(String instrument) async {
     try {
@@ -135,16 +150,28 @@ class ScoreRepository {
   }
 
   /// Limpia el texto de acentos, espacios y caracteres especiales para comparaciones seguras
-  String _normalize(String text) {
-    return text
+  String normalizeTitle(String text) {
+    String processed = text;
+    
+    // 1. Manejar codificación de URL (ej. %C3%B1 -> ñ)
+    try {
+      processed = Uri.decodeComponent(processed);
+    } catch (_) {}
+
+    // 2. Quitar extensión si existe
+    processed = processed.replaceAll(RegExp(r'\.(png|jpe?g|gif|mp3)$', caseSensitive: false), '');
+
+    return processed
         .toLowerCase()
         .trim()
+        // 3. Normalizar 'ñ' tanto de Windows (NFC) como de Mac (NFD)
+        .replaceAll('\u00f1', 'n')   // ñ precompuesta
+        .replaceAll('n\u0303', 'n')   // n + tilde combinada
         .replaceAll(RegExp(r'[áàäâ]'), 'a')
         .replaceAll(RegExp(r'[éèëê]'), 'e')
         .replaceAll(RegExp(r'[íìïî]'), 'i')
         .replaceAll(RegExp(r'[óòöô]'), 'o')
         .replaceAll(RegExp(r'[úùüû]'), 'u')
-        .replaceAll('ñ', 'n')
         .replaceAll(RegExp(r'[^a-z0-9]'), '_')
         .replaceAll(RegExp(r'_+'), '_')
         .replaceAll(RegExp(r'^_|_$'), '');
@@ -153,11 +180,11 @@ class ScoreRepository {
   /// Replica getSongChord: Busca la tonalidad en la lista de la API
   Future<String> getChordForSong(String fileName, String instrument) async {
     if (_apiSongs.isEmpty) await fetchApiSongs();
-    final searchTitle = _normalize(fileName.replaceAll('.png', ''));
+    final searchTitle = normalizeTitle(fileName);
     
     try {
       final song = _apiSongs.firstWhere((s) {
-        final apiTitle = _normalize(s.title);
+        final apiTitle = normalizeTitle(s.title);
         return apiTitle == searchTitle || '${apiTitle}_$instrument' == searchTitle;
       });
       return song.chord;
@@ -167,15 +194,25 @@ class ScoreRepository {
   }
 
   String getChordForSongSync(String title, String instrument) {
-    final searchTitle = _normalize(title);
+    final searchTitle = normalizeTitle(title);
     try {
+      // Primera pasada: Coincidencia exacta o con instrumento
       final song = _apiSongs.firstWhere((s) {
-        final apiTitle = _normalize(s.title);
+        final apiTitle = normalizeTitle(s.title);
         return apiTitle == searchTitle || '${apiTitle}_$instrument' == searchTitle;
       });
       return song.chord;
     } catch (e) {
-      return 'F';
+      // Segunda pasada: Coincidencia parcial (ej. "Abre mis ojos" dentro de "Abre mis ojos Señor")
+      try {
+        final song = _apiSongs.firstWhere((s) {
+          final apiTitle = normalizeTitle(s.title);
+          return searchTitle.contains(apiTitle) || apiTitle.contains(searchTitle);
+        });
+        return song.chord;
+      } catch (_) {
+        return 'F';
+      }
     }
   }
 }

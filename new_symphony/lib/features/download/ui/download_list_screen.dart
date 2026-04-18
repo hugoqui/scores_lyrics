@@ -6,6 +6,8 @@ import 'package:new_symphony/data/models/instrument.dart';
 import 'package:new_symphony/features/download/providers/download_provider.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
+import 'package:new_symphony/core/services/service_locator.dart';
+import 'package:new_symphony/data/repositories/score_repository.dart';
 
 class DownloadListScreen extends ConsumerStatefulWidget {
   final Instrument instrument;
@@ -21,6 +23,17 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
   Timer? _debounce;
 
   @override
+  void initState() {
+    super.initState();
+    // Actualizar los acordes desde el endpoint apenas entramos a la vista
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getIt<ScoreRepository>().fetchApiSongs().then((_) {
+        if (mounted) setState(() {});
+      });
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
@@ -30,9 +43,12 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
   // Método para mostrar la confirmación
   Future<void> _confirmDownloadAll(DownloadState state) async {
     final songs = state.songs.asData?.value ?? [];
-    if (songs.isEmpty) return;
+    
+    // Deduplicamos por nombre de archivo para el conteo correcto
+    final uniqueFileNames = songs.map((s) => s.fileName).toSet();
+    if (uniqueFileNames.isEmpty) return;
 
-    final count = songs.length;
+    final count = uniqueFileNames.length;
     // Cálculo aproximado: asumiendo un promedio de 250kb por imagen/archivo
     final totalSizeMb = (count * 0.25).toStringAsFixed(1);
 
@@ -152,26 +168,37 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text('Error: $err')),
               data: (songs) {
-                String normalize(String text) => text.toLowerCase()
-                    .replaceAll('á', 'a')
-                    .replaceAll('é', 'e')
-                    .replaceAll('í', 'i')
-                    .replaceAll('ó', 'o')
-                    .replaceAll('ú', 'u')
-                    .replaceAll('ü', 'u');
+                final scoreRepo = getIt<ScoreRepository>();
 
-                // Filtramos localmente usando la misma lógica de visualización
-                final filteredSongs = songs.where((song) {
+                // 1. Deduplicamos por Título Real de la API
+                final Map<String, DownloadableSong> uniqueSongsMap = {};
+                for (var s in songs) {
+                  // Intentamos encontrar el título de la API para usarlo como KEY única
+                  // Esto colapsa "Abre mis ojos" y "Abre mis ojos Señor" en una sola entrada si ambos apuntan al mismo canto
+                  final chord = scoreRepo.getChordForSongSync(s.fileName, widget.instrument.path);
+                  final normalizedKey = scoreRepo.normalizeTitle(s.fileName);
+                  
+                  uniqueSongsMap[normalizedKey] = s;
+                }
+                final deduplicatedSongs = uniqueSongsMap.values.toList();
+
+                // 2. Filtramos localmente la lista deduplicada
+                final filteredSongs = deduplicatedSongs.where((song) {
                   final cleanTitle = song.fileName.replaceAll('.png', '').replaceAll('_', ' ');
-                  return normalize(cleanTitle).contains(normalize(_searchQuery));
+                  return scoreRepo.normalizeTitle(cleanTitle).contains(scoreRepo.normalizeTitle(_searchQuery));
                 }).toList();
 
                 return ListView.builder(
                   itemCount: filteredSongs.length,
                   itemBuilder: (context, index) {
                     final song = filteredSongs[index];
+                    
+                    // El endpoint manda: Obtenemos acorde real y estado de descarga real desde el repo
+                    final currentChord = scoreRepo.getChordForSongSync(song.fileName, widget.instrument.path);
+                    final isDownloaded = scoreRepo.isFileDownloaded(song.fileName, widget.instrument.path);
+
                     return ListTile(
-                      leading: _buildLeading(song),
+                      leading: _buildLeading(song, isDownloaded),
                       title: Text(
                         song.fileName
                             .replaceAll('.png', '')
@@ -181,9 +208,13 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                             .map((word) => '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
                             .join(' '),
                       ),
+                      subtitle: Text(
+                        'Acorde: $currentChord',
+                        style: const TextStyle(fontSize: 12, color: AppColors.grey),
+                      ),
                       trailing: IconButton(
                         icon: Icon(
-                          song.isDownloaded ? Icons.refresh : Icons.download, 
+                          isDownloaded ? Icons.refresh : Icons.download, 
                           color: Theme.of(context).colorScheme.onSurface
                         ),
                         onPressed: () => ref.read(downloadProvider(widget.instrument.path).notifier).download(song.fileName),
@@ -199,7 +230,7 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
     );
   }
 
-  Widget _buildLeading(DownloadableSong song) {
+  Widget _buildLeading(DownloadableSong song, bool isDownloaded) {
     if (song.isDownloading) {
       return SizedBox(
         width: 20,
@@ -207,7 +238,7 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
         child: CircularProgressIndicator(strokeWidth: 3, color: Theme.of(context).colorScheme.onSurface,),        
       );
     }
-    if (song.isDownloaded) {
+    if (isDownloaded) {
       return const Icon(Icons.check, color: AppColors.accent);
     }
     return const SizedBox.shrink();
