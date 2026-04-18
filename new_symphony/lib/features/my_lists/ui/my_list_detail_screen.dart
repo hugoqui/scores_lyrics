@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
@@ -10,6 +8,7 @@ import 'package:new_symphony/features/score/ui/score_screen.dart';
 import 'package:new_symphony/core/services/instruments_service.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/data/repositories/score_repository.dart';
+import 'package:new_symphony/features/practice/ui/widgets/song_picker_sheet.dart';
 
 class MyListDetailScreen extends ConsumerWidget {
   final String listId;
@@ -64,7 +63,7 @@ class MyListDetailScreen extends ConsumerWidget {
                       side: BorderSide(color: AppColors.grey.withOpacity(0.2)),
                     ),
                     child: ListTile(
-                      leading: _ChordAvatar(chord: chord),
+                      leading: ChordAvatar(chord: chord),
                       title: Text(title),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
@@ -104,155 +103,19 @@ class MyListDetailScreen extends ConsumerWidget {
     final myList = ref.read(myListsProvider).firstWhere((l) => l.id == listId);
 
     songsAsync.whenData((songs) {
-      List<String> selectedTitles = List.from(myList.songTitles);
-      String searchQuery = "";
-      String? selectedChord;
-      Timer? debounce;
-
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        builder: (context) => StatefulBuilder(
-          builder: (context, setModalState) {
-            String normalize(String text) => text.toLowerCase()
-                .replaceAll('á', 'a')
-                .replaceAll('é', 'e')
-                .replaceAll('í', 'i')
-                .replaceAll('ó', 'o')
-                .replaceAll('ú', 'u')
-                .replaceAll('ü', 'u');
-
-            final filteredSongs = songs.where((s) {
-              final matchesSearch = normalize(s.title).contains(normalize(searchQuery));
-              final currentChord = getIt<ScoreRepository>().getChordForSongSync(s.title, instrument);
-              final matchesChord = selectedChord == null || currentChord == selectedChord;
-              return matchesSearch && matchesChord;
-            }).toList();
-
-            final chordOptions = ["C", "Eb", "F", "G", "Bb"];
-
-            return DraggableScrollableSheet(
-              initialChildSize: 0.8,
-              minChildSize: 0.5,
-              maxChildSize: 0.95,
-              expand: false,
-              builder: (_, scrollController) => Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        const Text('Agregar Cantos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                        const Spacer(),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          onPressed: selectedTitles.isEmpty ? null : () {
-                            ref.read(myListsProvider.notifier).addSongsToList(listId, selectedTitles);
-                            Navigator.pop(context);
-                          },
-                          child: Text('Agregar (${selectedTitles.length})'),
-                        )
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Buscar canto...',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (val) {
-                        if (debounce?.isActive ?? false) debounce?.cancel();
-                        debounce = Timer(const Duration(milliseconds: 500), () {
-                          setModalState(() => searchQuery = val);
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        ChoiceChip(
-                          label: const Text("Todos"),
-                          selected: selectedChord == null,
-                          onSelected: (val) => setModalState(() => selectedChord = null),
-                        ),
-                        ...chordOptions.map((chord) => Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: ChoiceChip(
-                            label: Text(chord),
-                            selected: selectedChord == chord,
-                            onSelected: (val) => setModalState(() => selectedChord = val ? chord : null),
-                          ),
-                        )),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: filteredSongs.length,
-                      itemBuilder: (context, index) {
-                        final song = filteredSongs[index];
-                        final isSelected = selectedTitles.contains(song.title);
-                        return CheckboxListTile(
-                          secondary: _ChordAvatar(chord: getIt<ScoreRepository>().getChordForSongSync(song.title, instrument)),
-                          title: Text(song.title),
-                          value: isSelected,
-                          onChanged: (val) {
-                            setModalState(() {
-                              if (val == true) {
-                                selectedTitles.add(song.title);
-                              } else {
-                                selectedTitles.remove(song.title);
-                              }
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
+        builder: (context) => SongPickerSheet(
+          songs: songs,
+          initialSelectedTitles: myList.songTitles,
+          instrumentPath: instrument,
+          title: 'Agregar Cantos',
+          onConfirm: (selectedTitles) {
+            ref.read(myListsProvider.notifier).addSongsToList(listId, selectedTitles);
           },
         ),
-      ).then((_) => debounce?.cancel());
+      );
     });
-  }
-}
-
-class _ChordAvatar extends StatelessWidget {
-  final String chord;
-  const _ChordAvatar({required this.chord});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: AppColors.accent.withOpacity(0.1),
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.accent.withOpacity(0.4)),
-      ),
-      child: Center(
-        child: Text(
-          chord,
-          style: const TextStyle(
-            color: AppColors.accent,
-            fontWeight: FontWeight.bold,
-            fontSize: 11,
-          ),
-        ),
-      ),
-    );
   }
 }

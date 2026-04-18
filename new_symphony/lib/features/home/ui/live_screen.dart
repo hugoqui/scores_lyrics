@@ -10,6 +10,7 @@ import 'package:new_symphony/data/repositories/score_repository.dart';
 import 'package:new_symphony/features/live/providers/live_provider.dart';
 import 'package:new_symphony/features/practice/providers/practice_provider.dart';
 import 'package:new_symphony/features/score/providers/annotation_provider.dart';
+import 'package:new_symphony/features/practice/ui/widgets/song_picker_sheet.dart';
 import 'package:new_symphony/features/score/ui/widgets/score_image_view.dart';
 
 class LiveScreen extends ConsumerStatefulWidget {
@@ -238,136 +239,19 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     final songsAsync = ref.read(practiceSongsProvider(widget.instrument.path));
 
     songsAsync.whenData((songs) {
-      List<String> selectedTitles = List.from(liveState.liveSongList);
-      String searchQuery = "";
-      String? selectedChord;
-      Timer? debounce;
-
       showModalBottomSheet(
         context: context,
-        isScrollControlled: true,        
-        builder: (context) => StatefulBuilder(
-          builder: (context, setModalState) {
-            String normalize(String text) => text.toLowerCase()
-                .replaceAll('á', 'a')
-                .replaceAll('é', 'e')
-                .replaceAll('í', 'i')
-                .replaceAll('ó', 'o')
-                .replaceAll('ú', 'u')
-                .replaceAll('ü', 'u');
-
-            final filteredSongs = songs.where((s) {
-              final matchesSearch = normalize(s.title).contains(normalize(searchQuery));
-              final currentChord = getIt<ScoreRepository>().getChordForSongSync(s.title, widget.instrument.path);
-              final matchesChord = selectedChord == null || currentChord == selectedChord;
-              return matchesSearch && matchesChord;
-            }).toList();
-
-            final chordOptions = ["C", "Eb", "F", "G", "Bb"];
-
-            return DraggableScrollableSheet(
-              initialChildSize: 0.8,
-              minChildSize: 0.5,
-              maxChildSize: 0.95,
-              expand: false,
-              builder: (_, scrollController) => Container(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.borderRadiusLarge)),
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          const Text('Agregar Cantos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                          const Spacer(),
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.onSurface,
-                            ),
-                            onPressed: selectedTitles.isEmpty ? null : () {
-                              ref.read(liveProvider.notifier).updateLiveSongList(selectedTitles);
-                              Navigator.pop(context);
-                            },
-                            child: Text('Agregar (${selectedTitles.length})'),                          
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          hintText: 'Buscar canto...',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (val) {
-                          if (debounce?.isActive ?? false) debounce?.cancel();
-                          debounce = Timer(const Duration(milliseconds: 500), () {
-                            setModalState(() => searchQuery = val);
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          ChoiceChip(
-                            label: const Text("Todos"),
-                            selected: selectedChord == null,
-                            onSelected: (val) => setModalState(() => selectedChord = null),
-                          ),
-                          ...chordOptions.map((chord) => Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: ChoiceChip(
-                              label: Text(chord),
-                              selected: selectedChord == chord,
-                              onSelected: (val) => setModalState(() => selectedChord = val ? chord : null),
-                            ),
-                          )),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: filteredSongs.length,
-                        itemBuilder: (context, index) {
-                          final song = filteredSongs[index];
-                          // IMPORTANTE: Usamos normalización para comparar contra la lista de la sesión
-                          // Esto permite que el check aparezca aunque el servidor mande títulos sin tildes.
-                          final isSelected = selectedTitles.any((t) => normalize(t) == normalize(song.title));
-                          final chord = getIt<ScoreRepository>().getChordForSongSync(song.title, widget.instrument.path);
-                          
-                          return CheckboxListTile(
-                            secondary: _ChordAvatar(chord: chord),
-                            title: Text(song.title),
-                            value: isSelected,
-                            onChanged: (val) {
-                              setModalState(() {
-                                if (val == true) {
-                                  if (!isSelected) selectedTitles.add(song.title);
-                                } else {
-                                  selectedTitles.removeWhere((t) => normalize(t) == normalize(song.title));
-                                }
-                              });
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+        isScrollControlled: true,
+        builder: (context) => SongPickerSheet(
+          songs: songs,
+          initialSelectedTitles: liveState.liveSongList,
+          instrumentPath: widget.instrument.path,
+          title: 'Agregar Cantos',
+          onConfirm: (selectedTitles) {
+            ref.read(liveProvider.notifier).updateLiveSongList(selectedTitles);
           },
         ),
-      ).then((_) => debounce?.cancel());
+      );
     });
   }
 
@@ -413,7 +297,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                     final chord = getIt<ScoreRepository>().getChordForSongSync(title, widget.instrument.path);
 
                     return ListTile(
-                      leading: _ChordAvatar(chord: chord),
+                      leading: ChordAvatar(chord: chord),
                       title: Text(
                         title,
                         style: TextStyle(
@@ -459,34 +343,6 @@ class _ConnectionStatusIndicator extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 16),
       child: Icon(Icons.circle, size: 12, color: color),
-    );
-  }
-}
-
-class _ChordAvatar extends StatelessWidget {
-  final String chord;
-  const _ChordAvatar({required this.chord});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: AppColors.accent.withOpacity(0.1),
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.accent.withOpacity(0.4)),
-      ),
-      child: Center(
-        child: Text(
-          chord,
-          style: const TextStyle(
-            color: AppColors.accent,
-            fontWeight: FontWeight.bold,
-            fontSize: 11,
-          ),
-        ),
-      ),
     );
   }
 }
