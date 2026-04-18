@@ -29,7 +29,7 @@ pod cache clean --all
 cd ..
 
 rm -rf ~/Library/Developer/Xcode/DerivedData
-
+flutter clean
 flutter pub get
 cd ios
 pod install --repo-update

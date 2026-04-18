@@ -4,6 +4,7 @@ import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 
 class FloatingPlayerCard extends StatelessWidget {
+  final bool hasArrangement; // ¿Existe un arreglo para este canto?
   final bool isArrangementScore; // ¿Estamos viendo la partitura de arreglo?
   final bool isArrangementAudio; // ¿Estamos escuchando el audio de arreglo?
   final bool isLoopEnabled;
@@ -20,6 +21,7 @@ class FloatingPlayerCard extends StatelessWidget {
 
   const FloatingPlayerCard({
     super.key,
+    required this.hasArrangement,
     required this.isArrangementScore,
     required this.isArrangementAudio,
     required this.isLoopEnabled,
@@ -126,29 +128,28 @@ class FloatingPlayerCard extends StatelessWidget {
                       ),
                       
                       // Toggle de Partitura (Melodía / Arreglo)
-                      _buildActionButton(
-                        icon: isArrangementScore
-                            ? Icons.auto_awesome_motion
-                            : Icons.description,
-                        label: isArrangementScore ? 'Arr.' : 'Mel.',
-                        onTap: onToggleScoreMode,
-                        isActive: isArrangementScore,
-                        isVertical: true,
-                      ),
+                      if (hasArrangement)
+                        _buildActionButton(
+                          icon: isArrangementScore
+                              ? Icons.auto_awesome_motion
+                              : Icons.description,
+                          label: isArrangementScore ? 'Arr.' : 'Mel.',
+                          onTap: onToggleScoreMode,
+                          isActive: isArrangementScore,
+                          isVertical: true,
+                        ),
                       
                       // Selector de Audio
-                      Opacity(
-                        opacity: isArrangementScore ? 1.0 : 0.3,
-                        child: _buildActionButton(
+                      if (hasArrangement)
+                        _buildActionButton(
                           icon: isArrangementAudio
                               ? Icons.headphones
                               : Icons.person,
                           label: isArrangementAudio ? 'Arr.' : 'Base',
-                          onTap: isArrangementScore ? onToggleAudioMode : () {},
-                          isActive: isArrangementAudio && isArrangementScore,
+                          onTap: onToggleAudioMode,
+                          isActive: isArrangementAudio,
                           isVertical: true,
                         ),
-                      ),
                       
                       // Botón Loop
                       _buildActionButton(
@@ -218,16 +219,17 @@ class FloatingPlayerCard extends StatelessWidget {
                             onTap: () => _showSpeedMenu(context),
                           ),
                           // Toggle de Partitura (Melodía / Arreglo)
-                          _buildActionButton(
-                            icon: isArrangementScore
-                                ? Icons.auto_awesome_motion
-                                : Icons.description,
-                            label: isArrangementScore
-                                ? 'Ver Melodía'
-                                : 'Ver Arreglo',
-                            onTap: onToggleScoreMode,
-                            isActive: isArrangementScore,
-                          ),
+                          if (hasArrangement)
+                            _buildActionButton(
+                              icon: isArrangementScore
+                                  ? Icons.auto_awesome_motion
+                                  : Icons.description,
+                              label: isArrangementScore
+                                  ? 'Ver Melodía'
+                                  : 'Ver Arreglo',
+                              onTap: onToggleScoreMode,
+                              isActive: isArrangementScore,
+                            ),
                           // Botón Play/Pause
                           IconButton(
                             iconSize: 44,
@@ -240,23 +242,16 @@ class FloatingPlayerCard extends StatelessWidget {
                             ),
                             onPressed: onPlayPause,
                           ),
-                          // Selector de Audio (Solo si la partitura es Arreglo)
-                          Opacity(
-                            opacity: isArrangementScore ? 1.0 : 0.3,
-                            child: _buildActionButton(
+                          // Selector de Audio
+                          if (hasArrangement)
+                            _buildActionButton(
                               icon: isArrangementAudio
                                   ? Icons.headphones
                                   : Icons.person,
-                              label: isArrangementAudio
-                                  ? 'Audio: Arr.'
-                                  : 'Audio: Base',
-                              onTap: isArrangementScore
-                                  ? onToggleAudioMode
-                                  : () {},
-                              isActive:
-                                  isArrangementAudio && isArrangementScore,
+                              label: isArrangementAudio ? 'Arr.' : 'Base',
+                              onTap: onToggleAudioMode,
+                              isActive: isArrangementAudio,
                             ),
-                          ),
                           // Botón Loop
                           _buildActionButton(
                             icon: Icons.repeat,

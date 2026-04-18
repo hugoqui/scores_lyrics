@@ -120,6 +120,7 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
                     ? Alignment.centerRight
                     : Alignment.bottomCenter,
                 child: FloatingPlayerCard(
+                  hasArrangement: currentSong.hasArrangementDownloaded,
                   isArrangementScore: state.isArrangementMode && currentSong.hasArrangementDownloaded,
                   isArrangementAudio: state.isAudioArrangement,
                   isLoopEnabled: state.isLoopEnabled,

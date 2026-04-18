@@ -31,12 +31,14 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
   late String _noteKey;
 
   late PhotoViewController _photoViewController;
+  late Future<File> _fileFuture;
 
   @override
   void initState() {
     super.initState();
     _noteKey = '${widget.instrument}_${widget.fileName}';
     _photoViewController = PhotoViewController();
+    _fileFuture = _getScoreFile();
     _calculateImageSize();
   }
 
@@ -44,8 +46,11 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
   void didUpdateWidget(ScoreImageView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fileName != widget.fileName || oldWidget.instrument != widget.instrument) {
-      _noteKey = '${widget.instrument}_${widget.fileName}';
-      _photoViewController.reset(); // Resetear el controlador al cambiar de canción
+      setState(() {
+        _noteKey = '${widget.instrument}_${widget.fileName}';
+        _photoViewController.reset(); // Resetear el controlador al cambiar de archivo
+        _fileFuture = _getScoreFile();
+      });
       _calculateImageSize();
     }
   }
@@ -57,7 +62,7 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
   }
 
   Future<void> _calculateImageSize() async {
-    final file = await _getScoreFile();
+    final file = await _fileFuture;
     if (!file.existsSync()) return;
 
     final Completer<Size> completer = Completer();
@@ -98,7 +103,7 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
     });
 
     return FutureBuilder<File>(
-      future: _getScoreFile(),
+      future: _fileFuture,
       builder: (context, snapshot) {
         if (!snapshot.hasData || _imageSize == null) {
           return const Center(child: CircularProgressIndicator());
@@ -117,6 +122,7 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
             child: Stack(
               children: [
                 PhotoView.customChild(
+                  key: ValueKey(_noteKey), // Forza un reset completo del widget al cambiar la imagen
                   controller: _photoViewController, // Pasamos el controlador
                   backgroundDecoration: const BoxDecoration(color: AppColors.white),
                   minScale: PhotoViewComputedScale.contained,
