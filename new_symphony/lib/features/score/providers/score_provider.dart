@@ -69,11 +69,21 @@ class ScoreNotifier extends StateNotifier<ScoreState> {
       state = state.copyWith(duration: dur ?? Duration.zero);
     });
     _stateSub = _player.playerStateStream.listen((playerState) {
-      state = state.copyWith(
-        isPlaying: playerState.playing,
-        isLoading: playerState.processingState == ProcessingState.buffering ||
-                  playerState.processingState == ProcessingState.loading,
-      );
+      if (playerState.processingState == ProcessingState.completed) {
+        // Punto 2: Al finalizar el canto, regresamos al inicio y ponemos pausa
+        _player.seek(Duration.zero);
+        _player.pause();
+        state = state.copyWith(
+          isPlaying: false,
+          position: Duration.zero,
+        );
+      } else {
+        state = state.copyWith(
+          isPlaying: playerState.playing,
+          isLoading: playerState.processingState == ProcessingState.buffering ||
+                    playerState.processingState == ProcessingState.loading,
+        );
+      }
     });
   }
 
@@ -89,11 +99,6 @@ class ScoreNotifier extends StateNotifier<ScoreState> {
   Future<void> loadSong(String instrument, PracticeSong song) async {
     state = state.copyWith(isLoading: true, position: Duration.zero, duration: Duration.zero);
     
-    // Si estamos en Melodía, forzamos audio de melodía
-    if (!state.isArrangementMode) {
-      state = state.copyWith(isAudioArrangement: false);
-    }
-
     final url = _getAudioUrl(instrument, song);
     try {
       await _player.setUrl(url);
@@ -142,14 +147,10 @@ class ScoreNotifier extends StateNotifier<ScoreState> {
     final nextMode = !state.isArrangementMode;
     state = state.copyWith(
       isArrangementMode: nextMode,
-      // Si pasamos a melodía, el audio DEBE ser melodía obligatoriamente
-      isAudioArrangement: nextMode ? state.isAudioArrangement : false,
     );
   }
 
   Future<void> toggleAudioMode(String instrument, PracticeSong song) async {
-    if (!state.isArrangementMode) return; // Regla: solo en modo arreglo se cambia audio
-
     final nextAudioArr = !state.isAudioArrangement;
     final currentPos = _player.position;
     final wasPlaying = _player.playing;
