@@ -4,7 +4,7 @@ import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/features/score/models/annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum AnnotationTool { pencil, arrow, circle, square }
+enum AnnotationTool { pencil, arrow, circle, square, eraser }
 
 class AnnotationState {
   final List<DrawingStroke> strokes;

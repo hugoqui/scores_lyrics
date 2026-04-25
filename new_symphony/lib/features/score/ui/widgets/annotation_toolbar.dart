@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/features/score/providers/annotation_provider.dart';
 
@@ -113,22 +114,34 @@ class AnnotationToolbar extends ConsumerWidget {
 
     return [
         IconButton(
+          style: IconButton.styleFrom(
+            backgroundColor: AppColors.lightGrey,
+          ),
           icon: const Icon(Icons.close, color: AppColors.error),
           onPressed: notifier.cancelChanges,
           tooltip: 'Cancelar cambios',
         ),
         IconButton(
+          style: IconButton.styleFrom(
+            backgroundColor: AppColors.lightGrey,
+          ),
           icon: const Icon(Icons.check),
-          color: AppColors.accent,
+          color: AppColors.success,
           onPressed: notifier.confirmChanges,
           tooltip: 'Confirmar notas',
         ),
         spacer,
         IconButton(
-          icon: const Icon(Icons.gesture),
+          icon: const Icon(Icons.edit),
           color: state.activeTool == AnnotationTool.pencil ? AppColors.accent : Colors.grey,
           onPressed: () => notifier.setTool(AnnotationTool.pencil),
           tooltip: 'Lápiz',
+        ),
+        IconButton(
+          icon: Icon(Symbols.ink_eraser),
+          color: state.activeTool == AnnotationTool.eraser ? AppColors.accent : Colors.grey,
+          onPressed: () => notifier.setTool(AnnotationTool.eraser),
+          tooltip: 'Borrador',
         ),
         IconButton(
           icon: const Icon(Icons.trending_flat),

@@ -9,6 +9,7 @@ class AppColors {
   static const Color accent = Color(0xFFC5A059); // Muted Gold
   static const Color accentLight = Color(0xFFE2C48D);
   static const Color accentDark = Color(0xFF846328);
+  static const Color success = Color.fromARGB(255, 12, 141, 42);
 
   // Text Colors
   static const Color textPrimary = Color(0xFF1C1C1C); 

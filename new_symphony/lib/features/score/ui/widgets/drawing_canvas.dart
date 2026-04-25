@@ -77,7 +77,8 @@ class _DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       } : null,
       onPanUpdate: annotationState.isDrawingMode ? (details) {
         setState(() {
-          if (annotationState.activeTool == AnnotationTool.pencil) {
+          if (annotationState.activeTool == AnnotationTool.pencil ||
+              annotationState.activeTool == AnnotationTool.eraser) {
             _currentPoints.add(OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition)));
           } else {
             // Para formas, solo guardamos el punto inicial y el actual como final
@@ -159,6 +160,13 @@ class _CanvasPainter extends CustomPainter {
       (size.height - renderedImageHeight) / 2 + position.dy,
     );
 
+    // Usamos saveLayer para que BlendMode.clear afecte solo a esta capa de dibujo
+    // y no borre la imagen de la partitura que está debajo en el Stack.
+    canvas.saveLayer(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint(),
+    );
+
     // Creamos una capa para dibujar las anotaciones transformadas
     canvas.save();
     canvas.translate(imageOffset.dx, imageOffset.dy);
@@ -180,6 +188,7 @@ class _CanvasPainter extends CustomPainter {
       _drawShape(canvas, currentPoints, activeTool, paint);
     }
     canvas.restore(); // Restauramos la capa
+    canvas.restore(); // Restauramos la capa de saveLayer
   }
 
   void _drawStroke(Canvas canvas, DrawingStroke stroke, Paint paint) {
@@ -191,7 +200,16 @@ class _CanvasPainter extends CustomPainter {
   void _drawShape(Canvas canvas, List<OffsetPoint> points, AnnotationTool tool, Paint paint) {
     if (points.isEmpty) return;
     
-    if (tool == AnnotationTool.pencil) {
+    // Configuramos el comportamiento según la herramienta
+    if (tool == AnnotationTool.eraser) {
+      paint.blendMode = BlendMode.clear;
+      paint.strokeWidth = 20.0; // Borrador más grueso para facilitar el uso
+    } else {
+      paint.blendMode = BlendMode.srcOver;
+      paint.strokeWidth = 3.0;
+    }
+
+    if (tool == AnnotationTool.pencil || tool == AnnotationTool.eraser) {
       for (int i = 0; i < points.length - 1; i++) {
         canvas.drawLine(points[i].toOffset(), points[i+1].toOffset(), paint);
       }
