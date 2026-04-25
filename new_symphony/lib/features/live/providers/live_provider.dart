@@ -80,7 +80,11 @@ class LiveNotifier extends StateNotifier<LiveState> {
     });
 
     _listSub = _socketService.listChangeStream.listen((_) {
-      fetchSongList();
+      // Agregamos un delay de 300ms para permitir que el servidor 
+      // termine de actualizar la lista antes de consultar el endpoint.
+      Future.delayed(const Duration(milliseconds: 300), () {
+        fetchSongList();
+      });
     });
   }
 

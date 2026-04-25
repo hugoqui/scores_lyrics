@@ -7,11 +7,11 @@ class SocketService {
 
   // Controladores de flujo para notificar eventos a los Providers
   final _statusController = StreamController<String>.broadcast();
-  final _songController = StreamController<String>.broadcast();
+  final _songController = StreamController<dynamic>.broadcast();
   final _listChangeController = StreamController<void>.broadcast();
 
   Stream<String> get statusStream => _statusController.stream;
-  Stream<String> get songStream => _songController.stream;
+  Stream<dynamic> get songStream => _songController.stream;
   Stream<void> get listChangeStream => _listChangeController.stream;
 
   void connect(String host) {
@@ -50,15 +50,11 @@ class SocketService {
     // Escucha de eventos de negocio
     _socket!.on('text_change', (data) {
       if (data != null) {
-        if (data is Map && data['title'] != null) {
-          _songController.add(data['title'].toString());
-        } else if (data is String) {
-          _songController.add(data);
-        }
+        _songController.add(data);
       }
     });
 
-    _socket!.on('listChange', (_) {
+    _socket!.on('list_change', (_) {
       _listChangeController.add(null);
     });
   }
