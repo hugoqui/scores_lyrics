@@ -11,6 +11,7 @@ import 'package:new_symphony/features/home/ui/live_screen.dart';
 import 'package:new_symphony/features/live/providers/live_provider.dart';
 import 'package:new_symphony/features/my_lists/ui/my_lists_screen.dart';
 import 'package:new_symphony/features/settings/ui/settings_screen.dart';
+import 'package:upgrader/upgrader.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -44,77 +45,86 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: AppDimensions.paddingMedium),
-          const SizedBox(height: AppDimensions.paddingExtraLarge),
-          Image.asset('assets/images/logo.png',height: 100,fit: BoxFit.contain,color: isDarkMode ? AppColors.white : null),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-              child: GridView(
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: maxColumnWidth,
-                  mainAxisExtent: itemHeight,
-                  crossAxisSpacing: AppDimensions.paddingMedium,
-                  mainAxisSpacing: AppDimensions.paddingMedium,
+      // UpgradeAlert verifica automáticamente las tiendas (App Store / Play Store)
+      body: UpgradeAlert(
+        dialogStyle: isPortrait ? UpgradeDialogStyle.material : UpgradeDialogStyle.cupertino,
+        upgrader: Upgrader(
+          // debugDisplayAlways: true, // Forzar que aparezca siempre para pruebas
+          debugLogging: true,       // Ver log detallado en la consola
+          messages: UpgraderMessages(code: 'es'),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: AppDimensions.paddingMedium),
+            const SizedBox(height: AppDimensions.paddingExtraLarge),
+            Image.asset('assets/images/logo.png',height: 100,fit: BoxFit.contain,color: isDarkMode ? AppColors.white : null),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+                child: GridView(
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: maxColumnWidth,
+                    mainAxisExtent: itemHeight,
+                    crossAxisSpacing: AppDimensions.paddingMedium,
+                    mainAxisSpacing: AppDimensions.paddingMedium,
+                  ),
+                  children: [
+                    _MenuCard(
+                      title: 'Conectarse a Transmisión',
+                      icon: Icons.wifi_tethering,
+                      onTap: () {
+                        _showConnectDialog(context, ref);
+                      },
+                    ),            
+                    _MenuCard(
+                      title: 'Mis Listas',
+                      icon: Icons.list,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MyListsScreen()),
+                        );
+                      },
+                    ),
+                    _MenuCard(
+                      title: 'Practicar',
+                      icon: Icons.music_note,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const InstrumentSelectionScreen(isPractice: true)),
+                        );
+                      },
+                    ),
+                    _MenuCard(
+                      title: 'Descargar',
+                      icon: Icons.download,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const InstrumentSelectionScreen()),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                children: [
-                  _MenuCard(
-                    title: 'Conectarse a Transmisión',
-                    icon: Icons.wifi_tethering,
-                    onTap: () {
-                      _showConnectDialog(context, ref);
-                    },
-                  ),            
-                  _MenuCard(
-                    title: 'Mis Listas',
-                    icon: Icons.list,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const MyListsScreen()),
-                      );
-                    },
-                  ),
-                  _MenuCard(
-                    title: 'Practicar',
-                    icon: Icons.music_note,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const InstrumentSelectionScreen(isPractice: true)),
-                      );
-                    },
-                  ),
-                  _MenuCard(
-                    title: 'Descargar',
-                    icon: Icons.download,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const InstrumentSelectionScreen()),
-                      );
-                    },
-                  ),
-                ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppDimensions.paddingLarge),
-            child: FutureBuilder<PackageInfo>(
-              future: PackageInfo.fromPlatform(),
-              builder: (context, snapshot) {
-                final version = snapshot.data?.version ?? '...';
-                return Text(
-                  'Versión $version',
-                  style: const TextStyle(color: AppColors.grey, fontSize: 12),
-                );
-              },
+            Padding(
+              padding: const EdgeInsets.all(AppDimensions.paddingLarge),
+              child: FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  final version = snapshot.data?.version ?? '...';
+                  return Text(
+                    'Versión $version',
+                    style: const TextStyle(color: AppColors.grey, fontSize: 12),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

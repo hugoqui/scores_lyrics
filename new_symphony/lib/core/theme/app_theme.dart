@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_styles.dart';
+import 'package:new_symphony/core/constants/app_dimensions.dart';
 
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
@@ -59,6 +60,14 @@ class AppTheme {
         ),
       ),
     ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.white,
+      titleTextStyle: AppStyles.headlineMedium.copyWith(color: AppColors.textPrimary),
+      contentTextStyle: AppStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
+      ),
+    ),
     // Add more theme properties as needed
   );
 
@@ -102,6 +111,17 @@ class AppTheme {
       bodySmall: AppStyles.bodySmall.copyWith(color: AppColors.textLight),
       labelLarge: AppStyles.buttonText,
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.textLight, // Texto blanco para botones de texto en dark mode
+        textStyle: AppStyles.buttonText,
+      ),
+    ),
+    buttonTheme: const ButtonThemeData( // Mantener si se usa en algún lugar, pero TextButtonThemeData es más moderno
+      buttonColor: AppColors.primaryDark,
+      textTheme: ButtonTextTheme.primary,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primaryDark,
@@ -110,6 +130,14 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.darkGrey,
+      titleTextStyle: AppStyles.headlineMedium.copyWith(color: AppColors.textLight),
+      contentTextStyle: AppStyles.bodyMedium.copyWith(color: AppColors.textLight),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
       ),
     ),
     // Dentro de AppTheme.darkTheme

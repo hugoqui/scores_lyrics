@@ -23,6 +23,7 @@ dependencies:
   socket_io_client: ^2.0.3
   package_info_plus: ^8.0.0
   flutter_svg: ^2.0.10+1
+  upgrader: ^10.3.0
 
 
 dev_dependencies:
