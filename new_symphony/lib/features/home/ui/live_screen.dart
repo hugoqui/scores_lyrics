@@ -31,7 +31,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController = PageController(initialPage: 5000); // Página base para el loop infinito
   }
 
   @override
@@ -65,7 +65,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     if (liveState.liveSongList.isNotEmpty && liveState.currentIndex < liveState.liveSongList.length) {
       final currentTitle = liveState.liveSongList[liveState.currentIndex];
       final songs = songsAsync.value ?? [];
-      final currentSong = songs.where((s) => s.title.toLowerCase() == currentTitle.toLowerCase()).firstOrNull;
+      final scoreRepo = getIt<ScoreRepository>();
+      final currentSong = songs.where((s) => 
+        scoreRepo.normalizeTitle(s.title) == scoreRepo.normalizeTitle(currentTitle)
+      ).firstOrNull;
       
       if (currentSong != null) {
         final displayFileName = (_isArrangementMode && currentSong.arrangementFileName != null)
@@ -77,21 +80,25 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
       }
     }
 
-    // Escuchar cambios de índice desde el servidor para mover el PageView
-    ref.listen(liveProvider.select((s) => s.currentIndex), (prev, next) {
-      if (_pageController.hasClients) {
-        final listLength = liveState.liveSongList.length;
+    // Escuchar cambios de TÍTULO para mover el visor (más confiable que el índice)
+    ref.listen(liveProvider.select((s) => s.currentSongTitle), (prev, nextTitle) {
+      if (_pageController.hasClients && nextTitle != null) {
+        final scoreRepo = getIt<ScoreRepository>();
+        final list = ref.read(liveProvider).liveSongList;
+        final nextIndex = list.indexWhere((t) => scoreRepo.normalizeTitle(t) == scoreRepo.normalizeTitle(nextTitle));
+        
+        final listLength = list.length;
         if (listLength <= 1) return;
+        if (nextIndex < 0) return;
 
         final currentPage = _pageController.page?.round() ?? 0;
         final currentRealIndex = currentPage % listLength;
+        if (currentRealIndex == nextIndex) return;
 
-        if (currentRealIndex == next) return;
-
-        // Encontrar el salto más corto para el loop circular
-        int diff = next - currentRealIndex;
-        if (diff > listLength / 2) diff -= listLength;
-        if (diff < -listLength / 2) diff += listLength;
+        int diff = nextIndex - currentRealIndex;
+        if (diff.abs() > listLength / 2) {
+          diff = diff > 0 ? diff - listLength : diff + listLength;
+        }
 
         _pageController.animateToPage(
           currentPage + diff,
@@ -102,14 +109,6 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     });
 
     final bool canHaveArrangement = widget.instrument.path != 'piano' && widget.instrument.path != 'trompeta';
-
-    // Inicialización del PageController con un offset grande para permitir loop infinito
-    if (_isFirstLoad && liveState.liveSongList.isNotEmpty) {
-      _isFirstLoad = false;
-      final length = liveState.liveSongList.length;
-      final initialVirtualPage = (length * 100) + liveState.currentIndex;
-      _pageController = PageController(initialPage: initialVirtualPage);
-    }
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -182,7 +181,6 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                   error: (err, _) => Center(child: Text('Error: $err')),
                   data: (songs) {
                     return PageView.builder(
-                      key: ValueKey('live_page_view_${liveState.liveSongList.length}'), 
                       controller: _pageController,
                       physics: isDrawing ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
                       // Sin itemCount para permitir scroll infinito
@@ -195,8 +193,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                         if (liveState.liveSongList.isEmpty) return const SizedBox.shrink();
                         final realIndex = index % liveState.liveSongList.length;
                         final songTitle = liveState.liveSongList[realIndex];
+                        final scoreRepo = getIt<ScoreRepository>();
                         final song = songs.where((s) => 
-                          s.title.toLowerCase() == songTitle.toLowerCase()
+                          scoreRepo.normalizeTitle(s.title) == scoreRepo.normalizeTitle(songTitle)
                         ).firstOrNull;
 
                         if (song == null) {
@@ -288,34 +287,34 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                 child: Text('Lista de la Sesión', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               ),
               Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: liveState.liveSongList.length,
-                  itemBuilder: (context, index) {
-                    final title = liveState.liveSongList[index];
-                    final isCurrent = index == liveState.currentIndex;
-                    final chord = getIt<ScoreRepository>().getChordForSongSync(title, widget.instrument.path);
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final currentLiveState = ref.watch(liveProvider);
+                    return ListView.builder(
+                      controller: scrollController,
+                      itemCount: currentLiveState.liveSongList.length,
+                      itemBuilder: (context, index) {
+                        final title = currentLiveState.liveSongList[index];
+                        final isCurrent = index == currentLiveState.currentIndex;
+                        final chord = getIt<ScoreRepository>().getChordForSongSync(title, widget.instrument.path);
 
-                    return ListTile(
-                      leading: ChordAvatar(chord: chord),
-                      title: Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                          color: isCurrent ? AppColors.accent : null,
-                        ),
-                      ),
-                      trailing: isCurrent 
-                          ? const Icon(Icons.play_circle_fill, color: AppColors.accent)
-                          : Text('${index + 1}', style: const TextStyle(color: AppColors.grey, fontSize: 12)),
-                      selected: isCurrent,
-                      onTap: () {
-                        ref.read(liveProvider.notifier).updateIndex(index);
-                        Navigator.pop(context);
-                        _pageController.animateToPage(
-                          index,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
+                        return ListTile(
+                          leading: ChordAvatar(chord: chord),
+                          title: Text(
+                            title,
+                            style: TextStyle(
+                              fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                              color: isCurrent ? AppColors.accent : null,
+                            ),
+                          ),
+                          trailing: isCurrent 
+                              ? const Icon(Icons.play_circle_fill, color: AppColors.accent)
+                              : Text('${index + 1}', style: const TextStyle(color: AppColors.grey, fontSize: 12)),
+                          selected: isCurrent,
+                          onTap: () {
+                            ref.read(liveProvider.notifier).updateIndex(index);
+                            Navigator.pop(context);
+                          },
                         );
                       },
                     );

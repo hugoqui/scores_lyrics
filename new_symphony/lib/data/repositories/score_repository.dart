@@ -215,4 +215,14 @@ class ScoreRepository {
       }
     }
   }
+
+  /// Verifica si un título existe en la base de datos de la API (caché)
+  bool isValidSongTitle(String title) {
+    if (_apiSongs.isEmpty) return false;
+    final searchTitle = normalizeTitle(title);
+    return _apiSongs.any((s) {
+      final apiTitle = normalizeTitle(s.title);
+      return apiTitle == searchTitle;
+    });
+  }
 }
