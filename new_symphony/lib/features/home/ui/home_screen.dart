@@ -11,6 +11,7 @@ import 'package:new_symphony/features/home/ui/live_screen.dart';
 import 'package:new_symphony/features/live/providers/live_provider.dart';
 import 'package:new_symphony/features/my_lists/ui/my_lists_screen.dart';
 import 'package:new_symphony/features/settings/ui/settings_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -98,6 +99,19 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppDimensions.paddingLarge),
+            child: FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                final version = snapshot.data?.version ?? '...';
+                return Text(
+                  'Versión $version',
+                  style: const TextStyle(color: AppColors.grey, fontSize: 12),
+                );
+              },
             ),
           ),
         ],
