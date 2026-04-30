@@ -26,7 +26,6 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   late PageController _pageController;
   bool _isFullScreen = false;
   bool _isArrangementMode = false;
-  bool _isFirstLoad = true;
 
   @override
   void initState() {
@@ -55,6 +54,31 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     setState(() => _isFullScreen = !_isFullScreen);
   }
 
+  void _syncPageToIndex(int targetIndex, int listLength, {bool animate = false}) {
+    if (!_pageController.hasClients || listLength <= 0) return;
+
+    final currentPage = _pageController.page?.round() ?? _pageController.initialPage;
+    final currentRealIndex = currentPage % listLength;
+    if (currentRealIndex == targetIndex) return;
+
+    int diff = targetIndex - currentRealIndex;
+    if (diff.abs() > listLength / 2) {
+      diff = diff > 0 ? diff - listLength : diff + listLength;
+    }
+
+    final targetPage = currentPage + diff;
+    if (animate) {
+      _pageController.animateToPage(
+        targetPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      return;
+    }
+
+    _pageController.jumpToPage(targetPage);
+  }
+
   @override
   Widget build(BuildContext context) {
     final liveState = ref.watch(liveProvider);
@@ -80,6 +104,18 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
       }
     }
 
+    // Si cambia el tamaño de la lista, reanclamos el PageView al índice actual
+    // para que la página física no apunte a otro canto por el nuevo módulo.
+    ref.listen(liveProvider.select((s) => (length: s.liveSongList.length, index: s.currentIndex)), (prev, next) {
+      final previousLength = prev?.length;
+      if (previousLength == null || previousLength == next.length || next.length <= 1) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncPageToIndex(next.index, next.length);
+      });
+    });
+
     // Escuchar cambios de TÍTULO para mover el visor (más confiable que el índice)
     ref.listen(liveProvider.select((s) => s.currentSongTitle), (prev, nextTitle) {
       if (_pageController.hasClients && nextTitle != null) {
@@ -91,20 +127,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
         if (listLength <= 1) return;
         if (nextIndex < 0) return;
 
-        final currentPage = _pageController.page?.round() ?? 0;
-        final currentRealIndex = currentPage % listLength;
-        if (currentRealIndex == nextIndex) return;
-
-        int diff = nextIndex - currentRealIndex;
-        if (diff.abs() > listLength / 2) {
-          diff = diff > 0 ? diff - listLength : diff + listLength;
-        }
-
-        _pageController.animateToPage(
-          currentPage + diff,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
+        _syncPageToIndex(nextIndex, listLength, animate: true);
       }
     });
 
@@ -255,8 +278,6 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   }
 
   void _showSongListSheet(BuildContext context, WidgetRef ref) {
-    final liveState = ref.read(liveProvider);
-    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

@@ -80,9 +80,11 @@ class LiveNotifier extends StateNotifier<LiveState> {
     });
 
     _listSub = _socketService.listChangeStream.listen((_) {
+      print('[live] socket:list_change currentSong=${state.currentSongTitle} currentIndex=${state.currentIndex} listSize=${state.liveSongList.length}');
       // Agregamos un delay de 300ms para permitir que el servidor 
       // termine de actualizar la lista antes de consultar el endpoint.
       Future.delayed(const Duration(milliseconds: 300), () {
+        print('[live] list_change -> fetchSongList start');
         fetchSongList();
       });
     });
@@ -124,6 +126,7 @@ class LiveNotifier extends StateNotifier<LiveState> {
 
   Future<void> fetchSongList({bool isInitialFetch = false}) async {
     try {
+      print('[live] fetchSongList start initial=$isInitialFetch currentSong=${state.currentSongTitle} currentIndex=${state.currentIndex} localListSize=${state.liveSongList.length}');
       final response = await _dio.get('${_getHostWithProtocol()}/api/songList');
       final List<dynamic> data = response.data;
       
@@ -152,8 +155,13 @@ class LiveNotifier extends StateNotifier<LiveState> {
         newLiveSongList = [];
       }
 
-      // Actualizamos el estado con la nueva lista y re-evaluamos el canto/índice actual
-      updateLiveSongList(newLiveSongList);
+      print('[live] fetchSongList response initial=$isInitialFetch serverListSize=${serverTitles.length} mergedListSize=${newLiveSongList.length} firstServer=${serverTitles.isNotEmpty ? serverTitles.first : 'null'} currentSong=${state.currentSongTitle}');
+
+      // En updates de lista preservamos el canto actual; en carga inicial permitimos selección inicial.
+      updateLiveSongList(
+        newLiveSongList,
+        preserveCurrentSong: !isInitialFetch,
+      );
     } catch (e) {
       print('Error fetching song list: $e'); // Considerar un logger o feedback al usuario
     }
@@ -168,7 +176,13 @@ class LiveNotifier extends StateNotifier<LiveState> {
   }
 
   // Método para actualizar la lista y recalcular el índice actual
-  void updateLiveSongList(List<String> newTitles) {
+  void updateLiveSongList(
+    List<String> newTitles, {
+    bool preserveCurrentSong = true,
+  }) {
+    final previousTitle = state.currentSongTitle;
+    final previousIndex = state.currentIndex;
+
     // Aseguramos que los títulos sean únicos (basado en el título normalizado)
     final uniqueTitles = <String>[];
     final normalizedUniqueTitles = <String>{};
@@ -182,21 +196,49 @@ class LiveNotifier extends StateNotifier<LiveState> {
     }
 
     String? newTitle = state.currentSongTitle;
-    int newIndex = 0;
+    int newIndex = state.currentIndex;
 
-    // Si el canto actual ya no está en la nueva lista, intentamos mantener la posición o ir al inicio
+    // En cambios de lista por socket, preservamos el canto actual.
+    // Solo en carga inicial hacemos selección automática.
     if (newTitle != null) {
-      int index = uniqueTitles.indexWhere((t) => scoreRepo.normalizeTitle(t) == scoreRepo.normalizeTitle(newTitle!));
+      int index = uniqueTitles.indexWhere(
+        (t) => scoreRepo.normalizeTitle(t) == scoreRepo.normalizeTitle(newTitle!),
+      );
+
+      // Fallback por si el normalizado no coincide pero el texto sí coincide.
+      if (index < 0) {
+        final lowered = newTitle.trim().toLowerCase();
+        index = uniqueTitles.indexWhere((t) => t.trim().toLowerCase() == lowered);
+      }
+
       if (index >= 0) {
         newIndex = index;
+        // Sincroniza el título con la representación exacta de la lista actual.
+        newTitle = uniqueTitles[index];
       } else {
-        // Si el canto ya no está, tomamos el primero de la lista si existe
-        newTitle = uniqueTitles.isNotEmpty ? uniqueTitles[0] : null;
-        newIndex = 0;
+        if (!preserveCurrentSong) {
+          // En carga inicial sí tomamos el primero disponible.
+          newTitle = uniqueTitles.isNotEmpty ? uniqueTitles[0] : null;
+          newIndex = 0;
+        }
       }
-    } else if (uniqueTitles.isNotEmpty) {
+    } else if (uniqueTitles.isNotEmpty && !preserveCurrentSong) {
       newTitle = uniqueTitles[0];
+      newIndex = 0;
     }
+
+    if (uniqueTitles.isEmpty) {
+      newIndex = 0;
+      if (!preserveCurrentSong) {
+        newTitle = null;
+      }
+    } else if (newIndex >= uniqueTitles.length) {
+      newIndex = uniqueTitles.length - 1;
+    } else if (newIndex < 0) {
+      newIndex = 0;
+    }
+
+    print('[live] updateLiveSongList preserve=$preserveCurrentSong prevSong=$previousTitle prevIndex=$previousIndex newSong=$newTitle newIndex=$newIndex oldListSize=${state.liveSongList.length} newListSize=${uniqueTitles.length}');
 
     state = state.copyWith(
       liveSongList: uniqueTitles, 
@@ -207,21 +249,27 @@ class LiveNotifier extends StateNotifier<LiveState> {
 
   void _updateCurrentSong(String title, {String? reference}) {
     final cleanTitle = title.trim();
+    print('[live] _updateCurrentSong incoming title=$cleanTitle reference=$reference currentSong=${state.currentSongTitle} currentIndex=${state.currentIndex}');
     if (cleanTitle.isEmpty) return; // Evita el "canto vacío"
     if (reference != null && reference.trim().isNotEmpty) return;
 
     final scoreRepo = getIt<ScoreRepository>();
     final isKnownSong = scoreRepo.isValidSongTitle(cleanTitle) || 
                         state.liveSongList.any((t) => scoreRepo.normalizeTitle(t) == scoreRepo.normalizeTitle(cleanTitle));
-    if (!isKnownSong) return;
+    if (!isKnownSong) {
+      print('[live] _updateCurrentSong ignored unknown title=$cleanTitle');
+      return;
+    }
 
     // Agregamos a la lista si no existe
     if (!state.liveSongList.any((t) => scoreRepo.normalizeTitle(t) == scoreRepo.normalizeTitle(cleanTitle))) {
+      print('[live] _updateCurrentSong title missing in list, adding title=$cleanTitle');
       updateLiveSongList([...state.liveSongList, cleanTitle]);
     }
 
     // Buscamos el índice en la lista actualizada
     int index = state.liveSongList.indexWhere((t) => scoreRepo.normalizeTitle(t) == scoreRepo.normalizeTitle(cleanTitle));
+    print('[live] _updateCurrentSong apply title=$cleanTitle resolvedIndex=$index');
     state = state.copyWith(
       currentSongTitle: cleanTitle,
       currentIndex: index >= 0 ? index : 0,
