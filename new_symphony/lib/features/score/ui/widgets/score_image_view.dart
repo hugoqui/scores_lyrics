@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:path_provider/path_provider.dart';
@@ -90,17 +89,6 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
   Widget build(BuildContext context) {
     final annotationState = ref.watch(annotationProvider(_noteKey));
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-
-    // Escuchamos cambios en el modo de dibujo para activar/desactivar modo inmersivo
-    ref.listen(annotationProvider(_noteKey).select((s) => s.isDrawingMode), (prev, next) {
-      if (next != prev) {
-        if (next) {
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-        } else {
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-        }
-      }
-    });
 
     return FutureBuilder<File>(
       future: _fileFuture,

@@ -51,8 +51,6 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    // Restaurar barras del sistema al salir
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 

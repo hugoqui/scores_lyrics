@@ -1,7 +1,7 @@
 name: new_symphony
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 3.4.1+341
+version: 3.4.2+342
 
 environment:
   sdk: ^3.11.3
