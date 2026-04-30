@@ -29,6 +29,10 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
   late PageController _pageController;
   late int _currentIndex;
 
+  // Dimensiones estimadas de los controles laterales en Landscape
+  static const double _toolbarWidth = 85.0;
+  static const double _playerWidth = 85.0;
+
   @override
   void initState() {
     super.initState();
@@ -70,6 +74,14 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
     final String noteKey = '${widget.instrument.path}_$fileForNoteKey';
     final bool isDrawing = ref.watch(annotationProvider(noteKey).select((s) => s.isDrawingMode));
 
+    // Cálculos de layout responsivo
+    final orientation = MediaQuery.of(context).orientation;
+    final bool isLandscape = orientation == Orientation.landscape;
+
+    // Calculamos los márgenes laterales basados en los controles visibles
+    final double leftPadding = (isLandscape && state.isUiVisible) ? _toolbarWidth : 0;
+    final double rightPadding = (isLandscape && state.isUiVisible) ? _playerWidth : 0;
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: (state.isUiVisible && !isDrawing) // Ocultar AppBar si estamos dibujando
@@ -104,6 +116,10 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
                 instrument: widget.instrument.path,
                 fileName: fileToShow,
                 onTap: () => ref.read(scoreProvider.notifier).toggleUiVisibility(),
+                // Pasamos ambos paddings para que la partitura se centre en el hueco
+                // pero el Toolbar pueda seguir pegado al borde izquierdo de la pantalla.
+                leftPadding: leftPadding,
+                rightPadding: rightPadding,
               );
             },
           ),

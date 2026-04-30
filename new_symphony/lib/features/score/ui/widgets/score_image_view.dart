@@ -13,12 +13,16 @@ class ScoreImageView extends ConsumerStatefulWidget {
   final String instrument;
   final String fileName;
   final VoidCallback onTap;  
+  final double leftPadding;
+  final double rightPadding;
 
   const ScoreImageView({
     super.key,
     required this.instrument,
     required this.fileName,
-    required this.onTap,    
+    required this.onTap,
+    this.leftPadding = 0,
+    this.rightPadding = 0,
   });
 
   @override
@@ -109,30 +113,33 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
           child: SizedBox.expand(
             child: Stack(
               children: [
-                PhotoView.customChild(
-                  key: ValueKey(_noteKey), // Forza un reset completo del widget al cambiar la imagen
-                  controller: _photoViewController, // Pasamos el controlador
-                  backgroundDecoration: const BoxDecoration(color: AppColors.white),
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.covered * 4,
-                  disableGestures: annotationState.isDrawingMode, // Deshabilitar gestos de PhotoView al dibujar
-                  onTapUp: (context, details, controllerValue) {
-                    if (!annotationState.isDrawingMode) {
-                      widget.onTap(); // Toggle UI visibility only if not in drawing mode
-                    }
-                  },
-                  childSize: _imageSize,
-                  child: Image.file(
-                    file,
-                    width: _imageSize!.width,
-                    height: _imageSize!.height,
-                    fit: BoxFit.contain,
+                // Envolvemos solo el PhotoView y el Canvas en el Padding
+                Padding(
+                  padding: EdgeInsets.only(left: widget.leftPadding, right: widget.rightPadding),
+                  child: PhotoView.customChild(
+                    key: ValueKey(_noteKey),
+                    controller: _photoViewController,
+                    backgroundDecoration: const BoxDecoration(color: AppColors.white),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.covered * 4,
+                    disableGestures: annotationState.isDrawingMode,
+                    onTapUp: (context, details, controllerValue) {
+                      if (!annotationState.isDrawingMode) {
+                        widget.onTap();
+                      }
+                    },
+                    childSize: _imageSize,
+                    child: Image.file(
+                      file,
+                      width: _imageSize!.width,
+                      height: _imageSize!.height,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
-                // El DrawingCanvas ahora es un overlay de pantalla completa
                 if (annotationState.isVisible && _imageSize != null)
-                  IgnorePointer(
-                    ignoring: !annotationState.isDrawingMode, // Ignore pointer events if NOT in drawing mode
+                  Padding(
+                    padding: EdgeInsets.only(left: widget.leftPadding, right: widget.rightPadding),
                     child: DrawingCanvas(
                       noteKey: _noteKey,
                       imageSize: _imageSize!,
