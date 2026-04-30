@@ -164,7 +164,6 @@
 				2D8A96D243EC20E7EB33EDAB /* Pods-RunnerTests.release.xcconfig */,
 				48968AAF2C0CEE34AFD60C1F /* Pods-RunnerTests.profile.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -484,6 +483,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.nativescript.symphony;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -690,6 +690,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.nativescript.symphony;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
