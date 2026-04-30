@@ -15,6 +15,7 @@ class ScoreRepository {
   
   List<DownloadedFile> _downloadedFiles = [];
   List<ApiSong> _apiSongs = [];
+  Map<String, String> _chordMap = {}; // Caché de títulos normalizados -> acorde
 
   ScoreRepository(this._dio, this._prefs, this._migrationService) {
     _init();
@@ -42,6 +43,7 @@ class ScoreRepository {
       try {
         final List<dynamic> decoded = jsonDecode(cachedData);
         _apiSongs = decoded.map((json) => ApiSong.fromJson(json)).toList();
+        _updateChordMap();
       } catch (e) {
         print('Error loading API songs cache: $e');
       }
@@ -103,6 +105,14 @@ class ScoreRepository {
     return _downloadedFiles.where((f) => f.instrument == instrument).toList();
   }
 
+  void _updateChordMap() {
+    final map = <String, String>{};
+    for (var song in _apiSongs) {
+      map[normalizeTitle(song.title)] = song.chord;
+    }
+    _chordMap = map;
+  }
+
   /// Verifica si un archivo existe localmente basándose solo en su nombre e instrumento,
   /// ignorando si el acorde ha cambiado en el servidor.
   bool isFileDownloaded(String fileName, String instrument) {
@@ -146,6 +156,7 @@ class ScoreRepository {
       final response = await _dio.get('https://api.iglesiacristianabelen.com/api/cantos');
       final List<dynamic> data = response.data;
       _apiSongs = data.map((json) => ApiSong.fromJson(json)).toList();
+      _updateChordMap();
       
       // Guardamos en caché para que persista al cerrar la app
       _prefs.setString('api_songs_cache', jsonEncode(data));
@@ -209,49 +220,29 @@ class ScoreRepository {
   /// Replica getSongChord: Busca la tonalidad en la lista de la API
   Future<String> getChordForSong(String fileName, String instrument) async {
     if (_apiSongs.isEmpty) await fetchApiSongs();
-    final searchTitle = normalizeTitle(fileName);
-    
-    try {
-      final song = _apiSongs.firstWhere((s) {
-        final apiTitle = normalizeTitle(s.title);
-        return apiTitle == searchTitle || '${apiTitle}_$instrument' == searchTitle;
-      });
-      return song.chord;
-    } catch (e) {
-      return 'F';
-    }
+    // Reutilizamos la lógica optimizada O(1)
+    return getChordForSongSync(fileName, instrument);
   }
 
   String getChordForSongSync(String title, String instrument) {
     final searchTitle = normalizeTitle(title);
-    try {
-      // Primera pasada: Coincidencia exacta o con instrumento
-      final song = _apiSongs.firstWhere((s) {
-        final apiTitle = normalizeTitle(s.title);
-        return apiTitle == searchTitle || '${apiTitle}_$instrument' == searchTitle;
-      });
-      return song.chord;
-    } catch (e) {
-      // Segunda pasada: Coincidencia parcial (ej. "Abre mis ojos" dentro de "Abre mis ojos Señor")
-      try {
-        final song = _apiSongs.firstWhere((s) {
-          final apiTitle = normalizeTitle(s.title);
-          return searchTitle.contains(apiTitle) || apiTitle.contains(searchTitle);
-        });
-        return song.chord;
-      } catch (_) {
-        return 'F';
-      }
+
+    // 1. Búsqueda directa en el Map (O(1)) - Instantáneo
+    if (_chordMap.containsKey(searchTitle)) return _chordMap[searchTitle]!;
+    
+    // 2. Coincidencia con sufijo de instrumento (ej. "Canto_piano")
+    final instrumentSuffix = '_$instrument';
+    if (searchTitle.endsWith(instrumentSuffix)) {
+      final baseTitle = searchTitle.substring(0, searchTitle.length - instrumentSuffix.length);
+      if (_chordMap.containsKey(baseTitle)) return _chordMap[baseTitle]!;
     }
+
+    return 'F';
   }
 
   /// Verifica si un título existe en la base de datos de la API (caché)
   bool isValidSongTitle(String title) {
-    if (_apiSongs.isEmpty) return false;
-    final searchTitle = normalizeTitle(title);
-    return _apiSongs.any((s) {
-      final apiTitle = normalizeTitle(s.title);
-      return apiTitle == searchTitle;
-    });
+    // Búsqueda instantánea O(1) usando el mapa ya generado
+    return _chordMap.containsKey(normalizeTitle(title));
   }
 }

@@ -63,7 +63,7 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
               ),
               onChanged: (value) {
                 if (_debounce?.isActive ?? false) _debounce?.cancel();
-                _debounce = Timer(const Duration(milliseconds: 500), () {
+                _debounce = Timer(const Duration(milliseconds: 300), () {
                   setState(() => _searchQuery = value);
                 });
               },
@@ -96,34 +96,41 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text('Error: $err')),
               data: (songs) {
-                String normalize(String text) => text.toLowerCase()
-                    .replaceAll('á', 'a')
-                    .replaceAll('é', 'e')
-                    .replaceAll('í', 'i')
-                    .replaceAll('ó', 'o')
-                    .replaceAll('ú', 'u')
-                    .replaceAll('ü', 'u');
+                final scoreRepo = getIt<ScoreRepository>();
+                
+                // 1. Pre-procesamos la data para no calcular normalizaciones ni acordes en cada rebuild
+                final songViewModels = songs.map((s) {
+                  return (
+                    song: s,
+                    normalizedTitle: scoreRepo.normalizeTitle(s.title),
+                    chord: scoreRepo.getChordForSongSync(s.title, widget.instrument.path),
+                  );
+                }).toList();
 
-                // Aplicamos filtros de búsqueda (normalizada) y tonalidad
-                final filteredSongs = songs.where((s) {
-                  final matchesSearch = normalize(s.title).contains(normalize(_searchQuery));
-                  final currentChord = getIt<ScoreRepository>().getChordForSongSync(s.title, widget.instrument.path);
-                  final matchesChord = _selectedChord == null || currentChord == _selectedChord;
+                final normalizedQuery = scoreRepo.normalizeTitle(_searchQuery);
+
+                // 2. Filtramos sobre el ViewModel ya procesado
+                final filteredViewModels = songViewModels.where((vm) {
+                  final matchesSearch = vm.normalizedTitle.contains(normalizedQuery);
+                  final matchesChord = _selectedChord == null || vm.chord == _selectedChord;
                   
                   return matchesSearch && matchesChord;
                 }).toList();
 
-                if (filteredSongs.isEmpty) {
+                if (filteredViewModels.isEmpty) {
                   return const Center(
                     child: Text('No hay partituras descargadas para este instrumento.'),
                   );
                 }
+
+                final songsForNavigator = filteredViewModels.map((v) => v.song).toList();
+
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingMedium),
-                  itemCount: filteredSongs.length,
+                  itemCount: filteredViewModels.length,
                   itemBuilder: (context, index) {
-                    final song = filteredSongs[index];
-                    final chord = getIt<ScoreRepository>().getChordForSongSync(song.title, widget.instrument.path);
+                    final vm = filteredViewModels[index];
+                    final song = vm.song;
                     
                     return Card(
                       color: Theme.of(context).brightness == Brightness.dark ? AppColors.lightGrey.withOpacity(0.1): null,
@@ -133,7 +140,7 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
                         side: BorderSide(color: AppColors.grey.withOpacity(0.2)),
                       ),
                       child: ListTile(
-                        leading: _ChordAvatar(chord: chord),
+                        leading: _ChordAvatar(chord: vm.chord),
                         title: Text(song.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
                           song.hasArrangementDownloaded ? 'Melodía y Arreglo' : 'Solo Melodía',
@@ -146,7 +153,7 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
                             MaterialPageRoute(
                               builder: (_) => ScoreScreen(
                                 instrument: widget.instrument,
-                                songs: filteredSongs,
+                                songs: songsForNavigator,
                                 initialIndex: index,
                               ),
                             ),
