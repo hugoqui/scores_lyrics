@@ -109,29 +109,37 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
 
                 final normalizedQuery = scoreRepo.normalizeTitle(_searchQuery);
 
-                // 2. Filtramos sobre el ViewModel ya procesado
-                final filteredViewModels = songViewModels.where((vm) {
-                  final matchesSearch = vm.normalizedTitle.contains(normalizedQuery);
+                // 2. Primero, filtramos solo por acorde para la lista de navegación
+                final chordFilteredViewModels = songViewModels.where((vm) {
                   final matchesChord = _selectedChord == null || vm.chord == _selectedChord;
-                  
-                  return matchesSearch && matchesChord;
+                  return matchesChord;
                 }).toList();
 
-                if (filteredViewModels.isEmpty) {
+                // 3. Luego, filtramos por búsqueda para la lista que se muestra en pantalla
+                final displayViewModels = chordFilteredViewModels.where((vm) {
+                  final matchesSearch = vm.normalizedTitle.contains(normalizedQuery);
+                  return matchesSearch;
+                }).toList();
+
+                if (displayViewModels.isEmpty) {
                   return const Center(
                     child: Text('No hay partituras descargadas para este instrumento.'),
                   );
                 }
 
-                final songsForNavigator = filteredViewModels.map((v) => v.song).toList();
+                // La lista para el navegador solo debe estar filtrada por acorde, no por búsqueda
+                final songsForNavigator = chordFilteredViewModels.map((v) => v.song).toList();
 
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingMedium),
-                  itemCount: filteredViewModels.length,
+                  itemCount: displayViewModels.length,
                   itemBuilder: (context, index) {
-                    final vm = filteredViewModels[index];
+                    final vm = displayViewModels[index]; // El ViewModel actual que se muestra
                     final song = vm.song;
                     
+                    // Encontramos el índice real de esta canción en la lista completa para el navegador
+                    final actualIndexInNavigatorList = songsForNavigator.indexWhere((s) => s.title == song.title);
+
                     return Card(
                       color: Theme.of(context).brightness == Brightness.dark ? AppColors.lightGrey.withOpacity(0.1): null,
                       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -154,7 +162,7 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
                               builder: (_) => ScoreScreen(
                                 instrument: widget.instrument,
                                 songs: songsForNavigator,
-                                initialIndex: index,
+                                initialIndex: actualIndexInNavigatorList,
                               ),
                             ),
                           );

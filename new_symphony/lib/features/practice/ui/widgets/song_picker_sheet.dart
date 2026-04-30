@@ -114,12 +114,13 @@ class _SongPickerSheetState extends State<SongPickerSheet> {
     final chordOptions = ["C", "Eb", "F", "G", "Bb"];
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.8,
-      minChildSize: 0.5,
+      initialChildSize: 0.9, // Empieza más arriba (90% de la pantalla)
+      minChildSize: 0.6,     // No permite que se encoja demasiado
       maxChildSize: 0.95,
       expand: false,
       builder: (_, scrollController) => Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.borderRadiusLarge)),
         ),
         child: Column(
