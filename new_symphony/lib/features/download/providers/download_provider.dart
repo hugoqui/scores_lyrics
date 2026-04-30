@@ -147,21 +147,39 @@ class DownloadNotifier extends StateNotifier<DownloadState> {
     }
   }
 
-  Future<void> downloadAll() async {
-    final toDownload = _allSongs.where((s) => !s.isDownloaded && !s.isDownloading).toList();
-    if (toDownload.isEmpty) return;
-
+  Future<void> downloadAll({bool forceRedownload = false}) async {
     state = state.copyWith(isDownloadingAll: true, downloadProgress: 0);
-    
-    int total = toDownload.length;
-    int current = 0;
 
-    for (final song in toDownload) {
-      await download(song.fileName);
-      current++;
-      state = state.copyWith(downloadProgress: current / total);
+    try {
+      if (forceRedownload) {
+        // 1) Limpiar registros y archivos locales del instrumento para forzar redescarga completa.
+        await _repository.clearDownloadedFilesByInstrument(instrument);
+        _ref.read(downloadedFilesProvider.notifier).refresh();
+      }
+
+      // 2) Recargar lista remota/local con estado actualizado.
+      await loadSongs();
+
+      // 3) Elegir si bajamos solo faltantes o todos.
+      final toDownload = forceRedownload
+          ? _allSongs.where((s) => !s.isDownloading).toList()
+          : _allSongs.where((s) => !s.isDownloaded && !s.isDownloading).toList();
+
+      if (toDownload.isEmpty) {
+        state = state.copyWith(isDownloadingAll: false, downloadProgress: 0);
+        return;
+      }
+
+      final total = toDownload.length;
+      int current = 0;
+
+      for (final song in toDownload) {
+        await download(song.fileName);
+        current++;
+        state = state.copyWith(downloadProgress: current / total);
+      }
+    } finally {
+      state = state.copyWith(isDownloadingAll: false, downloadProgress: 0);
     }
-    
-    state = state.copyWith(isDownloadingAll: false, downloadProgress: 0);
   }
 }

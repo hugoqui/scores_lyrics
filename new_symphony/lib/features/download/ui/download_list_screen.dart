@@ -9,6 +9,8 @@ import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/data/repositories/score_repository.dart';
 
+enum _DownloadAllMode { missingOnly, redownloadAll }
+
 class DownloadListScreen extends ConsumerStatefulWidget {
   final Instrument instrument;
   const DownloadListScreen({super.key, required this.instrument});
@@ -48,34 +50,43 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
     final uniqueFileNames = songs.map((s) => s.fileName).toSet();
     if (uniqueFileNames.isEmpty) return;
 
-    final count = uniqueFileNames.length;
-    // Cálculo aproximado: asumiendo un promedio de 250kb por imagen/archivo
-    final totalSizeMb = (count * 0.25).toStringAsFixed(1);
+    final totalCount = uniqueFileNames.length;
+    final missingCount = songs.where((s) => !s.isDownloaded).map((s) => s.fileName).toSet().length;
+    // Cálculo aproximado: asumiendo un promedio de 250kb por imagen/archivo.
+    final missingSizeMb = (missingCount * 0.25).toStringAsFixed(1);
+    final totalSizeMb = (totalCount * 0.25).toStringAsFixed(1);
 
-    final bool? confirm = await showDialog<bool>(
+    final _DownloadAllMode? mode = await showDialog<_DownloadAllMode>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Descargar todo'),
         content: Text(
-          'Se descargarán $count archivos (aprox. $totalSizeMb MB).\n\n'
-          'Si ya tienes archivos descargados, se sobreescribirán con la versión más reciente.',
+          'Elige cómo quieres descargar las partituras:\n\n'
+          '- Solo faltantes: $missingCount archivos (aprox. $missingSizeMb MB).\n'
+          '- Re-descargar todo: $totalCount archivos (aprox. $totalSizeMb MB).',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context),
             child: const Text('CANCELAR', style: TextStyle(color: AppColors.grey)),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, _DownloadAllMode.missingOnly),
+            child: const Text('SOLO FALTANTES'),
+          ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('DESCARGAR'),
+            onPressed: () => Navigator.pop(context, _DownloadAllMode.redownloadAll),
+            child: const Text('RE-DESCARGAR TODO'),
           ),
         ],
       ),
     );
 
-    if (confirm == true) {
-      ref.read(downloadProvider(widget.instrument.path).notifier).downloadAll();
-    }
+    if (mode == null) return;
+
+    ref
+        .read(downloadProvider(widget.instrument.path).notifier)
+        .downloadAll(forceRedownload: mode == _DownloadAllMode.redownloadAll);
   }
 
   @override
@@ -175,7 +186,6 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                 for (var s in songs) {
                   // Intentamos encontrar el título de la API para usarlo como KEY única
                   // Esto colapsa "Abre mis ojos" y "Abre mis ojos Señor" en una sola entrada si ambos apuntan al mismo canto
-                  final chord = scoreRepo.getChordForSongSync(s.fileName, widget.instrument.path);
                   final normalizedKey = scoreRepo.normalizeTitle(s.fileName);
                   
                   uniqueSongsMap[normalizedKey] = s;

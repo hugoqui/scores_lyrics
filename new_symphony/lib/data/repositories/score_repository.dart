@@ -70,6 +70,35 @@ class ScoreRepository {
     _saveToNewStorage();
   }
 
+  /// Elimina del almacenamiento local todos los archivos descargados para un instrumento
+  /// y limpia sus registros en almacenamiento persistente.
+  Future<void> clearDownloadedFilesByInstrument(String instrument) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final instrumentPath = '${directory.path}/$instrument';
+    final folder = Directory(instrumentPath);
+
+    if (await folder.exists()) {
+      final entries = await folder.list().toList();
+      for (final entry in entries) {
+        if (entry is! File) continue;
+
+        final pathLower = entry.path.toLowerCase();
+        final isImage = pathLower.endsWith('.png') ||
+            pathLower.endsWith('.jpg') ||
+            pathLower.endsWith('.jpeg') ||
+            pathLower.endsWith('.gif');
+        if (!isImage) continue;
+
+        try {
+          await entry.delete();
+        } catch (_) {}
+      }
+    }
+
+    _downloadedFiles.removeWhere((f) => f.instrument == instrument);
+    _saveToNewStorage();
+  }
+
   List<DownloadedFile> getDownloadedFilesByInstrument(String instrument) {
     return _downloadedFiles.where((f) => f.instrument == instrument).toList();
   }
