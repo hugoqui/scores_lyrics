@@ -10,8 +10,17 @@ class DrawingCanvas extends ConsumerStatefulWidget {
   final String noteKey;
   final Size imageSize; // Tamaño original de la imagen
   final PhotoViewController photoViewController; // Controlador de PhotoView
+  final double leftOffset;
+  final double rightOffset;
 
-  const DrawingCanvas({super.key, required this.noteKey, required this.imageSize, required this.photoViewController});
+  const DrawingCanvas({
+    super.key, 
+    required this.noteKey, 
+    required this.imageSize, 
+    required this.photoViewController,
+    this.leftOffset = 0,
+    this.rightOffset = 0,
+  });
 
   @override
   ConsumerState<DrawingCanvas> createState() => _DrawingCanvasState();
@@ -47,13 +56,13 @@ class _DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final scale = controller.scale ?? 1.0;
     final position = controller.position;
 
-    // Calcula el tamaño de la imagen renderizada en pantalla
-    final renderedImageWidth = widget.imageSize.width * scale;
+    // El ancho renderizado del "hijo" de PhotoView incluye los paddings laterales
+    final renderedImageWidth = (widget.imageSize.width + widget.leftOffset + widget.rightOffset) * scale;
     final renderedImageHeight = widget.imageSize.height * scale;
 
-    // Calcula el offset de la imagen dentro del PhotoView (centrado)
+    // Calcula el offset exacto donde comienza la imagen real considerando el padding
     final imageOffset = Offset(
-      (context.size!.width - renderedImageWidth) / 2 + position.dx,
+      (context.size!.width - renderedImageWidth) / 2 + position.dx + (widget.leftOffset * scale),
       (context.size!.height - renderedImageHeight) / 2 + position.dy,
     );
 
@@ -66,53 +75,58 @@ class _DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final annotationState = ref.watch(annotationProvider(widget.noteKey));
     final notifier = ref.read(annotationProvider(widget.noteKey).notifier);
 
-    return GestureDetector(
-      // El DrawingCanvas ocupa toda la pantalla, pero su comportamiento de detección de gestos
-      // depende de si estamos en modo dibujo.
-      behavior: annotationState.isDrawingMode ? HitTestBehavior.opaque : HitTestBehavior.translucent,
-      onPanStart: annotationState.isDrawingMode ? (details) {
-        setState(() {
-          _currentPoints = [OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition))];
-        });
-      } : null,
-      onPanUpdate: annotationState.isDrawingMode ? (details) {
-        setState(() {
-          if (annotationState.activeTool == AnnotationTool.pencil ||
-              annotationState.activeTool == AnnotationTool.eraser) {
-            _currentPoints.add(OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition)));
-          } else {
-            // Para formas, solo guardamos el punto inicial y el actual como final
-            if (_currentPoints.length > 1) {
-              _currentPoints[1] = OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition));
-            } else {
+    return IgnorePointer(
+      ignoring: !annotationState.isDrawingMode,
+      child: GestureDetector(
+        // El DrawingCanvas ocupa toda la pantalla, pero su comportamiento de detección de gestos
+        // depende de si estamos en modo dibujo.
+        behavior: annotationState.isDrawingMode ? HitTestBehavior.opaque : HitTestBehavior.translucent,
+        onPanStart: annotationState.isDrawingMode ? (details) {
+          setState(() {
+            _currentPoints = [OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition))];
+          });
+        } : null,
+        onPanUpdate: annotationState.isDrawingMode ? (details) {
+          setState(() {
+            if (annotationState.activeTool == AnnotationTool.pencil ||
+                annotationState.activeTool == AnnotationTool.eraser) {
               _currentPoints.add(OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition)));
+            } else {
+              // Para formas, solo guardamos el punto inicial y el actual como final
+              if (_currentPoints.length > 1) {
+                _currentPoints[1] = OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition));
+              } else {
+                _currentPoints.add(OffsetPoint.fromOffset(_transformScreenToImageCoordinates(details.localPosition)));
+              }
             }
+          });
+        } : null,
+        onPanEnd: annotationState.isDrawingMode ? (_) {
+          if (_currentPoints.isNotEmpty) {
+            notifier.addStroke(DrawingStroke(
+              points: List.from(_currentPoints),
+              color: annotationState.selectedColor,
+              tool: annotationState.activeTool, // Asegúrate de añadir este campo al modelo
+            ));
+            setState(() => _currentPoints = []);
           }
-        });
-      } : null,
-      onPanEnd: annotationState.isDrawingMode ? (_) {
-        if (_currentPoints.isNotEmpty) {
-          notifier.addStroke(DrawingStroke(
-            points: List.from(_currentPoints),
-            color: annotationState.selectedColor,
-            tool: annotationState.activeTool, // Asegúrate de añadir este campo al modelo
-          ));
-          setState(() => _currentPoints = []);
-        }
-      } : null,
-      // Bloqueamos el tap para que no dispare el modo pantalla completa al dibujar
-      // onTap: annotationState.isDrawingMode ? () {} : widget.onTap, // REMOVED: onTap is now handled by PhotoView
-      child: CustomPaint(
-        size: Size.infinite, // Ocupa todo el espacio disponible
-        painter: _CanvasPainter(
-          strokes: annotationState.strokes,
-          tempStrokes: annotationState.tempStrokes,
-          currentPoints: _currentPoints,
-          currentColor: annotationState.selectedColor,
-          activeTool: annotationState.activeTool,
-          isVisible: annotationState.isVisible,
-          imageSize: widget.imageSize,
-          photoViewController: widget.photoViewController,
+        } : null,
+        // Bloqueamos el tap para que no dispare el modo pantalla completa al dibujar
+        // onTap: annotationState.isDrawingMode ? () {} : widget.onTap, // REMOVED: onTap is now handled by PhotoView
+        child: CustomPaint(
+          size: Size.infinite, // Ocupa todo el espacio disponible
+          painter: _CanvasPainter(
+            strokes: annotationState.strokes,
+            tempStrokes: annotationState.tempStrokes,
+            currentPoints: _currentPoints,
+            currentColor: annotationState.selectedColor,
+            activeTool: annotationState.activeTool,
+            isVisible: annotationState.isVisible,
+            imageSize: widget.imageSize,
+            photoViewController: widget.photoViewController,
+            leftOffset: widget.leftOffset,
+            rightOffset: widget.rightOffset,
+          ),
         ),
       ),
     );
@@ -128,6 +142,8 @@ class _CanvasPainter extends CustomPainter {
   final bool isVisible;
   final Size imageSize; // Tamaño original de la imagen
   final PhotoViewController photoViewController; // Controlador de PhotoView
+  final double leftOffset;
+  final double rightOffset;
 
   _CanvasPainter({
     required this.strokes,
@@ -138,6 +154,8 @@ class _CanvasPainter extends CustomPainter {
     required this.isVisible,
     required this.imageSize,
     required this.photoViewController,
+    required this.leftOffset,
+    required this.rightOffset,
   });
 
   @override
@@ -150,13 +168,13 @@ class _CanvasPainter extends CustomPainter {
     final scale = photoViewController.scale ?? 1.0;
     final position = photoViewController.position;
 
-    // Calculamos el tamaño de la imagen renderizada en pantalla
-    final renderedImageWidth = imageSize.width * scale;
+    // El ancho renderizado del "hijo" de PhotoView incluye los paddings laterales
+    final renderedImageWidth = (imageSize.width + leftOffset + rightOffset) * scale;
     final renderedImageHeight = imageSize.height * scale;
 
-    // Calculamos el offset de la imagen dentro del PhotoView (centrado)
+    // Ajustamos el centrado considerando el padding que PhotoView aplica al "child"
     final imageOffset = Offset(
-      (size.width - renderedImageWidth) / 2 + position.dx,
+      (size.width - renderedImageWidth) / 2 + position.dx + (leftOffset * scale),
       (size.height - renderedImageHeight) / 2 + position.dy,
     );
 

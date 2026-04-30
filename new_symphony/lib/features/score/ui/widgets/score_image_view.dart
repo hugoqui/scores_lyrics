@@ -113,22 +113,23 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
           child: SizedBox.expand(
             child: Stack(
               children: [
-                // Envolvemos solo el PhotoView y el Canvas en el Padding
-                Padding(
-                  padding: EdgeInsets.only(left: widget.leftPadding, right: widget.rightPadding),
-                  child: PhotoView.customChild(
-                    key: ValueKey(_noteKey),
-                    controller: _photoViewController,
-                    backgroundDecoration: const BoxDecoration(color: AppColors.white),
-                    minScale: PhotoViewComputedScale.contained,
-                    maxScale: PhotoViewComputedScale.covered * 4,
-                    disableGestures: annotationState.isDrawingMode,
-                    onTapUp: (context, details, controllerValue) {
-                      if (!annotationState.isDrawingMode) {
-                        widget.onTap();
-                      }
-                    },
-                    childSize: _imageSize,
+                PhotoView.customChild(
+                  key: ValueKey(_noteKey),
+                  controller: _photoViewController,
+                  backgroundDecoration: const BoxDecoration(color: AppColors.white),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 4,
+                  disableGestures: annotationState.isDrawingMode,
+                  onTapUp: (context, details, controllerValue) {
+                    print('[ScoreImageView] Tap detectado. Modo dibujo: ${annotationState.isDrawingMode}');
+                    if (!annotationState.isDrawingMode) {
+                      widget.onTap();
+                    }
+                  },
+                  // El tamaño del hijo ahora incluye los paddings para que PhotoView calcule el "fit" inicial
+                  childSize: Size(_imageSize!.width + widget.leftPadding + widget.rightPadding, _imageSize!.height),
+                  child: Padding(
+                    padding: EdgeInsets.only(left: widget.leftPadding, right: widget.rightPadding),
                     child: Image.file(
                       file,
                       width: _imageSize!.width,
@@ -138,13 +139,12 @@ class _ScoreImageViewState extends ConsumerState<ScoreImageView> {
                   ),
                 ),
                 if (annotationState.isVisible && _imageSize != null)
-                  Padding(
-                    padding: EdgeInsets.only(left: widget.leftPadding, right: widget.rightPadding),
-                    child: DrawingCanvas(
-                      noteKey: _noteKey,
-                      imageSize: _imageSize!,
-                      photoViewController: _photoViewController,
-                    ),
+                  DrawingCanvas(
+                    noteKey: _noteKey,
+                    imageSize: _imageSize!,
+                    photoViewController: _photoViewController,
+                    leftOffset: widget.leftPadding,
+                    rightOffset: widget.rightPadding,
                   ),
 
                 // La barra de herramientas (Lápiz)
