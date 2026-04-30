@@ -28,6 +28,7 @@ class SongPickerSheet extends StatefulWidget {
 
 class _SongPickerSheetState extends State<SongPickerSheet> {
   late List<String> _selectedTitles;
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
   String? _selectedChord;
   Timer? _debounce;
@@ -40,25 +41,31 @@ class _SongPickerSheetState extends State<SongPickerSheet> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
-  String _normalize(String text) => text
-      .toLowerCase()
-      .replaceAll('á', 'a')
-      .replaceAll('é', 'e')
-      .replaceAll('í', 'i')
-      .replaceAll('ó', 'o')
-      .replaceAll('ú', 'u')
-      .replaceAll('ü', 'u');
-
   @override
   Widget build(BuildContext context) {
-    final filteredSongs = widget.songs.where((s) {
-      final matchesSearch = _normalize(s.title).contains(_normalize(_searchQuery));
-      final currentChord = getIt<ScoreRepository>().getChordForSongSync(s.title, widget.instrumentPath);
-      final matchesChord = _selectedChord == null || currentChord == _selectedChord;
+    final scoreRepo = getIt<ScoreRepository>();
+
+    // 1. Pre-procesamos la data para no calcular normalizaciones ni acordes en cada rebuild
+    final songViewModels = widget.songs.map((s) {
+      return (
+        song: s,
+        normalizedTitle: scoreRepo.normalizeTitle(s.title),
+        chord: scoreRepo.getChordForSongSync(s.title, widget.instrumentPath),
+      );
+    }).toList();
+
+    final normalizedQuery = scoreRepo.normalizeTitle(_searchQuery);
+    final normalizedSelected = _selectedTitles.map((t) => scoreRepo.normalizeTitle(t)).toSet();
+
+    // 2. Filtramos sobre el ViewModel ya procesado
+    final filteredViewModels = songViewModels.where((vm) {
+      final matchesSearch = vm.normalizedTitle.contains(normalizedQuery);
+      final matchesChord = _selectedChord == null || vm.chord == _selectedChord;
       return matchesSearch && matchesChord;
     }).toList();
 
@@ -99,14 +106,25 @@ class _SongPickerSheetState extends State<SongPickerSheet> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
-                decoration: const InputDecoration(
+                controller: _searchController,
+                decoration: InputDecoration(
                   hintText: 'Buscar canto...',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            _debounce?.cancel();
+                            setState(() => _searchQuery = '');
+                          },
+                        )
+                      : null,
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (val) {
                   if (_debounce?.isActive ?? false) _debounce?.cancel();
-                  _debounce = Timer(const Duration(milliseconds: 500), () {
+                  _debounce = Timer(const Duration(milliseconds: 300), () {
                     setState(() => _searchQuery = val);
                   });
                 },
@@ -137,14 +155,15 @@ class _SongPickerSheetState extends State<SongPickerSheet> {
             Expanded(
               child: ListView.builder(
                 controller: scrollController,
-                itemCount: filteredSongs.length,
+                itemCount: filteredViewModels.length,
                 itemBuilder: (context, index) {
-                  final song = filteredSongs[index];
-                  final isSelected = _selectedTitles.any((t) => _normalize(t) == _normalize(song.title));
-                  final chord = getIt<ScoreRepository>().getChordForSongSync(song.title, widget.instrumentPath);
+                  final vm = filteredViewModels[index];
+                  final song = vm.song;
+                  // Búsqueda O(1) en el Set de normalizados
+                  final isSelected = normalizedSelected.contains(vm.normalizedTitle);
 
                   return CheckboxListTile(
-                    secondary: ChordAvatar(chord: chord),
+                    secondary: ChordAvatar(chord: vm.chord),
                     title: Text(song.title),
                     value: isSelected,
                     onChanged: (val) {
@@ -152,7 +171,7 @@ class _SongPickerSheetState extends State<SongPickerSheet> {
                         if (val == true) {
                           if (!isSelected) _selectedTitles.add(song.title);
                         } else {
-                          _selectedTitles.removeWhere((t) => _normalize(t) == _normalize(song.title));
+                          _selectedTitles.removeWhere((t) => scoreRepo.normalizeTitle(t) == vm.normalizedTitle);
                         }
                       });
                     },
