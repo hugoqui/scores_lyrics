@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
 import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/features/my_lists/providers/my_lists_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:new_symphony/features/practice/providers/practice_provider.dart';
 import 'package:new_symphony/features/score/ui/score_screen.dart';
 import 'package:new_symphony/core/services/instruments_service.dart';
@@ -25,6 +27,13 @@ class MyListDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(myList.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code),
+            tooltip: 'Compartir lista',
+            onPressed: () => _showQrDialog(context, myList.name, myList.songTitles),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         elevation: 0,
@@ -96,6 +105,41 @@ class MyListDetailScreen extends ConsumerWidget {
                 );
               },
             ),
+    );
+  }
+
+  void _showQrDialog(BuildContext context, String name, List<String> songTitles) {
+    final payload = jsonEncode({'v': 1, 'n': name, 's': songTitles});
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(name, textAlign: TextAlign.center),
+        content: SizedBox(
+          width: 260,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              QrImageView(
+                data: payload,
+                version: QrVersions.auto,
+                size: 240,
+                backgroundColor: AppColors.white,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '${songTitles.length} cantos',
+                style: const TextStyle(color: Colors.grey, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
     );
   }
 
