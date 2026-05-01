@@ -7,6 +7,7 @@ import 'package:new_symphony/core/constants/app_dimensions.dart';
 import 'package:new_symphony/core/services/instruments_service.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/data/models/instrument.dart';
+import 'package:new_symphony/data/repositories/score_repository.dart';
 import 'package:new_symphony/features/my_lists/providers/my_lists_provider.dart';
 import 'package:new_symphony/features/my_lists/ui/qr_scanner_screen.dart';
 
@@ -130,6 +131,7 @@ class MyListsScreen extends ConsumerWidget {
   void _showQrPreviewDialog(BuildContext context, WidgetRef ref, _QrPayload payload) {
     String? selectedInstrument;
     final instruments = getIt<InstrumentsService>().instruments();
+    final nameController = TextEditingController(text: payload.name);
 
     showDialog(
       context: context,
@@ -140,8 +142,12 @@ class MyListsScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(payload.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Nombre de la lista'),
+                autofocus: true,
+              ),
+              const SizedBox(height: 12),
               Text('${payload.songTitles.length} cantos'),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -162,11 +168,51 @@ class MyListsScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: selectedInstrument == null
                   ? null
-                  : () {
+                  : () async {
                       final notifier = ref.read(myListsProvider.notifier);
+                      final scoreRepo = getIt<ScoreRepository>();
+                      final editedName = nameController.text.trim();
+
+                      if (editedName.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Escribe un nombre para la lista')),
+                        );
+                        return;
+                      }
+
+                      final downloadedFiles = scoreRepo.getDownloadedFilesByInstrument(selectedInstrument!);
+
+                      final downloadedByNormalized = <String, String>{
+                        for (final file in downloadedFiles)
+                          scoreRepo.normalizeTitle(_displayTitleFromFileName(file.fileName, selectedInstrument!)):
+                              _displayTitleFromFileName(file.fileName, selectedInstrument!),
+                      };
+
+                      final importableTitles = <String>[];
+                      final missingTitles = <String>[];
+                      for (final qrTitle in payload.songTitles) {
+                        final normalized = scoreRepo.normalizeTitle(qrTitle);
+                        final localTitle = downloadedByNormalized[normalized];
+                        if (localTitle != null) {
+                          importableTitles.add(localTitle);
+                        } else {
+                          missingTitles.add(qrTitle);
+                        }
+                      }
+
+                      if (importableTitles.isEmpty) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('No se pudo importar la lista porque sus cantos no estan descargados'),
+                          ),
+                        );
+                        return;
+                      }
+
                       final beforeIds = ref.read(myListsProvider).map((l) => l.id).toSet();
 
-                      final importedName = _buildImportedListName(payload.name, notifier);
+                      final importedName = _buildImportedListName(editedName, notifier);
                       notifier.createList(importedName, selectedInstrument!);
 
                       final listsAfterCreate = ref.read(myListsProvider);
@@ -175,12 +221,26 @@ class MyListsScreen extends ConsumerWidget {
                         orElse: () => listsAfterCreate.last,
                       );
 
-                      // Importamos todos los titulos del QR aunque no existan localmente.
-                      notifier.addSongsToList(importedList.id, payload.songTitles);
+                      notifier.addSongsToList(importedList.id, importableTitles);
 
+                      if (!context.mounted) return;
                       Navigator.pop(context);
+
+                      if (missingTitles.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Lista "${importedList.name}" importada')),
+                        );
+                        return;
+                      }
+
+                      final preview = missingTitles.take(3).join(', ');
+                      final suffix = missingTitles.length > 3 ? '...' : '';
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Lista "${importedList.name}" importada')),
+                        SnackBar(
+                          content: Text(
+                            'Lista importada con ${importableTitles.length} cantos. Omitidos: $preview$suffix',
+                          ),
+                        ),
                       );
                     },
               child: const Text('Confirmar'),
@@ -202,6 +262,21 @@ class MyListsScreen extends ConsumerWidget {
       candidate = '$trimmed (importada $index)';
     }
     return candidate;
+  }
+
+  String _displayTitleFromFileName(String fileName, String instrumentPath) {
+    var baseName = fileName.replaceAll('.png', '');
+    final arrangementSuffix = '_$instrumentPath';
+    if (baseName.endsWith(arrangementSuffix)) {
+      baseName = baseName.substring(0, baseName.length - arrangementSuffix.length);
+    }
+
+    return baseName
+        .replaceAll('_', ' ')
+        .split(' ')
+        .where((w) => w.isNotEmpty)
+        .map((w) => '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
+        .join(' ');
   }
 
   void _showCreateListDialog(BuildContext context, WidgetRef ref) {

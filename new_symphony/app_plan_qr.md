@@ -30,9 +30,10 @@
 - [x] Agregar botón "Escanear QR" en `MyListsScreen`
 - [x] Crear pantalla de cámara con `mobile_scanner`
 - [x] Al detectar QR válido: mostrar dialog con nombre, cantidad de cantos y selector de instrumento
+- [x] Permitir editar el título de la lista en el modal antes de confirmar
 - [x] Al confirmar: crear la lista llamando a `createList` + `addSongsToList`
 
 ## Tarea 5 — Manejo de errores y casos borde
-- [ ] QR inválido o formato desconocido → snackbar de error
-- [ ] Nombre de lista duplicado → agregar sufijo " (importada)" automáticamente
-- [ ] Canciones no descargadas → se importan igual (aparecerán en la lista sin archivo local)
+- [x] QR inválido o formato desconocido → snackbar de error
+- [x] Nombre de lista duplicado → agregar sufijo " (importada)" automáticamente
+- [x] Cantos no descargados → se omiten con aviso; si ninguno existe, no se importa la lista
