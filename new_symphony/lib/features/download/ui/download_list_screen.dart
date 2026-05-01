@@ -45,13 +45,17 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
   // Método para mostrar la confirmación
   Future<void> _confirmDownloadAll(DownloadState state) async {
     final songs = state.songs.asData?.value ?? [];
-    
+
     // Deduplicamos por nombre de archivo para el conteo correcto
     final uniqueFileNames = songs.map((s) => s.fileName).toSet();
     if (uniqueFileNames.isEmpty) return;
 
     final totalCount = uniqueFileNames.length;
-    final missingCount = songs.where((s) => !s.isDownloaded).map((s) => s.fileName).toSet().length;
+    final missingCount = songs
+        .where((s) => !s.isDownloaded)
+        .map((s) => s.fileName)
+        .toSet()
+        .length;
     // Cálculo aproximado: asumiendo un promedio de 250kb por imagen/archivo.
     final missingSizeMb = (missingCount * 0.25).toStringAsFixed(1);
     final totalSizeMb = (totalCount * 0.25).toStringAsFixed(1);
@@ -68,14 +72,19 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCELAR', style: TextStyle(color: AppColors.grey)),
+            child: const Text(
+              'CANCELAR',
+              style: TextStyle(color: AppColors.grey),
+            ),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, _DownloadAllMode.missingOnly),
+            onPressed: () =>
+                Navigator.pop(context, _DownloadAllMode.missingOnly),
             child: const Text('SOLO FALTANTES'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, _DownloadAllMode.redownloadAll),
+            onPressed: () =>
+                Navigator.pop(context, _DownloadAllMode.redownloadAll),
             child: const Text('RE-DESCARGAR TODO'),
           ),
         ],
@@ -98,8 +107,8 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
         title: Text(widget.instrument.name),
         actions: [
           InkWell(
-            onTap: downloadState.isDownloadingAll 
-                ? null 
+            onTap: downloadState.isDownloadingAll
+                ? null
                 : () => _confirmDownloadAll(downloadState),
             borderRadius: BorderRadius.circular(8),
             child: Padding(
@@ -108,15 +117,19 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.download_for_offline, 
-                    color: downloadState.isDownloadingAll ? AppColors.white.withOpacity(0.5) : AppColors.white,
+                    Icons.download_for_offline,
+                    color: downloadState.isDownloadingAll
+                        ? AppColors.white.withOpacity(0.5)
+                        : AppColors.white,
                     size: 20,
                   ),
                   Text(
                     'Descargar Todo',
                     style: TextStyle(
-                      fontSize: 9, 
-                      color: downloadState.isDownloadingAll ? AppColors.white.withOpacity(0.5) : AppColors.white
+                      fontSize: 9,
+                      color: downloadState.isDownloadingAll
+                          ? AppColors.white.withOpacity(0.5)
+                          : AppColors.white,
                     ),
                   ),
                 ],
@@ -156,7 +169,9 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
           ),
           if (downloadState.isDownloadingAll)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingMedium),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.paddingMedium,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -168,7 +183,10 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                   const SizedBox(height: AppDimensions.paddingSmall),
                   Text(
                     'Descargando: ${(downloadState.downloadProgress * 100).toInt()}%',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: AppDimensions.paddingSmall),
                 ],
@@ -180,6 +198,45 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
               error: (err, _) => Center(child: Text('Error: $err')),
               data: (songs) {
                 final scoreRepo = getIt<ScoreRepository>();
+                final downloadedFiles = scoreRepo
+                    .getDownloadedFilesByInstrument(widget.instrument.path);
+
+                final downloadedByName = <String>{
+                  for (final file in downloadedFiles) file.fileName,
+                };
+                final downloadedNormalizedTitles = [
+                  for (final file in downloadedFiles)
+                    scoreRepo.normalizeTitle(
+                      file.fileName.replaceAll('.png', ''),
+                    ),
+                ];
+
+                bool isDownloadedFast(String fileName) {
+                  if (downloadedByName.contains(fileName)) return true;
+                  final searchTitle = scoreRepo.normalizeTitle(
+                    fileName.replaceAll('.png', ''),
+                  );
+                  for (final localTitle in downloadedNormalizedTitles) {
+                    if (localTitle.contains(searchTitle) ||
+                        searchTitle.contains(localTitle)) {
+                      return true;
+                    }
+                  }
+                  return false;
+                }
+
+                String formatDisplayTitle(String fileName) {
+                  return fileName
+                      .replaceAll('.png', '')
+                      .replaceAll('_', ' ')
+                      .split(' ')
+                      .where((word) => word.isNotEmpty)
+                      .map(
+                        (word) =>
+                            '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}',
+                      )
+                      .join(' ');
+                }
 
                 // 1. Deduplicamos por Título Real de la API
                 final Map<String, DownloadableSong> uniqueSongsMap = {};
@@ -187,47 +244,62 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
                   // Intentamos encontrar el título de la API para usarlo como KEY única
                   // Esto colapsa "Abre mis ojos" y "Abre mis ojos Señor" en una sola entrada si ambos apuntan al mismo canto
                   final normalizedKey = scoreRepo.normalizeTitle(s.fileName);
-                  
+
                   uniqueSongsMap[normalizedKey] = s;
                 }
                 final deduplicatedSongs = uniqueSongsMap.values.toList();
 
                 // 2. Filtramos localmente la lista deduplicada
-                final filteredSongs = deduplicatedSongs.where((song) {
-                  final cleanTitle = song.fileName.replaceAll('.png', '').replaceAll('_', ' ');
-                  return scoreRepo.normalizeTitle(cleanTitle).contains(scoreRepo.normalizeTitle(_searchQuery));
-                }).toList();
+                final normalizedQuery = scoreRepo.normalizeTitle(_searchQuery);
+                final filteredSongs = deduplicatedSongs
+                    .where((song) {
+                      final cleanTitle = song.fileName
+                          .replaceAll('.png', '')
+                          .replaceAll('_', ' ');
+                      return scoreRepo
+                          .normalizeTitle(cleanTitle)
+                          .contains(normalizedQuery);
+                    })
+                    .map((song) {
+                      final isDownloaded = isDownloadedFast(song.fileName);
+                      return (
+                        song: song,
+                        chord: scoreRepo.getChordForSongSync(
+                          song.fileName,
+                          widget.instrument.path,
+                        ),
+                        isDownloaded: isDownloaded,
+                        displayTitle: formatDisplayTitle(song.fileName),
+                      );
+                    })
+                    .toList();
 
                 return ListView.builder(
                   itemCount: filteredSongs.length,
                   itemBuilder: (context, index) {
-                    final song = filteredSongs[index];
-                    
-                    // El endpoint manda: Obtenemos acorde real y estado de descarga real desde el repo
-                    final currentChord = scoreRepo.getChordForSongSync(song.fileName, widget.instrument.path);
-                    final isDownloaded = scoreRepo.isFileDownloaded(song.fileName, widget.instrument.path);
+                    final item = filteredSongs[index];
+                    final song = item.song;
 
                     return ListTile(
-                      leading: _buildLeading(song, isDownloaded),
-                      title: Text(
-                        song.fileName
-                            .replaceAll('.png', '')
-                            .replaceAll('_', ' ')
-                            .split(' ')
-                            .where((word) => word.isNotEmpty)
-                            .map((word) => '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
-                            .join(' '),
-                      ),
+                      leading: _buildLeading(song, item.isDownloaded),
+                      title: Text(item.displayTitle),
                       subtitle: Text(
-                        'Acorde: $currentChord',
-                        style: const TextStyle(fontSize: 12, color: AppColors.grey),
+                        'Acorde: ${item.chord}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.grey,
+                        ),
                       ),
                       trailing: IconButton(
                         icon: Icon(
-                          isDownloaded ? Icons.refresh : Icons.download, 
-                          color: Theme.of(context).colorScheme.onSurface
+                          item.isDownloaded ? Icons.refresh : Icons.download,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
-                        onPressed: () => ref.read(downloadProvider(widget.instrument.path).notifier).download(song.fileName),
+                        onPressed: () => ref
+                            .read(
+                              downloadProvider(widget.instrument.path).notifier,
+                            )
+                            .download(song.fileName),
                       ),
                     );
                   },
@@ -245,7 +317,10 @@ class _DownloadListScreenState extends ConsumerState<DownloadListScreen> {
       return SizedBox(
         width: 20,
         height: 20,
-        child: CircularProgressIndicator(strokeWidth: 3, color: Theme.of(context).colorScheme.onSurface,),        
+        child: CircularProgressIndicator(
+          strokeWidth: 3,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
       );
     }
     if (isDownloaded) {

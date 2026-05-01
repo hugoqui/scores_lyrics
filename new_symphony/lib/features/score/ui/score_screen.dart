@@ -37,18 +37,21 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
   void initState() {
     super.initState();
     // Inicialización con un offset grande para permitir loop infinito circular
-    final int virtualInitialPage = (widget.songs.length * 100) + widget.initialIndex;
+    final int virtualInitialPage =
+        (widget.songs.length * 100) + widget.initialIndex;
     _currentIndex = virtualInitialPage;
     _pageController = PageController(initialPage: virtualInitialPage);
-    
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     // Cargar audio inicial
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(scoreProvider.notifier).loadSong(
-        widget.instrument.path, 
-        widget.songs[_currentIndex % widget.songs.length]
-      );
+      ref
+          .read(scoreProvider.notifier)
+          .loadSong(
+            widget.instrument.path,
+            widget.songs[_currentIndex % widget.songs.length],
+          );
     });
   }
 
@@ -60,31 +63,39 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(scoreProvider);
-    if (widget.songs.isEmpty) return const Scaffold(body: Center(child: Text('No hay cantos')));
+    final isArrangementMode = ref.watch(
+      scoreProvider.select((s) => s.isArrangementMode),
+    );
+    final isUiVisible = ref.watch(scoreProvider.select((s) => s.isUiVisible));
+    if (widget.songs.isEmpty) {
+      return const Scaffold(body: Center(child: Text('No hay cantos')));
+    }
 
     final int realIndex = _currentIndex % widget.songs.length;
     final currentSong = widget.songs[realIndex];
 
     // Calculamos la noteKey del canto visible actualmente para saber si se está dibujando
     String fileForNoteKey = currentSong.melodyFileName;
-    if (state.isArrangementMode && currentSong.hasArrangementDownloaded) {
+    if (isArrangementMode && currentSong.hasArrangementDownloaded) {
       fileForNoteKey = currentSong.arrangementFileName!;
     }
     final String noteKey = '${widget.instrument.path}_$fileForNoteKey';
-    final bool isDrawing = ref.watch(annotationProvider(noteKey).select((s) => s.isDrawingMode));
+    final bool isDrawing = ref.watch(
+      annotationProvider(noteKey).select((s) => s.isDrawingMode),
+    );
 
     // Cálculos de layout responsivo
     final orientation = MediaQuery.of(context).orientation;
     final bool isLandscape = orientation == Orientation.landscape;
 
     // Calculamos los márgenes laterales basados en los controles visibles
-    final double leftPadding = (isLandscape && state.isUiVisible) ? _toolbarWidth : 0;
-    final double rightPadding = (isLandscape && state.isUiVisible) ? _playerWidth : 0;
+    final double leftPadding = (isLandscape && isUiVisible) ? _toolbarWidth : 0;
+    final double rightPadding = (isLandscape && isUiVisible) ? _playerWidth : 0;
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: (state.isUiVisible && !isDrawing) // Ocultar AppBar si estamos dibujando
+      appBar:
+          (isUiVisible && !isDrawing) // Ocultar AppBar si estamos dibujando
           ? AppBar(
               title: Text(currentSong.title),
               backgroundColor: AppColors.primary,
@@ -95,27 +106,29 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
           // 1. Capa de la Partitura (Fondo)
           PageView.builder(
             controller: _pageController,
-            physics: isDrawing ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
+            physics: isDrawing
+                ? const NeverScrollableScrollPhysics()
+                : const BouncingScrollPhysics(),
             onPageChanged: (index) {
               final int newRealIndex = index % widget.songs.length;
               setState(() => _currentIndex = index);
-              ref.read(scoreProvider.notifier).loadSong(
-                widget.instrument.path, 
-                widget.songs[newRealIndex]
-              );
+              ref
+                  .read(scoreProvider.notifier)
+                  .loadSong(widget.instrument.path, widget.songs[newRealIndex]);
             },
             itemBuilder: (context, index) {
               final int itemRealIndex = index % widget.songs.length;
               final song = widget.songs[itemRealIndex];
               String fileToShow = song.melodyFileName;
-              if (state.isArrangementMode && song.hasArrangementDownloaded) {
+              if (isArrangementMode && song.hasArrangementDownloaded) {
                 fileToShow = song.arrangementFileName!;
               }
 
               return ScoreImageView(
                 instrument: widget.instrument.path,
                 fileName: fileToShow,
-                onTap: () => ref.read(scoreProvider.notifier).toggleUiVisibility(),
+                onTap: () =>
+                    ref.read(scoreProvider.notifier).toggleUiVisibility(),
                 // Pasamos ambos paddings para que la partitura se centre en el hueco
                 // pero el Toolbar pueda seguir pegado al borde izquierdo de la pantalla.
                 leftPadding: leftPadding,
@@ -125,37 +138,58 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
           ),
 
           // 2. Capa del Reproductor (Encima)
-          if (state.isUiVisible)
+          if (isUiVisible)
             SafeArea(
               left: false,
               bottom: false,
               child: Align(
-                alignment: MediaQuery.of(context).orientation == Orientation.landscape
+                alignment:
+                    MediaQuery.of(context).orientation == Orientation.landscape
                     ? Alignment.centerRight
                     : Alignment.bottomCenter,
-                child: FloatingPlayerCard(
-                  hasArrangement: currentSong.hasArrangementDownloaded,
-                  isArrangementScore: state.isArrangementMode && currentSong.hasArrangementDownloaded,
-                  isArrangementAudio: state.isAudioArrangement,
-                  isLoopEnabled: state.isLoopEnabled,
-                  playSpeed: state.playSpeed,
-                  position: state.position,
-                  duration: state.duration,
-                  onToggleAudioMode: () => ref.read(scoreProvider.notifier).toggleAudioMode(
-                        widget.instrument.path,
-                        currentSong,
-                      ),
-                  onToggleScoreMode: () => ref.read(scoreProvider.notifier).toggleScoreMode(),
-                  onToggleLoop: () => ref.read(scoreProvider.notifier).toggleLoop(),
-                  onChangeSpeed: (s) => ref.read(scoreProvider.notifier).setSpeed(s),
-                  onSeek: (d) => ref.read(scoreProvider.notifier).seek(d),
-                  onPlayPause: () => ref.read(scoreProvider.notifier).playPause(),
-                  isPlaying: state.isPlaying,
+                child: _ScorePlayerOverlay(
+                  instrumentPath: widget.instrument.path,
+                  currentSong: currentSong,
                 ),
               ),
             ),
         ],
       ),
+    );
+  }
+}
+
+class _ScorePlayerOverlay extends ConsumerWidget {
+  final String instrumentPath;
+  final PracticeSong currentSong;
+
+  const _ScorePlayerOverlay({
+    required this.instrumentPath,
+    required this.currentSong,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(scoreProvider);
+    final notifier = ref.read(scoreProvider.notifier);
+
+    return FloatingPlayerCard(
+      hasArrangement: currentSong.hasArrangementDownloaded,
+      isArrangementScore:
+          state.isArrangementMode && currentSong.hasArrangementDownloaded,
+      isArrangementAudio: state.isAudioArrangement,
+      isLoopEnabled: state.isLoopEnabled,
+      playSpeed: state.playSpeed,
+      position: state.position,
+      duration: state.duration,
+      onToggleAudioMode: () =>
+          notifier.toggleAudioMode(instrumentPath, currentSong),
+      onToggleScoreMode: notifier.toggleScoreMode,
+      onToggleLoop: notifier.toggleLoop,
+      onChangeSpeed: notifier.setSpeed,
+      onSeek: notifier.seek,
+      onPlayPause: notifier.playPause,
+      isPlaying: state.isPlaying,
     );
   }
 }
