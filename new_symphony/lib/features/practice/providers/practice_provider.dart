@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/data/repositories/score_repository.dart';
+import 'package:new_symphony/features/download/providers/download_provider.dart';
 
 class PracticeSong {
   final String title;
@@ -20,9 +21,21 @@ class PracticeSong {
   });
 }
 
-final practiceSongsProvider = StateNotifierProvider.family<PracticeNotifier, AsyncValue<List<PracticeSong>>, String>((ref, instrument) {
-  return PracticeNotifier(getIt<ScoreRepository>(), instrument);
-});
+final practiceSongsProvider =
+    StateNotifierProvider.family<
+      PracticeNotifier,
+      AsyncValue<List<PracticeSong>>,
+      String
+    >((ref, instrument) {
+      final notifier = PracticeNotifier(getIt<ScoreRepository>(), instrument);
+
+      // Mantiene la biblioteca de práctica sincronizada cuando cambia la lista global de descargas.
+      ref.listen(downloadedFilesProvider, (previous, next) {
+        notifier.loadLibrary();
+      });
+
+      return notifier;
+    });
 
 class PracticeNotifier extends StateNotifier<AsyncValue<List<PracticeSong>>> {
   final ScoreRepository _repository;
@@ -30,7 +43,8 @@ class PracticeNotifier extends StateNotifier<AsyncValue<List<PracticeSong>>> {
   List<PracticeSong> _allSongs = [];
   String _query = '';
 
-  PracticeNotifier(this._repository, this.instrument) : super(const AsyncValue.loading()) {
+  PracticeNotifier(this._repository, this.instrument)
+    : super(const AsyncValue.loading()) {
     loadLibrary();
   }
 
@@ -43,7 +57,9 @@ class PracticeNotifier extends StateNotifier<AsyncValue<List<PracticeSong>>> {
     if (_query.isEmpty) {
       state = AsyncValue.data(_allSongs);
     } else {
-      final filtered = _allSongs.where((s) => s.title.toLowerCase().contains(_query.toLowerCase())).toList();
+      final filtered = _allSongs
+          .where((s) => s.title.toLowerCase().contains(_query.toLowerCase()))
+          .toList();
       state = AsyncValue.data(filtered);
     }
   }
@@ -51,7 +67,7 @@ class PracticeNotifier extends StateNotifier<AsyncValue<List<PracticeSong>>> {
   void loadLibrary() {
     try {
       final allFiles = _repository.getDownloadedFilesByInstrument(instrument);
-      
+
       // Mapa para agrupar por nombre base del canto
       // Clave: nombre_base (sin .png y sin _instrumento)
       final Map<String, PracticeSong> songsMap = {};
@@ -59,7 +75,7 @@ class PracticeNotifier extends StateNotifier<AsyncValue<List<PracticeSong>>> {
       for (var file in allFiles) {
         final fileName = file.fileName;
         final isArrangement = fileName.contains('_$instrument');
-        
+
         // Obtener el nombre base (ej: "abre_mis_ojos")
         String baseName = fileName.replaceAll('.png', '');
         if (isArrangement) {
@@ -67,14 +83,17 @@ class PracticeNotifier extends StateNotifier<AsyncValue<List<PracticeSong>>> {
         }
 
         final current = songsMap[baseName];
-        
+
         if (current == null) {
           songsMap[baseName] = PracticeSong(
             title: baseName
                 .replaceAll('_', ' ')
                 .split(' ')
                 .where((word) => word.isNotEmpty)
-                .map((word) => '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
+                .map(
+                  (word) =>
+                      '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}',
+                )
                 .join(' '),
             melodyFileName: '$baseName.png',
             arrangementFileName: isArrangement ? fileName : null,
@@ -87,16 +106,20 @@ class PracticeNotifier extends StateNotifier<AsyncValue<List<PracticeSong>>> {
           songsMap[baseName] = PracticeSong(
             title: current.title,
             melodyFileName: current.melodyFileName,
-            arrangementFileName: isArrangement ? fileName : current.arrangementFileName,
+            arrangementFileName: isArrangement
+                ? fileName
+                : current.arrangementFileName,
             instrument: instrument,
             hasMelodyDownloaded: current.hasMelodyDownloaded || !isArrangement,
-            hasArrangementDownloaded: current.hasArrangementDownloaded || isArrangement,
+            hasArrangementDownloaded:
+                current.hasArrangementDownloaded || isArrangement,
           );
         }
       }
 
       // Convertimos a lista y ordenamos alfabéticamente
-      _allSongs = songsMap.values.toList()..sort((a, b) => a.title.compareTo(b.title));
+      _allSongs = songsMap.values.toList()
+        ..sort((a, b) => a.title.compareTo(b.title));
       _applyFilter();
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
