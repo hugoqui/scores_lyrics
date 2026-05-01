@@ -27,10 +27,10 @@
 - [x] Verificar que la app compila y corre sin errores
 
 ## Tarea 4 — Escaneo e importación (receptor)
-- [ ] Agregar botón "Escanear QR" en el AppBar de `MyListsScreen`
-- [ ] Crear pantalla de cámara con `mobile_scanner`
-- [ ] Al detectar QR válido: mostrar dialog con nombre, cantidad de cantos y selector de instrumento
-- [ ] Al confirmar: crear la lista llamando a `createList` + `addSongsToList`
+- [x] Agregar botón "Escanear QR" en `MyListsScreen`
+- [x] Crear pantalla de cámara con `mobile_scanner`
+- [x] Al detectar QR válido: mostrar dialog con nombre, cantidad de cantos y selector de instrumento
+- [x] Al confirmar: crear la lista llamando a `createList` + `addSongsToList`
 
 ## Tarea 5 — Manejo de errores y casos borde
 - [ ] QR inválido o formato desconocido → snackbar de error

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:new_symphony/core/constants/app_colors.dart';
@@ -6,6 +8,7 @@ import 'package:new_symphony/core/services/instruments_service.dart';
 import 'package:new_symphony/core/services/service_locator.dart';
 import 'package:new_symphony/data/models/instrument.dart';
 import 'package:new_symphony/features/my_lists/providers/my_lists_provider.dart';
+import 'package:new_symphony/features/my_lists/ui/qr_scanner_screen.dart';
 
 import 'my_list_detail_screen.dart';
 
@@ -20,13 +23,51 @@ class MyListsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Mis Listas'),
       ),
-      floatingActionButton: FloatingActionButton(
-        elevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        highlightElevation: 0,
-        onPressed: () => _showCreateListDialog(context, ref),
-        child: const Icon(Icons.add),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
+        width: MediaQuery.of(context).size.width - 32,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FloatingActionButton(
+              heroTag: 'scan_qr',
+              elevation: 0,
+              focusElevation: 0,
+              hoverElevation: 0,
+              highlightElevation: 0,
+              tooltip: 'Escanear lista',
+              onPressed: () async {
+                final raw = await Navigator.push<String>(
+                  context,
+                  MaterialPageRoute(builder: (_) => const QrScannerScreen()),
+                );
+                if (raw == null) return;
+
+                final payload = _parseQrPayload(raw);
+                if (payload == null) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('QR no valido para listas de Symphony')),
+                  );
+                  return;
+                }
+
+                if (!context.mounted) return;
+                _showQrPreviewDialog(context, ref, payload);
+              },
+              child: const Icon(Icons.document_scanner),
+            ),
+            FloatingActionButton(
+              heroTag: 'create_list',
+              elevation: 0,
+              focusElevation: 0,
+              hoverElevation: 0,
+              highlightElevation: 0,
+              onPressed: () => _showCreateListDialog(context, ref),
+              child: const Icon(Icons.add),
+            ),
+          ],
+        ),
       ),
       body: lists.isEmpty
           ? const Center(child: Text('No tienes listas creadas aún'))
@@ -62,6 +103,105 @@ class MyListsScreen extends ConsumerWidget {
               },
             ),
     );
+  }
+
+  _QrPayload? _parseQrPayload(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return null;
+
+      final version = decoded['v'];
+      final name = decoded['n'];
+      final songs = decoded['s'];
+
+      if (version != 1) return null;
+      if (name is! String || name.trim().isEmpty) return null;
+      if (songs is! List) return null;
+
+      final songTitles = songs.whereType<String>().map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+      if (songTitles.isEmpty) return null;
+
+      return _QrPayload(name: name.trim(), songTitles: songTitles);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _showQrPreviewDialog(BuildContext context, WidgetRef ref, _QrPayload payload) {
+    String? selectedInstrument;
+    final instruments = getIt<InstrumentsService>().instruments();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Lista detectada'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(payload.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('${payload.songTitles.length} cantos'),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedInstrument,
+                items: instruments
+                    .map((i) => DropdownMenuItem(value: i.path, child: Text(i.name)))
+                    .toList(),
+                onChanged: (val) => setDialogState(() => selectedInstrument = val),
+                decoration: const InputDecoration(labelText: 'Instrumento'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: selectedInstrument == null
+                  ? null
+                  : () {
+                      final notifier = ref.read(myListsProvider.notifier);
+                      final beforeIds = ref.read(myListsProvider).map((l) => l.id).toSet();
+
+                      final importedName = _buildImportedListName(payload.name, notifier);
+                      notifier.createList(importedName, selectedInstrument!);
+
+                      final listsAfterCreate = ref.read(myListsProvider);
+                      final importedList = listsAfterCreate.firstWhere(
+                        (l) => !beforeIds.contains(l.id),
+                        orElse: () => listsAfterCreate.last,
+                      );
+
+                      // Importamos todos los titulos del QR aunque no existan localmente.
+                      notifier.addSongsToList(importedList.id, payload.songTitles);
+
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lista "${importedList.name}" importada')),
+                      );
+                    },
+              child: const Text('Confirmar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _buildImportedListName(String baseName, MyListsNotifier notifier) {
+    final trimmed = baseName.trim();
+    if (notifier.isNameAvailable(trimmed)) return trimmed;
+
+    var index = 1;
+    var candidate = '$trimmed (importada)';
+    while (!notifier.isNameAvailable(candidate)) {
+      index++;
+      candidate = '$trimmed (importada $index)';
+    }
+    return candidate;
   }
 
   void _showCreateListDialog(BuildContext context, WidgetRef ref) {
@@ -164,6 +304,13 @@ class MyListsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _QrPayload {
+  final String name;
+  final List<String> songTitles;
+
+  const _QrPayload({required this.name, required this.songTitles});
 }
 
 class _SlidableListItem extends StatefulWidget {
