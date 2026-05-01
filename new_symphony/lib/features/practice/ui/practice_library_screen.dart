@@ -15,7 +15,8 @@ class PracticeLibraryScreen extends ConsumerStatefulWidget {
   const PracticeLibraryScreen({super.key, required this.instrument});
 
   @override
-  ConsumerState<PracticeLibraryScreen> createState() => _PracticeLibraryScreenState();
+  ConsumerState<PracticeLibraryScreen> createState() =>
+      _PracticeLibraryScreenState();
 }
 
 class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
@@ -37,9 +38,7 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
     final songsState = ref.watch(practiceSongsProvider(widget.instrument.path));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Práctica: ${widget.instrument.name}'),
-      ),
+      appBar: AppBar(title: Text('Práctica: ${widget.instrument.name}')),
       body: Column(
         children: [
           Padding(
@@ -71,22 +70,27 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingMedium),
-            child: Row(              
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.paddingMedium,
+            ),
+            child: Row(
               children: [
                 ChoiceChip(
                   label: const Text("Todos"),
                   selected: _selectedChord == null,
                   onSelected: (val) => setState(() => _selectedChord = null),
                 ),
-                ..._chordOptions.map((chord) => Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: ChoiceChip(
-                    label: Text(chord),
-                    selected: _selectedChord == chord,
-                    onSelected: (val) => setState(() => _selectedChord = val ? chord : null),
+                ..._chordOptions.map(
+                  (chord) => Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: ChoiceChip(
+                      label: Text(chord),
+                      selected: _selectedChord == chord,
+                      onSelected: (val) =>
+                          setState(() => _selectedChord = val ? chord : null),
+                    ),
                   ),
-                )),
+                ),
               ],
             ),
           ),
@@ -97,13 +101,16 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
               error: (err, _) => Center(child: Text('Error: $err')),
               data: (songs) {
                 final scoreRepo = getIt<ScoreRepository>();
-                
+
                 // 1. Pre-procesamos la data para no calcular normalizaciones ni acordes en cada rebuild
                 final songViewModels = songs.map((s) {
                   return (
                     song: s,
                     normalizedTitle: scoreRepo.normalizeTitle(s.title),
-                    chord: scoreRepo.getChordForSongSync(s.title, widget.instrument.path),
+                    chord: scoreRepo.getChordForSongSync(
+                      s.title,
+                      widget.instrument.path,
+                    ),
                   );
                 }).toList();
 
@@ -111,47 +118,74 @@ class _PracticeLibraryScreenState extends ConsumerState<PracticeLibraryScreen> {
 
                 // 2. Primero, filtramos solo por acorde para la lista de navegación
                 final chordFilteredViewModels = songViewModels.where((vm) {
-                  final matchesChord = _selectedChord == null || vm.chord == _selectedChord;
+                  final matchesChord =
+                      _selectedChord == null || vm.chord == _selectedChord;
                   return matchesChord;
                 }).toList();
 
                 // 3. Luego, filtramos por búsqueda para la lista que se muestra en pantalla
                 final displayViewModels = chordFilteredViewModels.where((vm) {
-                  final matchesSearch = vm.normalizedTitle.contains(normalizedQuery);
+                  final matchesSearch = vm.normalizedTitle.contains(
+                    normalizedQuery,
+                  );
                   return matchesSearch;
                 }).toList();
 
                 if (displayViewModels.isEmpty) {
                   return const Center(
-                    child: Text('No hay partituras descargadas para este instrumento.'),
+                    child: Text(
+                      'No hay partituras descargadas para este instrumento.',
+                    ),
                   );
                 }
 
                 // La lista para el navegador solo debe estar filtrada por acorde, no por búsqueda
-                final songsForNavigator = chordFilteredViewModels.map((v) => v.song).toList();
+                final songsForNavigator = chordFilteredViewModels
+                    .map((v) => v.song)
+                    .toList();
+
+                // Pre-calculamos el índice de cada canto en la lista de navegación (O(1) por fila)
+                final navigatorIndexByTitle = <String, int>{
+                  for (var i = 0; i < songsForNavigator.length; i++)
+                    songsForNavigator[i].title: i,
+                };
 
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingMedium),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.paddingMedium,
+                  ),
                   itemCount: displayViewModels.length,
                   itemBuilder: (context, index) {
-                    final vm = displayViewModels[index]; // El ViewModel actual que se muestra
+                    final vm =
+                        displayViewModels[index]; // El ViewModel actual que se muestra
                     final song = vm.song;
-                    
-                    // Encontramos el índice real de esta canción en la lista completa para el navegador
-                    final actualIndexInNavigatorList = songsForNavigator.indexWhere((s) => s.title == song.title);
+
+                    final actualIndexInNavigatorList =
+                        navigatorIndexByTitle[song.title] ?? 0;
 
                     return Card(
-                      color: Theme.of(context).brightness == Brightness.dark ? AppColors.lightGrey.withOpacity(0.1): null,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.lightGrey.withOpacity(0.1)
+                          : null,
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
-                        side: BorderSide(color: AppColors.grey.withOpacity(0.2)),
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.borderRadiusMedium,
+                        ),
+                        side: BorderSide(
+                          color: AppColors.grey.withOpacity(0.2),
+                        ),
                       ),
                       child: ListTile(
                         leading: _ChordAvatar(chord: vm.chord),
-                        title: Text(song.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(
+                          song.title,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         subtitle: Text(
-                          song.hasArrangementDownloaded ? 'Melodía y Arreglo' : 'Solo Melodía',
+                          song.hasArrangementDownloaded
+                              ? 'Melodía y Arreglo'
+                              : 'Solo Melodía',
                           style: const TextStyle(fontSize: 12),
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
