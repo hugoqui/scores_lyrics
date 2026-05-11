@@ -174,6 +174,7 @@ export default {
         inputSong: function (val) {
             try {
                 this.verses = val.split("*")
+                this.selectedVerse = 0
             } catch (error) {
                 console.error(error)
             }
@@ -185,6 +186,9 @@ export default {
         console.log("el host... ", this.url)
         this.getData()
         this.getList()
+    },
+    beforeDestroy() {
+        document.removeEventListener("keydown", this.nextItem)
     },
     methods: {
         async getData() {
@@ -281,13 +285,19 @@ export default {
         nextItem(event) {
             if (this.modalVisible) return
 
+            if (!this.verses || this.verses.length === 0) return
+
             const i = this.selectedVerse
             if (event.keyCode === 40) {
                 console.log("next...")
-                this.showVerse(this.verses[i], i)
+                if (i < this.verses.length) {
+                    this.showVerse(this.verses[i], i)
+                }
             } else if (event.keyCode === 38) {
                 console.log("prev...")
-                this.showVerse(this.verses[i - 2], i - 2)
+                if (i > 1) {
+                    this.showVerse(this.verses[i - 2], i - 2)
+                }
             }
             else if (event.keyCode === 27) {
                 this.cleanScreen()

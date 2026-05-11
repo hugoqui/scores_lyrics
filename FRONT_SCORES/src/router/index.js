@@ -35,13 +35,7 @@ const routes = [
     path: '/songs',
     name: 'songs',
     component: () => import('../views/Songs.vue')
-  },
-  {
-    path: '/scores/:instrument',
-    name: 'scores',
-    props:true, 
-    component: () => import('../views/Scores.vue')
-  },
+  },  
   {
     path: '/stream',
     name: 'streamControl',
