@@ -12,15 +12,11 @@ export default new Vuex.Store({
     isServer: false,
     isControl: false,
     config: [],
-    secondServerUrl: "http://192.168.0.181:3014/api/",    
   },
   mutations: {
     setHost(state, data) {
       state.url = data + "api/";
       state.socketUrl = data;
-    },
-    setSecondHost(state, data) {
-      state.secondServerUrl = data;      
     },
 
     setPrompterScreen(state, data) {
@@ -45,8 +41,7 @@ export default new Vuex.Store({
         fetch(url, opts);
       }
 
-      postData(state.url + "setNewSong")
-      postData(state.secondServerUrl + "setNewSong")
+      postData(state.url + "setNewSong")      
     },
   },
   modules: {},
