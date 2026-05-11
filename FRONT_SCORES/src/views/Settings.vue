@@ -11,15 +11,7 @@
                     <button style="width:10rem" class="p-3 mt-1 btn btn-outline-warning" @click="setHost()">Guardar Host</button>
                 </div>
             </div>
-           
-            <div class="row">
-                  <div class="col">
-                    <b class="gold">Ruta de Servidor Secundario</b> 
-                    <input type="text" class="form-control bg-darker text-warning"  v-model="secondHost">
-                    <button style="width:10rem" class="p-3 mt-1 btn btn-outline-warning" @click="setSecondHost()">Guardar Host</button>
-                </div>
-            </div>
-            
+                       
             <div class="row mt-3">
                 <div class="col gold">
                     <b class="gold">Pantalla de Prompter</b> <br>
@@ -55,13 +47,11 @@
 export default {
     data(){
         return {
-            host:"",
-            secondHost:"",
+            host:"",            
         }
     },
     mounted(){
-        this.host = this.$store.state.socketUrl
-        this.secondHost = this.$store.state.secondServerUrl
+        this.host = this.$store.state.socketUrl        
     },
     
     methods:{
@@ -71,11 +61,6 @@ export default {
             window.location.reload()
         },
 
-        setSecondHost(){
-            localStorage.setItem("secondHost", this.secondHost)
-            this.$store.commit("setSecondHost",this.secondHost)
-            window.location.reload()
-        },
         changePrompterScreen(){
             const newValue = !this.$store.state.isPrompterScreen 
             this.$store.state.isPrompterScreen = newValue
