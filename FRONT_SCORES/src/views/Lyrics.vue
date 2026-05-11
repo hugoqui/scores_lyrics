@@ -21,16 +21,17 @@ export default {
         url: null,
     }),
     mounted() {
-        this.url = this.$store.state.url
-        this.getLastSong()
+        this.url = this.$store.state.url;
+        this.getLastSong();
 
-        this.$socket.on('connect', () => {
-            console.log('socket connected');
-        });
+        // Si ya está conectado, ejecuta lo que necesites
+        if (this.$socket.connected) {
+            console.log('socket already connected');
+        }
+
         this.$socket.on('text_change', (data) => {
             this.showLyrics(data);
         });
-
     },
     beforeDestroy() {
         this.$socket.off('connect');

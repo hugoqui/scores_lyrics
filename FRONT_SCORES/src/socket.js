@@ -1,15 +1,22 @@
 import { io } from "socket.io-client";
 
+let socket;
 
-const socket = io(localStorage.getItem('host'), {
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-});
+export const initSocket = (host) => {
+  if (!socket) {
+    socket = io(host, {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      transports: ['websocket'] // Recomendado para evitar problemas de CORS/Parser
+    });
 
-socket.on("connect", () => {  
-  console.log('✅ Socket conectado con id:', socket.id);
+    socket.on("connect", () => {
+      console.log('✅ Socket conectado con id:', socket.id);
+    });
+  }
+  return socket;
+};
 
-});
-
-export default socket;
+// Exportamos una referencia que se llenará después
+export default () => socket;
