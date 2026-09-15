@@ -1,6 +1,6 @@
 # 001-andamiaje-y-tests — Andamiaje y pruebas
 
-**Estado:** ⬜ sin especificar · **Depende de:** nada
+**Estado:** 📝 especificado · **Depende de:** nada
 
 ## Objetivo
 
@@ -8,8 +8,8 @@ Migraciones de esquema versionadas, armazón de pruebas unitarias e integración
 
 ## Siguiente paso
 
-Escribir `spec.md`: el **qué** y el **porqué**, sin entrar en implementación.
-Después `plan.md` y `tasks.md`.
+[`spec.md`](spec.md) y [`plan.md`](plan.md) escritos, con sus tres decisiones
+ya registradas en ADR 0010, 0011 y 0012. Falta `tasks.md`.
 
 Antes de empezar, leer la [constitución](../constitution.md) y el
 [estado actual](../../docs/arquitectura/estado-actual.md).
