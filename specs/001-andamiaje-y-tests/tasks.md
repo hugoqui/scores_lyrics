@@ -8,18 +8,18 @@ Regla: **ninguna tarea que añade comportamiento se cierra sin su prueba**
 
 ## Fase 1 — Esqueleto de la solución
 
-- [ ] T1.1 Crear `Symphony.sln` en la raíz.
-- [ ] T1.2 Crear `Directory.Build.props`: versión de .NET, `Nullable` activo,
+- [x] T1.1 Crear `Symphony.sln` en la raíz.
+- [x] T1.2 Crear `Directory.Build.props`: versión de .NET, `Nullable` activo,
       advertencias como errores.
-- [ ] T1.3 Crear `.editorconfig` con el estilo del proyecto.
-- [ ] T1.4 Crear el proyecto `apps/node-server/src/Symphony.Node/`
+- [x] T1.3 Crear `.editorconfig` con el estilo del proyecto.
+- [x] T1.4 Crear el proyecto `apps/node-server/src/Symphony.Node/`
       (ASP.NET Core) y añadirlo a la solución.
-- [ ] T1.5 Crear el proyecto `services/cloud-api/src/Symphony.Cloud/`
+- [x] T1.5 Crear el proyecto `services/cloud-api/src/Symphony.Cloud/`
       (ASP.NET Core) y añadirlo a la solución.
-- [ ] T1.6 Crear `apps/node-server/tests/Symphony.Node.Tests/` (xUnit),
+- [x] T1.6 Crear `apps/node-server/tests/Symphony.Node.Tests/` (xUnit),
       referenciar el proyecto y dejar una prueba trivial que pase.
-- [ ] T1.7 Crear `services/cloud-api/tests/Symphony.Cloud.Tests/` igual.
-- [ ] T1.8 Verificar: `dotnet build` y `dotnet test` pasan desde la raíz.
+- [x] T1.7 Crear `services/cloud-api/tests/Symphony.Cloud.Tests/` igual.
+- [x] T1.8 Verificar: `dotnet build` y `dotnet test` pasan desde la raíz.
 
 > Al cerrar la fase 1, `dotnet test` corre en verde y no hay nada más que
 > reportar. Es el mínimo sobre el que se apoya todo lo demás.
