@@ -77,6 +77,24 @@ orden ([convención de Spec Kit](https://github.com/github/spec-kit)):
 - Al cerrar un módulo se actualiza `docs/arquitectura/`, que es lo que queda
   vigente cuando el spec ya caducó.
 
+### Ramas
+
+**Una rama por módulo**, no por cambio suelto.
+
+| Rama | Qué contiene |
+|---|---|
+| `main` / `dev` | El sistema que corre hoy en las iglesias. **No se mezcla nada del sistema nuevo** hasta el corte |
+| `feat/saas-platform` | Rama de integración del sistema nuevo |
+| `feat/NNN-modulo` | Un módulo. Sale de `feat/saas-platform` y vuelve por pull request |
+
+No se fusiona módulo por módulo hacia `main`: sin compatibilidad hacia atrás
+([ADR 0007](docs/adr/0007-sin-compatibilidad-hacia-atras.md)) no hay periodo en
+que los dos sistemas convivan, así que medio sistema nuevo en `main` rompe lo
+que funciona el domingo.
+
+El pull request es lo que la integración continua valida antes de dejar
+fusionar ([ADR 0012](docs/adr/0012-integracion-continua-en-github-actions.md)).
+
 ## Estructura del código
 
 Las carpetas se organizan por **ciclo de vida**, no por tecnología:
