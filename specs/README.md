@@ -25,7 +25,7 @@ Leyenda: ⬜ sin especificar · 📝 especificado · 🔨 en implementación · 
 
 | # | Módulo | Estado | Objetivo en una línea |
 |---|---|---|---|
-| 000 | [seguridad](000-seguridad/) | ⬜ | Rotar las credenciales filtradas, cerrar el acceso público a la BD y neutralizar la ejecución remota del agente de transmisión. |
+| 000 | [seguridad](000-seguridad/) | 📝 | Fijar las reglas de seguridad que cumple el sistema nuevo. Sin código propio: se implementan en los módulos que le siguen. |
 | 001 | [andamiaje-y-tests](001-andamiaje-y-tests/) | ⬜ | Migraciones versionadas, armazón de pruebas e integración continua, para que lo demás sea reversible. |
 | 002 | [identidad-de-iglesia](002-identidad-de-iglesia/) | ⬜ | Crear la entidad iglesia y propagarla a datos, usuarios y permisos. |
 | 003 | [panel-saas](003-panel-saas/) | ⬜ | Alta de iglesias, licencias, administrador por iglesia e invitaciones por QR. |
@@ -36,7 +36,8 @@ Leyenda: ⬜ sin especificar · 📝 especificado · 🔨 en implementación · 
 | 008 | [sincronizacion-y-licencias](008-sincronizacion-y-licencias/) | ⬜ | Sincronización nube↔nodo y licencia firmada verificable sin internet. |
 | 009 | [nodo-empaquetado](009-nodo-empaquetado/) | ⬜ | Instalador único del nodo, actualizaciones con reversión automática y respaldo. |
 
-**Siguiente:** `000-seguridad` — escribir su `spec.md`.
+**Siguiente:** `001-andamiaje-y-tests` — escribir su `spec.md`. El módulo 000
+ya fijó sus reglas y no tiene código propio; 001 es el primero que construye.
 
 ## Orden y dependencias
 

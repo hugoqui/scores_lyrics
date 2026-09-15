@@ -40,6 +40,12 @@ Los dos backends usan el mismo puerto 3014, uno en la nube y otro en la red loca
 
 Cada uno apunta al módulo que lo resuelve. Ninguno queda sin dueño.
 
+> **Resolver no significa parchear `legacy/`.** Nada de `back-scores` ni
+> `belen-backend` se arregla: ese código se retira entero cuando el sistema
+> nuevo lo reemplace ([ADR 0009](../adr/0009-no-se-parchea-el-legado.md)). Un
+> hallazgo situado en `legacy/` queda aquí como lo que el sistema nuevo no
+> puede repetir, no como una tarea pendiente sobre ese código.
+
 ### Seguridad → [`000-seguridad`](../../specs/000-seguridad/)
 
 - **Credenciales de producción en el repositorio.** `legacy/back-scores/src/config/config.js`

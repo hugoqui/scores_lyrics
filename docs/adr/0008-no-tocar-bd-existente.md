@@ -36,9 +36,11 @@ falta traer datos a la base nueva. Nunca vuelve a ser destino de escritura.
 
 - Migrar los datos que sí se necesitan (repertorio, historial) de la base
   vieja a la nueva es trabajo explícito, no un simple cambio de contraseña.
-- Mientras el inventario de instalaciones no esté lleno
-  (`docs/operacion/inventario-iglesias.md`), no se sabe qué nodo apunta a qué
-  base hoy, así que el corte no se puede coordinar todavía.
+- Los músicos se dan de alta de nuevo, con contraseñas nuevas: la tabla de
+  usuarios vieja se considera comprometida y no se importa.
+- El corte lo hace el propietario a mano en las dos iglesias, desinstalando la
+  versión vieja e instalando la nueva. Con dos instalaciones y un solo
+  responsable, no hace falta coordinación remota.
 
 ## Notas de implementación
 

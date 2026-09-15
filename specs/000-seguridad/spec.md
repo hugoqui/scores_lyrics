@@ -5,12 +5,18 @@
 ## Alcance
 
 Cierra los huecos de seguridad ya verificados en
-[estado-actual.md](../../docs/arquitectura/estado-actual.md#seguridad--000-seguridad).
-No diseña el modelo de autenticación/roles definitivo (usuarios, sesiones,
-permisos por iglesia): eso depende de que exista la entidad iglesia y se
-especifica en [002-identidad-de-iglesia](../002-identidad-de-iglesia/). Aquí
-solo se exige una autenticación mínima donde hoy no hay ninguna, para no dejar
-el sistema abierto mientras 002 se construye.
+[estado-actual.md](../../docs/arquitectura/estado-actual.md#seguridad--000-seguridad),
+**aplicándolos al sistema nuevo**, no al que corre hoy.
+
+**`legacy/` no se toca** ([ADR 0009](../../docs/adr/0009-no-se-parchea-el-legado.md)).
+Ni `back-scores` ni `belen-backend` reciben arreglos: se retiran enteros. Sus
+fallas quedan aquí registradas como lo que el sistema nuevo no puede repetir,
+no como tareas pendientes sobre ese código.
+
+Tampoco diseña el modelo de autenticación/roles definitivo (usuarios,
+sesiones, permisos por iglesia): eso depende de que exista la entidad iglesia
+y se especifica en [002-identidad-de-iglesia](../002-identidad-de-iglesia/).
+Aquí solo se fijan las reglas que 002 y los demás módulos deben cumplir.
 
 ## Qué (requisitos)
 
@@ -31,10 +37,12 @@ el sistema abierto mientras 002 se construye.
   nuevas, para todo lo que construya este módulo y los que dependen de él.
 - La base de datos actual queda congelada: solo se usa como fuente de lectura
   puntual si hace falta migrar datos, nunca como destino.
-- El `jwtSecret` y cualquier otra credencial de servicio (no de BD) hallados
-  en `legacy/back-scores` y `legacy/belen-backend` sí se rotan en sitio.
 - Se asume que la tabla de usuarios de la BD actual ya fue copiada
-  (constitución, hallazgo verificado); por eso no se reutiliza.
+  (constitución, hallazgo verificado); por eso no se reutiliza. Los músicos se
+  dan de alta de nuevo en el sistema nuevo, con contraseñas nuevas.
+- Los secretos que siguen en `legacy/` no se rotan: ese código se retira
+  entero. Lo que importa es que el sistema nuevo nazca con secretos propios,
+  sin heredar ninguno.
 - **Esto es una decisión de arquitectura → requiere ADR antes de
   implementarse** (constitución, punto 6).
 
@@ -49,26 +57,44 @@ el sistema abierto mientras 002 se construye.
 - Esto no impide que las partituras se descarguen por internet: impide que se
   llegue a la base que las cataloga sin pasar por la API.
 
-### R4 — Ninguna ejecución de comandos sin autenticar
-- `apps/stream-agent` deja de construir comandos de PowerShell a partir de
-  datos de socket sin validar ni autenticar.
-- Un valor recibido por socket nunca se concatena en una cadena ejecutable.
+### R4 — Ninguna ejecución de comandos a partir de datos de red
+`apps/stream-agent` **no es legado**: se conserva (estado-actual). Hoy recibe
+un valor por socket sin autenticar y lo concatena en una cadena de PowerShell,
+así que cualquiera en el wifi de invitados ejecuta comandos en la PC de
+transmisión.
+
+- Un valor recibido por la red nunca se concatena en una cadena ejecutable.
+  Las acciones posibles son una lista cerrada, no texto que se interpreta.
+- El agente solo acepta órdenes de un emisor autenticado.
+- Se arregla cuando el agente se conecte al protocolo nuevo
+  ([005-tiempo-real](../005-tiempo-real/)), no sobre el socket actual.
 
 ### R5 — Ninguna consulta SQL se construye por concatenación
-- Toda consulta a MySQL/lo que la reemplace usa parámetros. Aplica a
-  `mysqlController.js` y a `usuarios.js` (o su equivalente si ya se
-  reescribió en otro módulo antes de llegar aquí).
+- Toda consulta usa parámetros, siempre, en nodo y nube. Sin excepciones para
+  "campos internos" o valores que parezcan controlados.
+- Regla para el código nuevo. El SQL concatenado de `legacy/` no se arregla:
+  se retira con ese código.
 
-### R6 — El nodo del templo exige autenticación mínima
+### R6 — El nodo nuevo nace con autenticación
+Hoy el nodo no tiene ninguna: cualquiera en la red del templo lee, crea, edita
+y borra cantos, y proyecta texto arbitrario en la pantalla. El nodo nuevo no
+puede repetirlo.
+
 - Ninguna operación que lea, cree, edite o borre cantos, ni la proyección de
-  texto arbitrario, es alcanzable sin autenticarse.
-- No se exige aquí un modelo de roles ni de usuarios por iglesia (eso es
-  002); basta con que un desconocido en la red ya no tenga control total.
+  texto, es alcanzable sin autenticarse. Estar en la red local no autoriza.
+- El rol (pantalla, operador, músico) no lo decide el cliente. Hoy sale de
+  `localStorage` del navegador, así que cualquiera se autoproclama operador.
+- El modelo completo de usuarios y roles por iglesia es de
+  [002](../002-identidad-de-iglesia/); aquí solo se fija que sin él no se
+  levanta el nodo.
 
 ### R7 — Las contraseñas se guardan y transmiten de forma segura
-- Ninguna contraseña se guarda con SHA1 sin sal ni en texto claro.
-- La app móvil deja de guardar la contraseña del usuario en claro en el
-  dispositivo (`saved_password`).
+- Las contraseñas se guardan con un algoritmo de hash lento y con sal. Nunca
+  SHA1 sin sal, nunca en texto claro.
+- La app móvil no guarda la contraseña del usuario en el dispositivo. Para
+  mantener la sesión guarda un token, que es revocable; una contraseña no.
+- Aplica a la capa de datos reescrita de la app ([ADR 0006](../../docs/adr/0006-conservar-la-app-flutter.md)),
+  no a la versión que hoy tienen instalada los músicos.
 
 ### R8 — La app funciona sin internet, pero no se autoriza a sí misma
 Muchos músicos no tienen internet en casa: descargan partituras cuando
@@ -108,18 +134,29 @@ token. Los 30 días son precisamente el techo de esa ventana.
 
 ## Por qué
 
-Estas seis fallas (verificadas en el código, no supuestas) exponen a las
-iglesias a fuga total de datos, proyección de contenido arbitrario en el
-templo y ejecución remota de comandos en la PC de transmisión — hoy, con el
-sistema en producción. Migrar a multi-iglesia sobre esta base convertiría un
-riesgo aislado por instalación en una fuga entre todas las iglesias del SaaS.
-La constitución (puntos 3 y 7) exige que esto se cierre antes de construir
-identidad y multi-tenencia encima.
+Las seis fallas verificadas en el código actual —credenciales filtradas, nodo
+sin autenticación, ejecución remota de comandos, SQL concatenado, contraseñas
+en SHA1 y sesiones falseables con el reloj del teléfono— no son descuidos
+sueltos: son lo que pasa cuando cada iglesia es una instalación manual del
+mismo código sin identidad propia.
+
+Hoy el daño está acotado a una iglesia por instalación. En multi-iglesia, esas
+mismas fallas dejan de ser un riesgo local para convertirse en fuga entre
+congregaciones: una consulta sin filtro o una sesión falsificable alcanzan
+todo el SaaS. La constitución (puntos 3 y 7) exige cerrarlas **antes** de
+construir identidad y multi-tenencia encima, no después.
+
+Este módulo va primero para que esas reglas ya existan cuando 002 empiece, y
+no haya que retrofitearlas sobre código ya escrito.
 
 ## Fuera de alcance
 
+- **Todo `legacy/`**: `back-scores` y `belen-backend` no se arreglan; se
+  retiran ([ADR 0009](../../docs/adr/0009-no-se-parchea-el-legado.md)).
 - Modelo de usuarios, roles y permisos por iglesia → 002-identidad-de-iglesia.
 - Acceso público al servidor de partituras → 006-catalogo-y-partituras.
+- Verificación offline de sesión y licencia en el nodo →
+  008-sincronizacion-y-licencias.
 - Migraciones de esquema versionadas, CI, logging estructurado →
   001-andamiaje-y-tests.
 
