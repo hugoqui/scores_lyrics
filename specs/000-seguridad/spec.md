@@ -8,10 +8,12 @@ Cierra los huecos de seguridad ya verificados en
 [estado-actual.md](../../docs/arquitectura/estado-actual.md#seguridad--000-seguridad),
 **aplicándolos al sistema nuevo**, no al que corre hoy.
 
-**`legacy/` no se toca** ([ADR 0009](../../docs/adr/0009-no-se-parchea-el-legado.md)).
-Ni `back-scores` ni `belen-backend` reciben arreglos: se retiran enteros. Sus
-fallas quedan aquí registradas como lo que el sistema nuevo no puede repetir,
-no como tareas pendientes sobre ese código.
+**Lo que será reemplazado no se toca.** Ni `back-scores` ni `belen-backend`
+([ADR 0009](../../docs/adr/0009-no-se-parchea-el-legado.md)), ni `web-panel` y
+`desktop-node` ([ADR 0013](../../docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)),
+ni `stream-agent` ([ADR 0014](../../docs/adr/0014-obs-por-websocket.md)). Todos
+se retiran enteros. Sus fallas quedan aquí registradas como lo que el sistema
+nuevo no puede repetir, no como tareas pendientes sobre ese código.
 
 Tampoco diseña el modelo de autenticación/roles definitivo (usuarios,
 sesiones, permisos por iglesia): eso depende de que exista la entidad iglesia
@@ -58,16 +60,17 @@ Aquí solo se fijan las reglas que 002 y los demás módulos deben cumplir.
   llegue a la base que las cataloga sin pasar por la API.
 
 ### R4 — Ninguna ejecución de comandos a partir de datos de red
-`apps/stream-agent` **no es legado**: se conserva (estado-actual). Hoy recibe
-un valor por socket sin autenticar y lo concatena en una cadena de PowerShell,
-así que cualquiera en el wifi de invitados ejecuta comandos en la PC de
-transmisión.
+Hoy `apps/stream-agent` recibe un valor por socket sin autenticar y lo concatena
+en una cadena de PowerShell, así que cualquiera en el wifi de invitados ejecuta
+comandos en la PC de transmisión.
 
 - Un valor recibido por la red nunca se concatena en una cadena ejecutable.
   Las acciones posibles son una lista cerrada, no texto que se interpreta.
-- El agente solo acepta órdenes de un emisor autenticado.
-- Se arregla cuando el agente se conecte al protocolo nuevo
-  ([005-tiempo-real](../005-tiempo-real/)), no sobre el socket actual.
+- El control de OBS no simula pulsaciones de teclado: se hace por el protocolo
+  oficial de OBS, desde el nodo autenticado
+  ([ADR 0014](../../docs/adr/0014-obs-por-websocket.md)).
+- `apps/stream-agent` no se arregla: se retira entero junto con el resto de lo
+  que será reemplazado. El requisito aplica al nodo nuevo, que asume su función.
 
 ### R5 — Ninguna consulta SQL se construye por concatenación
 - Toda consulta usa parámetros, siempre, en nodo y nube. Sin excepciones para
@@ -151,8 +154,11 @@ no haya que retrofitearlas sobre código ya escrito.
 
 ## Fuera de alcance
 
-- **Todo `legacy/`**: `back-scores` y `belen-backend` no se arreglan; se
-  retiran ([ADR 0009](../../docs/adr/0009-no-se-parchea-el-legado.md)).
+- **Todo lo que será reemplazado**: `back-scores` y `belen-backend`
+  ([ADR 0009](../../docs/adr/0009-no-se-parchea-el-legado.md)), más
+  `web-panel`, `desktop-node` ([ADR 0013](../../docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md))
+  y `stream-agent` ([ADR 0014](../../docs/adr/0014-obs-por-websocket.md)). No se
+  arreglan; se retiran.
 - Modelo de usuarios, roles y permisos por iglesia → 002-identidad-de-iglesia.
 - Acceso público al servidor de partituras → 006-catalogo-y-partituras.
 - Verificación offline de sesión y licencia en el nodo →

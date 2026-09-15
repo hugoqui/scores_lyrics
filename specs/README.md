@@ -32,9 +32,10 @@ Leyenda: ⬜ sin especificar · 📝 especificado · 🔨 en implementación · 
 | 004 | [estado-en-vivo](004-estado-en-vivo/) | ⬜ | Persistir lista de alabanza y canto actual por iglesia; matar `songid.txt` y el array en memoria. |
 | 005 | [tiempo-real](005-tiempo-real/) | ⬜ | Protocolo nuevo con salas por iglesia y autorización por rol en los eventos de control. |
 | 006 | [catalogo-y-partituras](006-catalogo-y-partituras/) | ⬜ | Modelo melodía/arreglo, deduplicación por hash y acceso autenticado a los archivos. |
-| 007 | [app-movil](007-app-movil/) | ⬜ | Reescribir la capa de datos de Symphony conservando funcionalidades, descargas y anotaciones. |
+| 007 | [app-movil](007-app-movil/) | ⬜ | Reescribir la capa de datos de Symphony conservando funcionalidades, descargas y anotaciones, y añadir el rol de operador. |
 | 008 | [sincronizacion-y-licencias](008-sincronizacion-y-licencias/) | ⬜ | Sincronización nube↔nodo y licencia firmada verificable sin internet. |
 | 009 | [nodo-empaquetado](009-nodo-empaquetado/) | ⬜ | Instalador único del nodo, actualizaciones con reversión automática y respaldo. |
+| 010 | [app-de-escritorio](010-app-de-escritorio/) | ⬜ | Proyección en pantalla extendida y control desde el equipo del templo; reemplaza al panel Vue y a la cáscara WPF. |
 
 **Siguiente:** `001-andamiaje-y-tests` — `spec.md`, `plan.md` y `tasks.md`
 escritos y aprobados. Toca **implementar**, empezando por la fase 1 de su
@@ -52,7 +53,13 @@ el primero que construye.
                           └──> 006 catalogo ──> 007 app movil
                                     │
                                     └──> 008 sincronizacion ──> 009 nodo empaquetado
+
+005 tiempo real ──> 010 app de escritorio
 ```
+
+010 reemplaza al panel Vue y a la cáscara WPF
+([ADR 0013](../docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)); va al
+final porque necesita el estado en vivo y el protocolo nuevo debajo.
 
 000 y 001 no dependen de nada y pueden ir en paralelo. 003 es el primer
 entregable visible del negocio y por eso va pronto, pero necesita 002 antes:

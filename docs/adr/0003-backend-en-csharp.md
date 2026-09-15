@@ -1,6 +1,6 @@
 # ADR 0003 — Backend en C# / ASP.NET Core
 
-**Estado:** aceptada · **Fecha:** 2026-09-14
+**Estado:** aceptada, parcialmente sustituida por [ADR 0013](0013-app-de-escritorio-en-vez-de-panel-web.md) · **Fecha:** 2026-09-14
 
 ## Contexto
 
@@ -52,3 +52,10 @@ en vez de Dart, TypeScript y SQL. Se acepta a cambio de la fiabilidad del nodo.
 entre servidor, panel y un envoltorio Electron. Pero el nodo local cargaría con
 un runtime de Node y un empaquetado más frágil justo en el punto donde el
 proyecto menos puede permitirse fallar.
+
+---
+
+> **Sustituido en parte por [ADR 0013](0013-app-de-escritorio-en-vez-de-panel-web.md).**
+> El panel Vue se retira: el control pasa a una app de escritorio. El nodo
+> sigue sirviendo archivos estáticos, pero solo la página que OBS consume. El
+> resto de esta decisión —C#/ASP.NET Core para nodo y nube— sigue vigente.

@@ -27,7 +27,7 @@ Cada uno se implementa y se prueba en el módulo que le corresponde:
 | R1 secretos fuera del repo, configuración que falla ruidosamente | 001-andamiaje-y-tests |
 | R2 base de datos nueva | 001-andamiaje-y-tests |
 | R3 motores inalcanzables desde internet | 009-nodo-empaquetado |
-| R4 nada de comandos con datos de red | 005-tiempo-real |
+| R4 nada de comandos con datos de red | el nodo, al asumir el control de OBS ([ADR 0014](../../docs/adr/0014-obs-por-websocket.md)) |
 | R5 SQL parametrizado | todos los que toquen base de datos |
 | R6 nodo con autenticación | 002-identidad-de-iglesia |
 | R7 contraseñas con hash lento y con sal | 002-identidad-de-iglesia |

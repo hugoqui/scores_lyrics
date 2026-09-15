@@ -43,9 +43,14 @@ soporte a las dos instalaciones.
 
 ## Notas de implementación
 
-- `apps/stream-agent` **no** entra en esta decisión: no es legado, se conserva
-  (`estado-actual.md`). Su ejecución remota de comandos sí se arregla, cuando
-  se conecte al protocolo nuevo (`005-tiempo-real`).
+- ~~`apps/stream-agent` no entra en esta decisión: se conserva y se arregla al
+  conectarlo al protocolo nuevo.~~ **Sustituido por
+  [ADR 0014](0014-obs-por-websocket.md):** el agente no se arregla, se retira
+  entero; el nodo habla con OBS por su protocolo oficial. Su vulnerabilidad
+  queda abierta hasta entonces, como el resto del legado.
+- `apps/web-panel` y `apps/desktop-node` también se retiran
+  ([ADR 0013](0013-app-de-escritorio-en-vez-de-panel-web.md)). Tampoco se
+  parchean mientras tanto.
 - Si en algún momento entra una tercera iglesia, o alguien más administra una
   instalación, el costo aceptado aquí deja de serlo y esta decisión se
   revisa con un ADR nuevo.

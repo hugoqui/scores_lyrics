@@ -13,10 +13,10 @@ resuelve lo que aquí se registra.
 |---|---|---|
 | `legacy/back-scores/` | Node + Express + socket.io + MySQL, puerto 3014. Corre en un servidor dentro de cada iglesia. Biblia, cantos, lista de alabanza y proyección. | En producción. Será reemplazado. |
 | `legacy/belen-backend/` | Node + Express + MySQL en la nube. Solo `/api/login` y `/api/cantos`. | En producción. Será reemplazado. |
-| `apps/web-panel/` | Vue 2.6 + vue-cli 4. Panel de control, pantalla de proyección (`#/screen`), Biblia, teleprompter, control de OBS. | Se conserva. |
+| `apps/web-panel/` | Vue 2.6 + vue-cli 4. Panel de control, pantalla de proyección (`#/screen`), Biblia, teleprompter, control de OBS. | **Será reemplazado** por la app de escritorio ([ADR 0013](../adr/0013-app-de-escritorio-en-vez-de-panel-web.md)). Nadie se conecta a él desde la red. |
 | `apps/mobile/` | Flutter 3.6.0. App Symphony de los músicos. 43 archivos, 5.791 líneas. | Se conserva; se reescribe su capa de datos. |
-| `apps/desktop-node/` | C# WPF + WebView2. Abre el panel y una ventana a pantalla completa en el segundo monitor. | Se conserva. |
-| `apps/stream-agent/` | Node. Traduce eventos de socket en pulsaciones de teclado para OBS/vMix. | Se conserva, con cambios urgentes. |
+| `apps/desktop-node/` | C# WPF + WebView2. Abre el panel y una ventana a pantalla completa en el segundo monitor. | **Será reemplazado**: se funde con el panel en una app de escritorio multiplataforma ([ADR 0013](../adr/0013-app-de-escritorio-en-vez-de-panel-web.md)). |
+| `apps/stream-agent/` | Node. Traduce eventos de socket en pulsaciones de teclado para OBS/vMix. | **Será retirado**: el nodo hablará con OBS por su protocolo oficial ([ADR 0014](../adr/0014-obs-por-websocket.md)). |
 | `apps/node-server/` | El servidor del templo en C#. | Por construir. |
 | `services/cloud-api/` | Identidad, licencias y catálogo maestro en C#. | Por construir. |
 | `frozen/audio-console-manager/` | Flutter. Control OSC de una consola Behringer X32. No habla con el resto. | Congelado. |
@@ -40,11 +40,14 @@ Los dos backends usan el mismo puerto 3014, uno en la nube y otro en la red loca
 
 Cada uno apunta al módulo que lo resuelve. Ninguno queda sin dueño.
 
-> **Resolver no significa parchear `legacy/`.** Nada de `back-scores` ni
-> `belen-backend` se arregla: ese código se retira entero cuando el sistema
-> nuevo lo reemplace ([ADR 0009](../adr/0009-no-se-parchea-el-legado.md)). Un
-> hallazgo situado en `legacy/` queda aquí como lo que el sistema nuevo no
-> puede repetir, no como una tarea pendiente sobre ese código.
+> **Resolver no significa parchear lo que será reemplazado.** Nada de
+> `back-scores` ni `belen-backend` se arregla: ese código se retira entero
+> cuando el sistema nuevo lo reemplace
+> ([ADR 0009](../adr/0009-no-se-parchea-el-legado.md)). Lo mismo vale ahora para
+> `web-panel`, `desktop-node` ([ADR 0013](../adr/0013-app-de-escritorio-en-vez-de-panel-web.md))
+> y `stream-agent` ([ADR 0014](../adr/0014-obs-por-websocket.md)). Un hallazgo
+> sobre cualquiera de ellos queda aquí como lo que el sistema nuevo no puede
+> repetir, no como una tarea pendiente sobre ese código.
 
 ### Seguridad → [`000-seguridad`](../../specs/000-seguridad/)
 
@@ -59,7 +62,9 @@ Cada uno apunta al módulo que lo resuelve. Ninguno queda sin dueño.
 - **Ejecución remota de comandos.** `apps/stream-agent/app.js` recibe un valor por
   socket sin autenticar y lo concatena en una cadena de PowerShell. Cualquiera en
   la red —incluida una visita en el wifi de invitados— ejecuta comandos en la PC
-  de transmisión.
+  de transmisión. **No se arregla: el agente se retira entero**
+  ([ADR 0014](../adr/0014-obs-por-websocket.md)), y el control de OBS pasa al
+  nodo por obs-websocket, sin simular teclado.
 - **SQL construido por concatenación** en `legacy/back-scores/src/controllers/mysqlController.js`
   y en `legacy/belen-backend/src/controllers/usuarios.js`. Hoy es una
   vulnerabilidad; en multi-iglesia sería fuga de datos entre congregaciones.
@@ -161,7 +166,10 @@ El payload distingue canto de versículo por una convención implícita: si
   publicado en octubre de 2024.
 - `apps/desktop-node` posiciona mal la ventana en el segundo monitor: usa
   `Bounds.Width` como coordenada `Left` en vez de `Bounds.X`. Funciona por
-  casualidad con dos monitores idénticos lado a lado.
+  casualidad con dos monitores idénticos lado a lado. No se arregla: la app de
+  escritorio nueva ([ADR 0013](../adr/0013-app-de-escritorio-en-vez-de-panel-web.md))
+  maneja la pantalla extendida de forma nativa, y esto queda como lo que no
+  debe repetir.
 - Rutas inconsistentes: `.htaccess` declara `RewriteBase /lyricspanel`, mientras
   `vue.config.js` y el WPF usan `/panel`.
 - `npm run build` del panel usa sintaxis de Windows; en Mac hay que usar

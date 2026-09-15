@@ -124,9 +124,12 @@ saltarse bajo presión. Saltárselo significa construir a ciegas.
   009-nodo-empaquetado. Aquí solo se compila y se prueba.
 - Migrar datos de la base actual a la nueva. Esta spec provisiona la base
   vacía; mover datos, si hace falta, es trabajo aparte y solo de lectura.
-- Pruebas de la app Flutter y del panel Vue: se conservan
+- Pruebas de la app Flutter: se conserva
   ([ADR 0006](../../docs/adr/0006-conservar-la-app-flutter.md)) y su armazón de
   pruebas entra con la reescritura de su capa de datos → 007-app-movil.
+- Pruebas del panel Vue: no se escriben. El panel se retira
+  ([ADR 0013](../../docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)); el
+  armazón de la app de escritorio que lo reemplaza entra con su propio módulo.
 
 ## Abierto / bloqueante
 
