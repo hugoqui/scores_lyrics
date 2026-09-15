@@ -24,25 +24,32 @@ Comprobado en la máquina, no supuesto:
 ## Forma del repositorio al cerrar el módulo
 
 ```
-scores_lyrics.sln              solución única, abre todo
+Symphony.sln                   solución única de C#: nodo + nube
 Directory.Build.props          versión de .NET, nullable, warnings-as-errors
 .editorconfig                  estilo, aplicado por el compilador
 .github/workflows/ci.yml       compila y prueba en cada push
 
 apps/node-server/
-  src/NodeServer/              ASP.NET Core, ejecutable autocontenido
+  src/Symphony.Node/           ASP.NET Core, ejecutable autocontenido
   migrations/                  SQL de SQLite, numerado
-  tests/NodeServer.Tests/
+  tests/Symphony.Node.Tests/
 
 services/cloud-api/
-  src/CloudApi/                ASP.NET Core
+  src/Symphony.Cloud/          ASP.NET Core
   migrations/                  SQL de PostgreSQL, numerado
-  tests/CloudApi.Tests/
+  tests/Symphony.Cloud.Tests/
 ```
 
 Dos árboles paralelos y simétricos. Nada compartido entre nodo y nube en este
 módulo: la biblioteca común, si hace falta, aparecerá cuando haya algo real que
 compartir, no antes.
+
+**Sobre los nombres.** *Symphony* es la plataforma entera; los proyectos de C#
+llevan ese prefijo en PascalCase, la convención del lenguaje. La solución **no
+incluye Symphony Master**, la app de escritorio: esa es Tauri
+([ADR 0013](../../docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)) y no
+entra en un `.sln`. Las rutas de carpeta (`apps/node-server/`,
+`services/cloud-api/`) se conservan: describen el rol, no el producto.
 
 ## Cómo se cumple cada requisito
 

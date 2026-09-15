@@ -18,8 +18,9 @@ Windows.
 
 ## Decisión
 
-El control y la proyección pasan a **una sola app de escritorio multiplataforma,
-construida con Tauri**.
+El control y la proyección pasan a **Symphony Master**, una sola app de
+escritorio multiplataforma construida con Tauri. El nombre la enlaza con la app
+móvil que ya usan los músicos: dirige a todas las Symphony conectadas.
 
 **El control remoto no desaparece: se muda a la app móvil.** Symphony gana un
 **rol de operador** que permite manejar el servicio desde un teléfono o tablet.

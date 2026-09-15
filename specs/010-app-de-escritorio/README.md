@@ -1,11 +1,13 @@
-# 010-app-de-escritorio — App de escritorio
+# 010-app-de-escritorio — Symphony Master
 
 **Estado:** ⬜ sin especificar · **Depende de:** 004-estado-en-vivo, 005-tiempo-real
 
 ## Objetivo
 
-La app que se usa el domingo: control del servicio y proyección en la pantalla
-extendida, en una sola pieza multiplataforma construida con Tauri
+**Symphony Master** es la app que se usa el domingo: control del servicio y
+proyección en la pantalla extendida, en una sola pieza multiplataforma
+construida con Tauri. El nombre dice lo que hace: dirige a todas las Symphony
+conectadas
 ([ADR 0013](../../docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)).
 
 Reemplaza a dos componentes a la vez:

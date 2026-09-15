@@ -35,7 +35,7 @@ Leyenda: ⬜ sin especificar · 📝 especificado · 🔨 en implementación · 
 | 007 | [app-movil](007-app-movil/) | ⬜ | Reescribir la capa de datos de Symphony conservando funcionalidades, descargas y anotaciones, y añadir el rol de operador. |
 | 008 | [sincronizacion-y-licencias](008-sincronizacion-y-licencias/) | ⬜ | Sincronización nube↔nodo y licencia firmada verificable sin internet. |
 | 009 | [nodo-empaquetado](009-nodo-empaquetado/) | ⬜ | Instalador único del nodo, actualizaciones con reversión automática y respaldo. |
-| 010 | [app-de-escritorio](010-app-de-escritorio/) | ⬜ | Proyección en pantalla extendida y control desde el equipo del templo; reemplaza al panel Vue y a la cáscara WPF. |
+| 010 | [app-de-escritorio](010-app-de-escritorio/) | ⬜ | **Symphony Master**: proyección en pantalla extendida y control desde el equipo del templo; reemplaza al panel Vue y a la cáscara WPF. |
 
 **Siguiente:** `001-andamiaje-y-tests` — `spec.md`, `plan.md` y `tasks.md`
 escritos y aprobados. Toca **implementar**, empezando por la fase 1 de su

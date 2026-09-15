@@ -1,5 +1,5 @@
 > **Será retirado.** Nadie se conecta a este panel desde la red: su función
-> pasa a una app de escritorio multiplataforma
+> pasa a **Symphony Master**, una app de escritorio multiplataforma
 > ([ADR 0013](../../docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)).
 > No se parchea mientras tanto; sigue corriendo en las iglesias hasta que exista
 > el reemplazo, y es la referencia funcional de lo que este debe hacer.

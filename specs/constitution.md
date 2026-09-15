@@ -55,3 +55,14 @@ valor por defecto de producción.
 
 Se escribe el spec antes que el código. Si el código y el documento discrepan,
 lo que está mal es que nadie actualizó el documento al cambiar la decisión.
+
+## 9. Todo lo que ve un usuario está traducido
+
+Español e inglés desde el primer día, en la app de escritorio, la app móvil y
+el panel del SaaS. El idioma se toma del dispositivo y se puede cambiar.
+
+Ningún texto visible se escribe directo en el código: sale de un archivo de
+traducciones. Añadir un idioma nuevo no debe obligar a tocar la lógica.
+
+No aplica al contenido que carga la iglesia —letras de cantos, anotaciones—,
+que va en el idioma en que lo escribieron.

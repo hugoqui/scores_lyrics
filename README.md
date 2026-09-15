@@ -15,7 +15,7 @@ red local.
 
 **Si acabas de llegar —persona o asistente— lee en este orden:**
 
-1. [`specs/constitution.md`](specs/constitution.md) — los 8 principios que no se
+1. [`specs/constitution.md`](specs/constitution.md) — los 9 principios que no se
    negocian. Nada se propone sin haberlo leído.
 2. [`docs/arquitectura/estado-actual.md`](docs/arquitectura/estado-actual.md) —
    cómo está el sistema hoy, verificado en el código.
@@ -39,7 +39,7 @@ termina; `docs/` está siempre vigente.
 
 | Ruta | Qué contiene |
 |---|---|
-| [`specs/constitution.md`](specs/constitution.md) | Los 8 principios innegociables. Se lee antes que nada |
+| [`specs/constitution.md`](specs/constitution.md) | Los 9 principios innegociables. Se lee antes que nada |
 | [`specs/README.md`](specs/README.md) | Tabla de los 10 módulos, su estado y **cuál sigue** |
 | `specs/NNN-modulo/` | Una carpeta por módulo, con cuatro archivos |
 
@@ -96,7 +96,7 @@ Las carpetas se organizan por **ciclo de vida**, no por tecnología:
 | [`apps/node-server`](apps/node-server/) | Servidor del templo | C# · por construir |
 | [`apps/web-panel`](apps/web-panel/) | Panel, proyección, Biblia y teleprompter | Vue 2 · **será retirado** ([ADR 0013](docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)) |
 | [`apps/mobile`](apps/mobile/) | App Symphony de los músicos | Flutter |
-| [`apps/desktop-node`](apps/desktop-node/) | Ventana de proyección en el segundo monitor | C# WPF · **será retirado**, se funde con el panel en una app de escritorio ([ADR 0013](docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)) |
+| [`apps/desktop-node`](apps/desktop-node/) | Ventana de proyección en el segundo monitor | C# WPF · **será retirado**, se funde con el panel en **Symphony Master** ([ADR 0013](docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md)) |
 | [`apps/stream-agent`](apps/stream-agent/) | Atajos para OBS/vMix | Node · **será retirado**: el nodo habla con OBS por su protocolo ([ADR 0014](docs/adr/0014-obs-por-websocket.md)) |
 | [`services/cloud-api`](services/cloud-api/) | Identidad, licencias y catálogo maestro | C# · por construir |
 

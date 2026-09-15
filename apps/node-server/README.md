@@ -11,8 +11,7 @@ Un **ejecutable único autocontenido**, instalado como servicio del sistema, que
 en el mismo proceso:
 
 - expone la API del templo,
-- mantiene la conexión en tiempo real con la app de escritorio y con los
-  teléfonos,
+- mantiene la conexión en tiempo real con Symphony Master y con los teléfonos,
 - guarda su estado en SQLite embebido ([ADR 0004](../../docs/adr/0004-sqlite-en-el-nodo.md)),
 - **controla OBS por su protocolo oficial**, sin simular teclado
   ([ADR 0014](../../docs/adr/0014-obs-por-websocket.md)),
