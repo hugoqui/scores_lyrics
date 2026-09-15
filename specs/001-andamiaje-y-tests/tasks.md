@@ -6,7 +6,12 @@ verifica y se confirma en git por separado.
 Regla: **ninguna tarea que añade comportamiento se cierra sin su prueba**
 (constitución, punto 4). La prueba va en la misma tarea, no en una posterior.
 
+Cada fase indica el **modelo sugerido**. Si el modelo en uso no es el sugerido,
+hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
+
 ## Fase 1 — Esqueleto de la solución
+
+> **Modelo sugerido: Sonnet** — crear proyectos y archivos de configuración; el plan ya dice exactamente qué.
 
 - [x] T1.1 Crear `Symphony.sln` en la raíz.
 - [x] T1.2 Crear `Directory.Build.props`: versión de .NET, `Nullable` activo,
@@ -26,6 +31,8 @@ Regla: **ninguna tarea que añade comportamiento se cierra sin su prueba**
 
 ## Fase 2 — Configuración que falla ruidosamente (spec R3)
 
+> **Modelo sugerido: Sonnet** — patrón conocido, y las pruebas fijan el comportamiento esperado.
+
 - [ ] T2.1 Definir la configuración del nodo: ruta del archivo SQLite, URL de
       la nube, entorno. Leída del entorno, sin valores por defecto de
       producción.
@@ -41,6 +48,8 @@ Regla: **ninguna tarea que añade comportamiento se cierra sin su prueba**
       entró al repositorio.
 
 ## Fase 3 — Migraciones (spec R1, [ADR 0010](../../docs/adr/0010-migraciones-sql-planas.md))
+
+> **Modelo sugerido: Opus** — es la pieza donde un error no se ve hasta que corrompe el esquema de una iglesia; la convergencia y la idempotencia hay que razonarlas, no copiarlas.
 
 - [ ] T3.1 Escribir el ejecutor de migraciones: lee los `.sql` de una carpeta,
       los ordena por número, aplica los pendientes en una transacción y anota
@@ -60,6 +69,8 @@ Regla: **ninguna tarea que añade comportamiento se cierra sin su prueba**
 
 ## Fase 4 — Pruebas con base real ([ADR 0011](../../docs/adr/0011-pruebas-con-base-real-efimera.md))
 
+> **Modelo sugerido: Opus** — el aislamiento entre pruebas es fácil de romper de formas que no fallan de inmediato.
+
 - [ ] T4.1 Armazón para pruebas de PostgreSQL: levantar un contenedor efímero,
       aplicar migraciones, destruirlo al terminar.
 - [ ] T4.2 Armazón para pruebas de SQLite: archivo temporal en carpeta propia,
@@ -70,6 +81,8 @@ Regla: **ninguna tarea que añade comportamiento se cierra sin su prueba**
       correr las pruebas (Docker) y qué pasa si no está.
 
 ## Fase 5 — Integración continua ([ADR 0012](../../docs/adr/0012-integracion-continua-en-github-actions.md))
+
+> **Modelo sugerido: Sonnet** — escribir el YAML del flujo y verificarlo con un push.
 
 - [ ] T5.1 Crear `.github/workflows/ci.yml`: compila con advertencias como
       errores, corre todas las pruebas, verifica el formato.
@@ -82,6 +95,8 @@ Regla: **ninguna tarea que añade comportamiento se cierra sin su prueba**
 
 ## Fase 6 — Logs (spec R7)
 
+> **Modelo sugerido: Sonnet** — configuración con una prueba que verifica el filtrado de secretos.
+
 - [ ] T6.1 Registro estructurado en la nube: consola, con nivel y marca de
       tiempo.
 - [ ] T6.2 Registro estructurado en el nodo: consola **y** archivo rotado.
@@ -92,6 +107,8 @@ Regla: **ninguna tarea que añade comportamiento se cierra sin su prueba**
 - [ ] T6.5 Un fallo no atendido se registra completo, no se traga en silencio.
 
 ## Fase 7 — Base de datos nueva (spec R2)
+
+> **Modelo sugerido: Sonnet** — la ejecuta el propietario en su VPS; el asistente solo documenta los pasos.
 
 - [ ] T7.1 En el VPS: crear usuario, base y contraseña nuevos para PostgreSQL.
 - [ ] T7.2 Verificar que PostgreSQL escucha solo en `localhost` y no es

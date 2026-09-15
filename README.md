@@ -77,6 +77,19 @@ orden ([convención de Spec Kit](https://github.com/github/spec-kit)):
 - Al cerrar un módulo se actualiza `docs/arquitectura/`, que es lo que queda
   vigente cuando el spec ya caducó.
 
+### Qué modelo usar
+
+La documentación dice qué modelo conviene en cada punto: una columna en
+[`specs/README.md`](specs/README.md) por módulo, y una nota por fase en el
+`tasks.md` de cada uno.
+
+En corto: **Opus escribe** —specs, planes y ADR—, **Sonnet implementa** lo que
+ya está escrito, salvo las fases marcadas como excepción.
+
+Antes de empezar una tarea, el asistente compara el modelo en uso con el
+sugerido. Si no coincide, avisa y espera: el cambio lo hace el propietario con
+`/model`.
+
 ### Ramas
 
 **Una rama por módulo**, no por cambio suelto.
