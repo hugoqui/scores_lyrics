@@ -1,6 +1,5 @@
 import Vue from "vue";
 import Vuex from "vuex";
-// const base = require('../../public/js/host.js').base
 
 Vue.use(Vuex);
 

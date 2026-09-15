@@ -1,0 +1,33 @@
+# Dependencias
+node_modules/
+**/Pods/
+.dart_tool/
+.packages
+
+# Compilados
+build/
+dist/
+out/
+bin/
+obj/
+*.user
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+key.properties
+*.keystore
+*.jks
+
+# Estado en tiempo de ejecucion (no es codigo)
+legacy/back-scores/src/songid.txt
+
+# Editores
+.idea/
+.vscode/
+*.swp
