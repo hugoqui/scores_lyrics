@@ -36,9 +36,10 @@ Leyenda: ⬜ sin especificar · 📝 especificado · 🔨 en implementación · 
 | 008 | [sincronizacion-y-licencias](008-sincronizacion-y-licencias/) | ⬜ | Sincronización nube↔nodo y licencia firmada verificable sin internet. |
 | 009 | [nodo-empaquetado](009-nodo-empaquetado/) | ⬜ | Instalador único del nodo, actualizaciones con reversión automática y respaldo. |
 
-**Siguiente:** `001-andamiaje-y-tests` — su `spec.md` está escrito y espera
-aprobación; luego `plan.md`. El módulo 000 ya fijó sus reglas y no tiene código
-propio; 001 es el primero que construye.
+**Siguiente:** `001-andamiaje-y-tests` — `spec.md`, `plan.md` y `tasks.md`
+escritos y aprobados. Toca **implementar**, empezando por la fase 1 de su
+`tasks.md`. El módulo 000 ya fijó sus reglas y no tiene código propio; 001 es
+el primero que construye.
 
 ## Orden y dependencias
 

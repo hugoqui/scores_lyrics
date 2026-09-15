@@ -8,8 +8,9 @@ Migraciones de esquema versionadas, armazón de pruebas unitarias e integración
 
 ## Siguiente paso
 
-[`spec.md`](spec.md) y [`plan.md`](plan.md) escritos, con sus tres decisiones
-ya registradas en ADR 0010, 0011 y 0012. Falta `tasks.md`.
+[`spec.md`](spec.md), [`plan.md`](plan.md) y [`tasks.md`](tasks.md) escritos,
+con las tres decisiones registradas en ADR 0010, 0011 y 0012. Listo para
+implementar: empezar por la fase 1 de `tasks.md`.
 
 Antes de empezar, leer la [constitución](../constitution.md) y el
 [estado actual](../../docs/arquitectura/estado-actual.md).
