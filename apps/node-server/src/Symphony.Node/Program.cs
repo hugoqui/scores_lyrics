@@ -1,4 +1,9 @@
+using Symphony.Node.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var nodeOptions = NodeOptions.FromEnvironment(builder.Environment.EnvironmentName);
+builder.Services.AddSingleton(nodeOptions);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -37,3 +42,6 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+
+// Visible para WebApplicationFactory<Program> en las pruebas de arranque.
+public partial class Program;

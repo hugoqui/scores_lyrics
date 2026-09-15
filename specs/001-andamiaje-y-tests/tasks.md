@@ -33,18 +33,18 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Sonnet** — patrón conocido, y las pruebas fijan el comportamiento esperado.
 
-- [ ] T2.1 Definir la configuración del nodo: ruta del archivo SQLite, URL de
+- [x] T2.1 Definir la configuración del nodo: ruta del archivo SQLite, URL de
       la nube, entorno. Leída del entorno, sin valores por defecto de
       producción.
-- [ ] T2.2 Definir la configuración de la nube: cadena de conexión a
+- [x] T2.2 Definir la configuración de la nube: cadena de conexión a
       PostgreSQL, entorno.
-- [ ] T2.3 Validar toda la configuración **al arrancar**, antes de atender la
+- [x] T2.3 Validar toda la configuración **al arrancar**, antes de atender la
       primera petición. Si falta una variable, el proceso muere nombrándola.
-- [ ] T2.4 Prueba: arranca con configuración válida.
-- [ ] T2.5 Prueba: falla con configuración incompleta, y el nombre de la
+- [x] T2.4 Prueba: arranca con configuración válida.
+- [x] T2.5 Prueba: falla con configuración incompleta, y el nombre de la
       variable que falta aparece en el mensaje.
-- [ ] T2.6 Añadir `.env.example` con los nombres y valores obviamente falsos.
-- [ ] T2.7 Confirmar que `.env` está en `.gitignore` y que ningún secreto real
+- [x] T2.6 Añadir `.env.example` con los nombres y valores obviamente falsos.
+- [x] T2.7 Confirmar que `.env` está en `.gitignore` y que ningún secreto real
       entró al repositorio.
 
 ## Fase 3 — Migraciones (spec R1, [ADR 0010](../../docs/adr/0010-migraciones-sql-planas.md))
