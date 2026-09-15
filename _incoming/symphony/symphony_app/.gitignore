@@ -1,0 +1,70 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# NativeScript
+platforms/
+hooks/
+report.json
+*.tmp
+*.log
+*.bak
+*.njsproj
+*.sln
+*.user
+
+# VS Code
+.vscode/
+
+# Angular
+dist/
+out-tsc/
+.tmp/
+.angular/
+
+# IDEs y sistemas operativos
+.DS_Store
+.idea/
+*.iml
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Android/Gradle
+.gradle/
+build/
+*.apk
+*.ap_
+# *.keystore
+local.properties
+
+# iOS/Xcode
+*.xcodeproj
+*.xcworkspace
+*.xcuserstate
+*.xcuserdata
+*.swp
+*.lock
+Pods/
+DerivedData/
+build/
+*.pbxuser
+!default.pbxuser
+!default.pbxproj
+
+# Webpack cache
+# webpack.config.js
+# webpack.config.ts
+# webpack.config.*
+# webpack/
+
+# Optional: Git ignore git-ignored file list backups
+.gitignore~
+
+scores

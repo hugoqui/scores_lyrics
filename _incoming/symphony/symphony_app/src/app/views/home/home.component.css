@@ -1,0 +1,18 @@
+.button-menu{
+    border-width: 1;
+    border-color: #bbb;
+    padding: 32;
+    border-radius: 8;
+    vertical-align: middle;
+    min-height: 100;
+    text-align: center;
+    background-color: #fff;
+    width: 350;
+    margin: 16;
+    color: #555;
+}
+
+.button-menu *{
+    horizontal-alignment:center;
+    padding: 8;    
+}

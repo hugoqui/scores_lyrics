@@ -1,0 +1,33 @@
+<ActionBar [title]="`Descargar Partituras - ${instrument().label}`">
+    <NavigationButton text="Volver" android.systemIcon="ic_menu_back" (tap)="goBack()"></NavigationButton>    
+</ActionBar>
+<StackLayout padding="20">
+    <StackLayout orientation="horizontal" horizontalAlignment="right" marginBottom="20">        
+        @if(generalLoading()){
+            <Label [text]="`${selectedSong().replace('.png','').substring(0,20)} ... ${nScores()}/${songList().length}`" class="text-gray-500"></Label>
+            <ActivityIndicator width="100" height="40" [busy]="true" color="#333" />                        
+            <Button (tap)="cancelDownload()" padding="20">Cancelar Descarga</Button>
+        }@else{
+            <Button (tap)="downloadAllSongs()" padding="20">Descargar Todas</Button>          
+        }
+    </StackLayout>
+
+    
+    <ListView [items]="songList()" height="100%">
+        <ng-template let-song>
+            <GridLayout class="song-item" orientation="horizontal" columns="60,*,auto">                
+                <Label col="1" [text]="song.title.replace('.png','')" class="" color="#000"></Label>                
+                @if(!song.isDownloaded){
+                    @if(loading() && selectedSong()==song.title){
+                        <ActivityIndicator width="100" height="40" [busy]="true" />                        
+                    } 
+                }
+                @else
+                {
+                    <Image src="~/app/assets/icons/check.jpg" stretch="aspectFit" height="20" /> 
+                }
+                <Button col="2" (tap)="downloadSingleSong(song.title)" text="Descargar" class="btn btn-primary" @downloadSingleSong(song.title)></Button>
+            </GridLayout>
+        </ng-template>
+    </ListView>
+</StackLayout>

@@ -1,0 +1,10 @@
+# Dependencias
+node_modules/
+
+# Registros (Logs)
+*.log
+npm-debug.log*
+
+# Cachés opcionales
+.npm
+.eslintcache

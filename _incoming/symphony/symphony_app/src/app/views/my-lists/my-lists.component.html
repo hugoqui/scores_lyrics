@@ -1,0 +1,19 @@
+<ActionBar title="Symphony / Mis Listas">
+    <NavigationButton text="Volver" android.systemIcon="ic_menu_back" (tap)="goBack()"></NavigationButton> </ActionBar>
+
+<StackLayout>
+    <GridLayout rows="auto,*" columns="*,200" margin="20">
+        <Button text="Crear lista" (tap)="addList()" col="1" class="button"></Button>
+        
+        <ListView row="1" colSpan="2" [items]="service.myLists()" height="100%" row="1">
+            <ng-template let-item let-i="index">
+                <GridLayout columns="auto, *" (tap)="goToDetails(item)" rows="auto,auto">
+                    <Button rowSpan="2" height="40" width="90" padding="0" text="borrar" (tap)="removeList(i)" class="button"></Button>
+                    <Label [text]="item.name" class="list-item" col="1" ></Label>
+                    <Label [text]="item.instrument" class="instrument-name" col="1" row="1" ></Label>
+                </GridLayout>
+            </ng-template>
+        </ListView>
+    </GridLayout>
+
+</StackLayout>

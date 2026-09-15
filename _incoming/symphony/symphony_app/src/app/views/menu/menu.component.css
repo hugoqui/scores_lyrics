@@ -1,0 +1,14 @@
+.menu-item{
+    margin-left: 100;
+}
+
+.instrument-item{
+    margin-top: 30;
+    font-size: 24;    
+}
+
+.download-info{
+  font-size: 14;
+  margin-bottom: 30;
+  color:#333;
+}

@@ -1,0 +1,15 @@
+.list-item {
+    font-size: 24px;
+    color: #333;
+    margin-left: 40;    
+}
+
+.instrument-name{
+    margin-left: 40;
+    margin-bottom: 20;
+}
+
+.button{
+    padding-left: 8;
+    padding-right: 8;
+}

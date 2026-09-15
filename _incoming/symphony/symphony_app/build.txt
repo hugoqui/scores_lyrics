@@ -1,0 +1,5 @@
+ns build android  --release  --key-store-path symphony-upload.keystore --key-store-password 123456  --key-store-alias symphony-upload-alias  --key-store-alias-password 123456  --aab
+
+
+security cms -D -i dist.mobileprovision | plutil -extract UUID xml1 -o - - | xmllint --xpath 'string(//string)' -
+ns build ios --for-device --provision "b6260ce0-b351-41bb-9760-774067978a03" --team "45654D52VQ" --certificate "./cert.p12"

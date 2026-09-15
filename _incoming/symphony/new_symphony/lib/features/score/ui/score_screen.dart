@@ -1,0 +1,195 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:new_symphony/data/models/instrument.dart';
+import 'package:new_symphony/features/practice/providers/practice_provider.dart';
+import 'package:new_symphony/features/score/providers/annotation_provider.dart';
+import 'package:new_symphony/features/score/providers/score_provider.dart';
+import 'package:new_symphony/features/score/ui/widgets/score_image_view.dart';
+import 'package:new_symphony/features/score/ui/widgets/floating_player_card.dart';
+import 'package:new_symphony/core/constants/app_colors.dart';
+
+class ScoreScreen extends ConsumerStatefulWidget {
+  final Instrument instrument;
+  final List<PracticeSong> songs;
+  final int initialIndex;
+
+  const ScoreScreen({
+    super.key,
+    required this.instrument,
+    required this.songs,
+    required this.initialIndex,
+  });
+
+  @override
+  ConsumerState<ScoreScreen> createState() => _ScoreScreenState();
+}
+
+class _ScoreScreenState extends ConsumerState<ScoreScreen> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  // Dimensiones estimadas de los controles laterales en Landscape
+  static const double _toolbarWidth = 85.0;
+  static const double _playerWidth = 85.0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicialización con un offset grande para permitir loop infinito circular
+    final int virtualInitialPage =
+        (widget.songs.length * 100) + widget.initialIndex;
+    _currentIndex = virtualInitialPage;
+    _pageController = PageController(initialPage: virtualInitialPage);
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    // Cargar audio inicial
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(scoreProvider.notifier)
+          .loadSong(
+            widget.instrument.path,
+            widget.songs[_currentIndex % widget.songs.length],
+          );
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isArrangementMode = ref.watch(
+      scoreProvider.select((s) => s.isArrangementMode),
+    );
+    final isUiVisible = ref.watch(scoreProvider.select((s) => s.isUiVisible));
+    if (widget.songs.isEmpty) {
+      return const Scaffold(body: Center(child: Text('No hay cantos')));
+    }
+
+    final int realIndex = _currentIndex % widget.songs.length;
+    final currentSong = widget.songs[realIndex];
+
+    // Calculamos la noteKey del canto visible actualmente para saber si se está dibujando
+    String fileForNoteKey = currentSong.melodyFileName;
+    if (isArrangementMode && currentSong.hasArrangementDownloaded) {
+      fileForNoteKey = currentSong.arrangementFileName!;
+    }
+    final String noteKey = '${widget.instrument.path}_$fileForNoteKey';
+    final bool isDrawing = ref.watch(
+      annotationProvider(noteKey).select((s) => s.isDrawingMode),
+    );
+
+    // Cálculos de layout responsivo
+    final orientation = MediaQuery.of(context).orientation;
+    final bool isLandscape = orientation == Orientation.landscape;
+
+    // Calculamos los márgenes laterales basados en los controles visibles
+    final double leftPadding = (isLandscape && isUiVisible) ? _toolbarWidth : 0;
+    final double rightPadding = (isLandscape && isUiVisible) ? _playerWidth : 0;
+
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      appBar:
+          (isUiVisible && !isDrawing) // Ocultar AppBar si estamos dibujando
+          ? AppBar(
+              title: Text(currentSong.title),
+              backgroundColor: AppColors.primary,
+            )
+          : null,
+      body: Stack(
+        children: [
+          // 1. Capa de la Partitura (Fondo)
+          PageView.builder(
+            controller: _pageController,
+            physics: isDrawing
+                ? const NeverScrollableScrollPhysics()
+                : const BouncingScrollPhysics(),
+            onPageChanged: (index) {
+              final int newRealIndex = index % widget.songs.length;
+              setState(() => _currentIndex = index);
+              ref
+                  .read(scoreProvider.notifier)
+                  .loadSong(widget.instrument.path, widget.songs[newRealIndex]);
+            },
+            itemBuilder: (context, index) {
+              final int itemRealIndex = index % widget.songs.length;
+              final song = widget.songs[itemRealIndex];
+              String fileToShow = song.melodyFileName;
+              if (isArrangementMode && song.hasArrangementDownloaded) {
+                fileToShow = song.arrangementFileName!;
+              }
+
+              return ScoreImageView(
+                instrument: widget.instrument.path,
+                fileName: fileToShow,
+                onTap: () =>
+                    ref.read(scoreProvider.notifier).toggleUiVisibility(),
+                // Pasamos ambos paddings para que la partitura se centre en el hueco
+                // pero el Toolbar pueda seguir pegado al borde izquierdo de la pantalla.
+                leftPadding: leftPadding,
+                rightPadding: rightPadding,
+              );
+            },
+          ),
+
+          // 2. Capa del Reproductor (Encima)
+          if (isUiVisible)
+            SafeArea(
+              left: false,
+              bottom: false,
+              child: Align(
+                alignment:
+                    MediaQuery.of(context).orientation == Orientation.landscape
+                    ? Alignment.centerRight
+                    : Alignment.bottomCenter,
+                child: _ScorePlayerOverlay(
+                  instrumentPath: widget.instrument.path,
+                  currentSong: currentSong,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScorePlayerOverlay extends ConsumerWidget {
+  final String instrumentPath;
+  final PracticeSong currentSong;
+
+  const _ScorePlayerOverlay({
+    required this.instrumentPath,
+    required this.currentSong,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(scoreProvider);
+    final notifier = ref.read(scoreProvider.notifier);
+
+    return FloatingPlayerCard(
+      hasArrangement: currentSong.hasArrangementDownloaded,
+      isArrangementScore:
+          state.isArrangementMode && currentSong.hasArrangementDownloaded,
+      isArrangementAudio: state.isAudioArrangement,
+      isLoopEnabled: state.isLoopEnabled,
+      playSpeed: state.playSpeed,
+      position: state.position,
+      duration: state.duration,
+      onToggleAudioMode: () =>
+          notifier.toggleAudioMode(instrumentPath, currentSong),
+      onToggleScoreMode: notifier.toggleScoreMode,
+      onToggleLoop: notifier.toggleLoop,
+      onChangeSpeed: notifier.setSpeed,
+      onSeek: notifier.seek,
+      onPlayPause: notifier.playPause,
+      isPlaying: state.isPlaying,
+    );
+  }
+}

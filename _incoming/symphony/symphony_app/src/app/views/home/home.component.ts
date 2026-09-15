@@ -1,0 +1,81 @@
+import { Component, NO_ERRORS_SCHEMA, OnInit, inject } from '@angular/core'
+import { NativeScriptCommonModule, NativeScriptRouterModule, RouterExtensions } from '@nativescript/angular'
+import { Page, Label } from '@nativescript/core'
+import { prompt } from "@nativescript/core/ui/dialogs";
+import * as appSettings from '@nativescript/core/application-settings';
+import { Router } from "@angular/router";
+import { setString, remove } from '@nativescript/core/application-settings';
+import { ScoresDownloaderService } from '~/app/services/scoresDownloader.service';
+
+@Component({
+  moduleId: module.id,
+  selector: 'ns-home',
+  templateUrl: 'home.component.html',
+  styleUrls: ['home.component.css'],
+  imports: [NativeScriptCommonModule, NativeScriptRouterModule,],
+  schemas: [NO_ERRORS_SCHEMA],
+})
+export class HomeComponent {
+
+  page = inject(Page)
+
+  constructor(private router: Router, private scoreDownloaderService: ScoresDownloaderService, private routerExtensions: RouterExtensions) {
+    this.page.on('loaded', (args) => {
+      if (__IOS__) {
+        const navigationController: UINavigationController = this.page.frame.ios.controller
+        navigationController.navigationBar.prefersLargeTitles = true
+      }
+    })
+
+    this.page.actionBarHidden = true;
+  }
+
+  async setHost(): Promise<void> {
+    try {
+      console.log('setting host...')
+      let host = appSettings.getString('host', 'http://192.168.5.1:3014');
+
+      const newHost = await prompt({
+        title: 'Servidor',
+        message: 'Ingrese el url del servidor:',
+        okButtonText: 'Confirmar',
+        cancelButtonText: 'Cancelar',
+        defaultText: host,
+        inputType: 'text',
+        capitalizationType: 'none'
+      })
+
+      console.log('newost', newHost)
+      if (!newHost.result) { return }
+
+      appSettings.setString('host', newHost.text);
+      this.router.navigate(['/menu/live']);
+
+    } catch (error) {
+      console.log('error setting host...', error)
+    }
+  }
+
+  goToSettings() {
+    try {
+      console.log('navigating to settings...')
+      this.router.navigate(['/settings']);
+    } catch (error) {
+      console.log('error navigating to settings...', error)
+    }
+  }
+
+  wipeData() {
+    console.log('Wiping all data...');
+    this.scoreDownloaderService.wipeAll();
+  }
+
+  logout() {
+    console.log('cerrando sesión...')
+    remove('token');
+    remove('email');
+    remove('password');
+    remove('expiration');
+    this.routerExtensions.navigate(['/login'], { clearHistory: true });
+  }
+}

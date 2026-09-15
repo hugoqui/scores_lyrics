@@ -1,0 +1,24 @@
+<ActionBar title="Symphony / Settings"> 
+  <NavigationButton text="Volver" android.systemIcon="ic_menu_back" (tap)="goBack()"></NavigationButton>
+</ActionBar>
+
+<StackLayout margin="20">
+  <StackLayout orientation="horizontal" horizontalAlignment="right">      
+    <Button text="Borrar Datos" (tap)="wipeData()" class="button"></Button> 
+  </StackLayout>
+
+  <Label text="Descargar Partituras" textWrap="true" class="title"></Label>
+  <ListView [items]="instrumentsService.instruments()" height="100%">
+    <ng-template let-item>
+      <GridLayout [nsRouterLink]="['/download-scores', item.id]" columns="60, *"  >
+        <Image [src]="`~/app/assets/icons/${item.path}.jpg`" class="instrument-image" col="0"></Image>
+        <StackLayout col="1" marginLeft="20">          
+          <Label [text]="item.label" class="instrument-item text-gray-700"></Label>          
+          <Label [text]="`${getDownloadsLength(item.path)} partituras`" class="text-gray-500 download-info"></Label>
+        </StackLayout>
+      </GridLayout>
+    </ng-template>
+
+  </ListView>
+
+</StackLayout>

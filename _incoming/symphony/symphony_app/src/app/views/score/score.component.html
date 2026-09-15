@@ -1,0 +1,100 @@
+<ActionBar [title]="`Symphony - ${baseName}`">
+    <NavigationButton text="Volver" android.systemIcon="ic_menu_back" (tap)="goBack()"></NavigationButton>
+</ActionBar>
+
+<!-- Usamos un GridLayout para poder superponer el botón de play -->
+<GridLayout rows="*">
+  <StackLayout
+    #imageRef
+    (swipe)="onSwipe($event)"
+    (tap)="toggleVisibilityNav()"
+  >
+    <ns-zoom-image [src]="scorePath"></ns-zoom-image>
+  </StackLayout>
+
+  <!-- Botón Flotante para cambiar Partitura (Melodía/Arreglo) -->
+  @if (shouldShowScoreSwitch()) {
+    <Button 
+        [text]="scoreType()==='melody'?'melodía':'arreglo'" 
+        (tap)="toggleScoreType()"
+        verticalAlignment="top"
+        horizontalAlignment="right"
+        margin="4"
+        class="buttonn">
+    </Button>
+  }
+
+  <!-- Contenedor izquierdo: Switch + Botones de reproducción -->
+  <StackLayout
+    verticalAlignment="bottom"
+    horizontalAlignment="left"
+    marginBottom="0"
+    marginLeft="10"
+    orientation="vertical"
+    class="player-controls"
+  >   
+    <!-- Switch Arreglo/Melodía -->
+    @if (shouldShowAudioSwitch()) {
+        <StackLayout orientation="horizontal" verticalAlignment="center" marginBottom="10">
+          <Label text="Melodía" class="switch-label" verticalAlignment="center" marginLeft="8"></Label>
+          <Switch [checked]="audioState().audioMode === 'arreglo'" 
+          (checkedChange)="onAudioModeChange($event)"
+          class="mode-switch"/>
+          <Label text="Arreglo" class="switch-label" verticalAlignment="center" marginRight="8"></Label> 
+        </StackLayout>
+    }
+
+    @if (audioState().hasAudio){
+    <StackLayout orientation="horizontal">
+      <!-- Indicador de Carga o Botón de Play/Pausa -->
+      @if (audioState().isLoading) {
+        <ActivityIndicator busy="true" class="player-button"></ActivityIndicator>
+      } @else if (audioState().isPlaying) {
+        <!-- Botón de Pausa -->
+        <Image src="~/app/assets/icons/pause.png" (tap)="pause()" class="player-button" height="60" />
+      } @else {
+        <!-- Botón de Play -->
+        <Image src="~/app/assets/icons/play.png" (tap)="play()" class="player-button" height="60"/>
+      }
+
+      <!-- Botón de Detener (visible si está sonando o en pausa) -->
+      @if (audioState().isPlaying || _player.currentTime > 0) {
+        <Image src="~/app/assets/icons/stop.png" (tap)="stop()" class="player-button" marginLeft="4" height="40"/>
+      }
+    </StackLayout>  
+    }
+
+    <!-- Botones de reproducción en horizontal -->
+  </StackLayout>
+
+  <!-- Botón flotante de Grabar/Pausar (lado derecho) -->
+  <StackLayout
+      verticalAlignment="bottom"
+      horizontalAlignment="right"
+      marginBottom="0"
+      marginRight="10"
+      orientation="horizontal"
+      class="player-controls"
+  >
+      <!-- Botón de Microfono/Grabar (si no hay grabación en curso) -->
+      @if (!recordingState().isRecording && !recordingState().isPaused) {
+          <Image src="~/app/assets/icons/mic.png" (tap)="startRecording()" class="record-button" height="60" />
+      }
+
+      <!-- Botón de Pausar Grabación (visible si está grabando) -->
+      @if (recordingState().isRecording) {
+          <Image src="~/app/assets/icons/pause.png" (tap)="pauseRecording()" class="record-button" height="60" />
+      }
+
+      <!-- Botón de Reanudar Grabación (visible si está pausada) -->
+      @if (recordingState().isPaused) {
+          <Image src="~/app/assets/icons/mic.png" (tap)="resumeRecording()" class="record-button" height="60" />
+      }
+
+      <!-- Botón de Detener Grabación (visible si está grabando o pausada) -->
+      @if (recordingState().isRecording || recordingState().isPaused) {
+          <Image src="~/app/assets/icons/stop.png" (tap)="stopRecording()" class="record-button" marginLeft="4" height="40" />
+      }
+      
+  </StackLayout>
+</GridLayout>

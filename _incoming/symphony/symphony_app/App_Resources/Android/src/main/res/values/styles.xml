@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Tema base de la app -->
+    <style name="AppThemeBase" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Estilo base para la barra de herramientas -->
+    <style name="NativeScriptToolbarStyleBase" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@android:color/white</item>
+    </style>
+
+    <!-- Tema para el splash -->
+    <style name="LaunchScreenTheme" parent="AppThemeBase">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
+</resources>

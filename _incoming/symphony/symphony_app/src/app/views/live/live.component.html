@@ -1,0 +1,23 @@
+<ActionBar [title]="'Partituras ' + instrument()?.label + ' - ' + status()">
+  <ActionItem
+    text="Desconectarse"
+    (tap)="turnOffSocket()"
+    android.position="actionBar"
+    ios.position="right" />
+</ActionBar>
+
+
+<GridLayout columns="auto, *, auto" rows="*,auto" (swipe)="onSwipe($event)" #imageRef >
+    <ContentView colSpan="3" rowSpan="2" (tap)="toggleVisibilityNav()">
+        <ns-zoom-image [src]="scorePath()"></ns-zoom-image>
+    </ContentView>
+    @if(instrument().path !== 'piano' && instrument().path !=='trumpet'){
+    <Button 
+        [text]="scoreType()==='melody'?'melodía':'arreglo'" 
+        (tap)="toggleArrangement()" row="1"
+        class="btn">
+    </Button>
+    }
+    <Image src="~/app/assets/icons/search.png" class="search-icon" stretch="aspectFit" col="2" row="1"
+        (tap)="openSearchModal()" />
+</GridLayout>

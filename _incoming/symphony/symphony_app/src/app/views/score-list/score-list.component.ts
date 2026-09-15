@@ -1,0 +1,123 @@
+import { Component, NO_ERRORS_SCHEMA, OnInit, ViewChild, ViewContainerRef, effect, inject, signal } from '@angular/core'
+import { ModalDialogService, NativeScriptCommonModule, NativeScriptRouterModule, RouterExtensions } from '@nativescript/angular'
+import { Dialogs, Page } from '@nativescript/core'
+import { InstrumentsService } from '../../services/instruments.service'
+import { ActivatedRoute, Router } from '@angular/router'
+import { ScoresDownloaderService } from '../../services/scoresDownloader.service';
+import { DownloadedFile } from '../../models/downloadedFile'
+import { Instrument } from '~/app/models/instrument'
+import { SearchModalComponent } from '~/app/components/search-modal/search-modal.component';
+
+
+@Component({
+  selector: 'ns-score-list',
+  templateUrl: './score-list.component.html',
+  styleUrl: './score-list.component.css',
+  imports: [NativeScriptCommonModule, NativeScriptRouterModule],
+  schemas: [NO_ERRORS_SCHEMA],
+})
+export class ScoreListComponent implements OnInit {  
+  songList = signal<DownloadedFile[]>([]);
+  instrument = signal<Instrument>(null)
+  chordFilter: string = '*';
+  private allSongs: DownloadedFile[] = [];
+
+  constructor(
+    private page: Page,
+    public instrumentsService: InstrumentsService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private modalService: ModalDialogService,
+    private vcRef: ViewContainerRef,
+    private scoresDownloaderService: ScoresDownloaderService,
+    private routerExtensions: RouterExtensions
+  ) {
+    effect(() => {
+      this.songList()
+    })
+  }
+
+  ngOnInit(): void {
+    try {
+      console.log('ScoreListComponent ngOnInit...')
+      const id = +this.route.snapshot.params.instrumentId
+      this.instrument.set(this.instrumentsService.getInstrument(id))
+      this.page.actionBarHidden = false;
+      this.getSongList(this.instrument().path);
+    } catch (error) {
+      console.error('Error in ScoreListComponent ngOnInit:', error);
+    }
+  }
+
+  goBack(): void {
+    this.routerExtensions.backToPreviousPage();
+  }
+
+  getSongList(instrument: string): void {
+    console.log('getSongList called with instrument:', instrument);    
+    this.allSongs = this.scoresDownloaderService.getDownloadedFiles(instrument).filter(s => !s.fileName.includes(instrument));
+    this.applyFilter();
+  }
+
+  goToScore(song: DownloadedFile): void {
+    console.log('>>>>>>>>>>>>>>> antes de navegar miremos... ', song)
+    const index = this.songList().findIndex(s => s.fileName === song.fileName && s.instrument === song.instrument);
+    this.router.navigate(['/score', index], {
+      queryParams: { songs: JSON.stringify(this.songList()) }
+    });
+  }
+
+  // Filtra la lista según el filtro de chord
+  applyFilter(): void {
+    if (!this.chordFilter || this.chordFilter === '*') {
+      this.songList.set(this.allSongs);
+    } else {
+      const filtered = this.allSongs.filter(song => song.chord === this.chordFilter);
+      this.songList.set(filtered);
+    }
+  }
+
+  // Método que se llama al cambiar el filtro desde el template
+  onFilterChange(newChord: string): void {
+    this.chordFilter = newChord;
+    this.applyFilter();
+  }
+
+  async selectFilter() {
+    const options = ['Todas', 'C', 'Eb', 'F', 'G', 'Bb'];
+    Dialogs.action({
+      title: 'Nota',
+      message: 'Selecciona la tonalidad:',
+      cancelButtonText: 'Cancelar',
+      actions: options,
+      cancelable: true,
+    }).then(selected => {
+      console.log("selected!!! ", selected)
+      if (selected && selected !== 'Cancelar') {
+        if (selected == 'Todas') {
+          selected = '*'
+        }
+        this.onFilterChange(selected);
+      }
+    });
+  }
+
+  async openSearchModal() {
+    const selectedSongName = await this.modalService.showModal(SearchModalComponent, {
+      viewContainerRef: this.vcRef,
+      fullscreen: false,
+      context: {
+        instrument: this.instrument().path
+      }
+    })
+
+    if (!selectedSongName) { return }
+    
+    console.log('Canto seleccionado:', selectedSongName);
+    const selectedSong = this.songList().find(s => s.fileName.replace('.png', '') === selectedSongName);
+    setTimeout(() => {      
+      this.goToScore(selectedSong);    
+    }, 100);
+  }
+
+}
