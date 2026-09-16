@@ -87,10 +87,10 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 - [x] T5.1 Crear `.github/workflows/ci.yml`: compila con advertencias como
       errores, corre todas las pruebas, verifica el formato.
 - [x] T5.2 Verificar que la tubería corre sin ningún secreto de producción.
-- [ ] T5.3 Verificar en verde con un push real.
-- [ ] T5.4 Verificar en rojo: romper una prueba a propósito, comprobar que
+- [x] T5.3 Verificar en verde con un push real.
+- [x] T5.4 Verificar en rojo: romper una prueba a propósito, comprobar que
       falla, revertir.
-- [ ] T5.5 Proteger `main` y `dev`: sin tubería verde no entra la fusión.
+- [x] T5.5 Proteger `main` y `dev`: sin tubería verde no entra la fusión.
       *(Se hace en la configuración de GitHub, no en el repositorio.)*
 
 ## Fase 6 — Logs (spec R7)
