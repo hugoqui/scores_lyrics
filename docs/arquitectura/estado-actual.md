@@ -74,11 +74,16 @@ Cada uno apunta al módulo que lo resuelve. Ninguno queda sin dueño.
 - **Sesión de 30 días validada contra la fecha local del teléfono**, falseable
   cambiando la hora del dispositivo. El JWT real dura 7 días y no se comprueba.
 
-### Ausencia de red de seguridad → [`001-andamiaje-y-tests`](../../specs/001-andamiaje-y-tests/)
+### Ausencia de red de seguridad → [`001-andamiaje-y-tests`](../../specs/001-andamiaje-y-tests/) ✅ resuelto
 
-No hay pruebas en ningún componente, ni integración continua, ni migraciones de
-esquema versionadas, ni logs estructurados. Hoy no existe forma de saber qué
-esquema tiene la base de datos de cada iglesia, ni de revertir un cambio.
+Resuelto por el módulo 001: `Symphony.Node` y `Symphony.Cloud` tienen
+migraciones versionadas y verificadas por hash
+([ADR 0010](../adr/0010-migraciones-sql-planas.md)), pruebas contra bases
+reales y efímeras ([ADR 0011](../adr/0011-pruebas-con-base-real-efimera.md)),
+integración continua en GitHub Actions que bloquea la fusión sin tubería verde
+([ADR 0012](../adr/0012-integracion-continua-en-github-actions.md)), y logs
+estructurados con filtrado de secretos en ambos procesos (spec R7). Ya se sabe
+qué esquema tiene cada base y hay forma de auditar qué pasó un domingo.
 
 ### No existe el concepto de iglesia → [`002-identidad-de-iglesia`](../../specs/002-identidad-de-iglesia/)
 

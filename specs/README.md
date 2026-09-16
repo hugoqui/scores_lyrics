@@ -33,7 +33,7 @@ Leyenda: ⬜ sin especificar · 📝 especificado · 🔨 en implementación · 
 | # | Módulo | Estado | Objetivo en una línea | Modelo |
 |---|---|---|---|---|
 | 000 | [seguridad](000-seguridad/) | 📝 | Fijar las reglas de seguridad que cumple el sistema nuevo. Sin código propio: se implementan en los módulos que le siguen. | Opus |
-| 001 | [andamiaje-y-tests](001-andamiaje-y-tests/) | 📝 | Migraciones versionadas, armazón de pruebas e integración continua, para que lo demás sea reversible. | mixto |
+| 001 | [andamiaje-y-tests](001-andamiaje-y-tests/) | ✅ | Migraciones versionadas, armazón de pruebas e integración continua, para que lo demás sea reversible. | mixto |
 | 002 | [identidad-de-iglesia](002-identidad-de-iglesia/) | ⬜ | Crear la entidad iglesia y propagarla a datos, usuarios y permisos. | **Opus** |
 | 003 | [panel-saas](003-panel-saas/) | ⬜ | Alta de iglesias, licencias, administrador por iglesia e invitaciones por QR. | mixto |
 | 004 | [estado-en-vivo](004-estado-en-vivo/) | ⬜ | Persistir lista de alabanza y canto actual por iglesia; matar `songid.txt` y el array en memoria. | mixto |
@@ -44,9 +44,8 @@ Leyenda: ⬜ sin especificar · 📝 especificado · 🔨 en implementación · 
 | 009 | [nodo-empaquetado](009-nodo-empaquetado/) | ⬜ | Instalador único del nodo, actualizaciones con reversión automática y respaldo. | mixto |
 | 010 | [app-de-escritorio](010-app-de-escritorio/) | ⬜ | **Symphony Master**: proyección en pantalla extendida y control desde el equipo del templo; reemplaza al panel Vue y a la cáscara WPF. | mixto |
 
-**Siguiente:** `001-andamiaje-y-tests` — fase 1 (esqueleto de la solución)
-terminada. Toca la **fase 2** de su `tasks.md`. El módulo 000 ya fijó sus reglas y no tiene código propio; 001 es
-el primero que construye.
+**Siguiente:** `001-andamiaje-y-tests` cerrado. Toca especificar
+`002-identidad-de-iglesia` (Opus: `spec.md`, `plan.md`, ADR).
 
 **Opus** en 002, 005, 006 y 008: identidad y aislamiento entre iglesias,
 autorización en tiempo real, deduplicación de partituras por hash y validación

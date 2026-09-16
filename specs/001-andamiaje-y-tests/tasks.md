@@ -126,11 +126,11 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 El módulo se cierra cuando, en una máquina limpia:
 
-- [ ] C1 `dotnet test` pasa en verde sin más preparación que tener Docker.
-- [ ] C2 Las pruebas de T3.3 y T3.4 demuestran que el esquema converge.
-- [ ] C3 La prueba de T2.5 demuestra que falta de configuración = no arranca.
-- [ ] C4 Un push abre la tubería y termina en verde; una prueba rota la pone en
+- [x] C1 `dotnet test` pasa en verde sin más preparación que tener Docker.
+- [x] C2 Las pruebas de T3.3 y T3.4 demuestran que el esquema converge.
+- [x] C3 La prueba de T2.5 demuestra que falta de configuración = no arranca.
+- [x] C4 Un push abre la tubería y termina en verde; una prueba rota la pone en
       rojo y bloquea la fusión.
-- [ ] C5 `docs/arquitectura/` actualizado: el hallazgo "ausencia de red de
+- [x] C5 `docs/arquitectura/` actualizado: el hallazgo "ausencia de red de
       seguridad" en `estado-actual.md` queda resuelto y se dice cómo.
-- [ ] C6 `specs/README.md` marca 001 como ✅ y nombra el módulo siguiente.
+- [x] C6 `specs/README.md` marca 001 como ✅ y nombra el módulo siguiente.
