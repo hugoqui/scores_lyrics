@@ -26,6 +26,7 @@ key.properties
 
 # Estado en tiempo de ejecucion (no es codigo)
 legacy/back-scores/src/songid.txt
+apps/node-server/src/Symphony.Node/logs/
 
 # Editores
 .idea/

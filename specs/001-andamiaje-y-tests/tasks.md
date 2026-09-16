@@ -97,14 +97,14 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Sonnet** — configuración con una prueba que verifica el filtrado de secretos.
 
-- [ ] T6.1 Registro estructurado en la nube: consola, con nivel y marca de
+- [x] T6.1 Registro estructurado en la nube: consola, con nivel y marca de
       tiempo.
-- [ ] T6.2 Registro estructurado en el nodo: consola **y** archivo rotado.
-- [ ] T6.3 Filtrar cadenas de conexión, contraseñas y tokens antes de
+- [x] T6.2 Registro estructurado en el nodo: consola **y** archivo rotado.
+- [x] T6.3 Filtrar cadenas de conexión, contraseñas y tokens antes de
       escribirlos.
-- [ ] T6.4 Prueba: una cadena de conexión pasada al registro no aparece en la
+- [x] T6.4 Prueba: una cadena de conexión pasada al registro no aparece en la
       salida.
-- [ ] T6.5 Un fallo no atendido se registra completo, no se traga en silencio.
+- [x] T6.5 Un fallo no atendido se registra completo, no se traga en silencio.
 
 ## Fase 7 — Base de datos nueva (spec R2)
 
