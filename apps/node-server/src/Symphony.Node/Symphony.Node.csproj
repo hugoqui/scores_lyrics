@@ -8,6 +8,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\libs\migraciones\src\Symphony.Migraciones\Symphony.Migraciones.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Las migraciones viajan con el binario: el ejecutor las busca junto al ejecutable. -->
+    <Content Include="..\..\migrations\*.sql" Link="migrations\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

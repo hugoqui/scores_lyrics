@@ -38,11 +38,21 @@ services/cloud-api/
   src/Symphony.Cloud/          ASP.NET Core
   migrations/                  SQL de PostgreSQL, numerado
   tests/Symphony.Cloud.Tests/
+
+libs/migraciones/
+  src/Symphony.Migraciones/    el ejecutor de migraciones, un motor
+  tests/Symphony.Migraciones.Tests/
 ```
 
-Dos árboles paralelos y simétricos. Nada compartido entre nodo y nube en este
-módulo: la biblioteca común, si hace falta, aparecerá cuando haya algo real que
-compartir, no antes.
+Tres árboles paralelos y simétricos.
+
+**Lo único compartido entre nodo y nube es el ejecutor de migraciones.** El SQL
+no se comparte —los dialectos difieren ([ADR 0010](../../docs/adr/0010-migraciones-sql-planas.md))—
+pero el algoritmo que lo aplica sí es el mismo, y es la pieza donde un error no
+se ve hasta que corrompe el esquema de una iglesia: dos copias son dos
+oportunidades de divergir y de que solo una quede probada. Recibe una
+`DbConnection`, así que no ata a nadie a un motor ni a un ORM. Cualquier otra
+biblioteca común aparecerá cuando haya algo real que compartir, no antes.
 
 **Sobre los nombres.** *Symphony* es la plataforma entera; los proyectos de C#
 llevan ese prefijo en PascalCase, la convención del lenguaje. La solución **no

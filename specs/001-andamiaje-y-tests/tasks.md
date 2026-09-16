@@ -51,20 +51,20 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Opus** — es la pieza donde un error no se ve hasta que corrompe el esquema de una iglesia; la convergencia y la idempotencia hay que razonarlas, no copiarlas.
 
-- [ ] T3.1 Escribir el ejecutor de migraciones: lee los `.sql` de una carpeta,
+- [x] T3.1 Escribir el ejecutor de migraciones: lee los `.sql` de una carpeta,
       los ordena por número, aplica los pendientes en una transacción y anota
       cada uno en `migraciones_aplicadas`.
-- [ ] T3.2 Guardar el hash de cada migración aplicada; si un archivo ya
+- [x] T3.2 Guardar el hash de cada migración aplicada; si un archivo ya
       aplicado cambió en disco, el arranque falla.
-- [ ] T3.3 Prueba: base vacía + todas las migraciones = esquema esperado.
-- [ ] T3.4 Prueba: base a medio migrar + migraciones restantes = **el mismo**
+- [x] T3.3 Prueba: base vacía + todas las migraciones = esquema esperado.
+- [x] T3.4 Prueba: base a medio migrar + migraciones restantes = **el mismo**
       esquema que T3.3.
-- [ ] T3.5 Prueba: aplicar dos veces no cambia nada ni falla.
-- [ ] T3.6 Prueba: alterar en disco una migración ya aplicada hace fallar el
+- [x] T3.5 Prueba: aplicar dos veces no cambia nada ni falla.
+- [x] T3.6 Prueba: alterar en disco una migración ya aplicada hace fallar el
       arranque.
-- [ ] T3.7 Conectar el ejecutor al arranque del nodo (SQLite) y de la nube
+- [x] T3.7 Conectar el ejecutor al arranque del nodo (SQLite) y de la nube
       (PostgreSQL), más un comando explícito para aplicarlas a mano.
-- [ ] T3.8 Crear `0001_inicial.sql` en cada carpeta: solo la tabla de control
+- [x] T3.8 Crear `0001_inicial.sql` en cada carpeta: solo la tabla de control
       de migraciones. Sin tablas de dominio — eso es de 002.
 
 ## Fase 4 — Pruebas con base real ([ADR 0011](../../docs/adr/0011-pruebas-con-base-real-efimera.md))

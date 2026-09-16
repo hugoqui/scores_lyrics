@@ -1,3 +1,4 @@
+using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,17 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+// Migraciones antes de atender la primera petición (spec R1, ADR 0010).
+// Si fallan, el proceso muere: un esquema del que no se sabe nada es peor
+// que un servicio apagado.
+MigracionesDeLaNube.Aplicar(cloudOptions, app.Logger);
+
+// `dotnet run -- migrar` aplica las migraciones y sale, sin levantar el servidor.
+if (args.Contains("migrar"))
+{
+    return;
+}
 
 app.Run();
 
