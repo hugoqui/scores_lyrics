@@ -1,6 +1,6 @@
 # 002-identidad-de-iglesia — Identidad de iglesia
 
-**Estado:** ⬜ sin especificar · **Depende de:** 000, 001
+**Estado:** 📝 especificado · **Depende de:** 000, 001
 
 ## Objetivo
 
@@ -8,8 +8,9 @@ Crear la entidad iglesia, que hoy no existe en ninguna parte, y propagarla a los
 
 ## Siguiente paso
 
-Escribir `spec.md`: el **qué** y el **porqué**, sin entrar en implementación.
-Después `plan.md` y `tasks.md`.
+[`spec.md`](spec.md), [`plan.md`](plan.md) y [`tasks.md`](tasks.md) escritos,
+con las tres decisiones registradas en ADR 0015, 0016 y 0017. Listo para
+implementar: empezar por la fase 1 de `tasks.md`.
 
 Antes de empezar, leer la [constitución](../constitution.md) y el
 [estado actual](../../docs/arquitectura/estado-actual.md).
