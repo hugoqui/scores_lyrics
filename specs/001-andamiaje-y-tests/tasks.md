@@ -110,13 +110,13 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Sonnet** — la ejecuta el propietario en su VPS; el asistente solo documenta los pasos.
 
-- [ ] T7.1 En el VPS: crear usuario, base y contraseña nuevos para PostgreSQL.
-- [ ] T7.2 Verificar que PostgreSQL escucha solo en `localhost` y no es
+- [x] T7.1 En el VPS: crear usuario, base y contraseña nuevos para PostgreSQL.
+- [x] T7.2 Verificar que PostgreSQL escucha solo en `localhost` y no es
       alcanzable desde internet (000-seguridad R3).
-- [ ] T7.3 Documentar el procedimiento en `docs/operacion/` — **sin la
+- [x] T7.3 Documentar el procedimiento en `docs/operacion/` — **sin la
       contraseña**, solo los pasos.
-- [ ] T7.4 Aplicar las migraciones contra esa base por primera vez.
-- [ ] T7.5 Confirmar que la base MySQL actual no aparece en ninguna cadena de
+- [x] T7.4 Aplicar las migraciones contra esa base por primera vez.
+- [x] T7.5 Confirmar que la base MySQL actual no aparece en ninguna cadena de
       conexión del repositorio.
 
 > La fase 7 la ejecuta el propietario en su VPS; es la única que toca una
