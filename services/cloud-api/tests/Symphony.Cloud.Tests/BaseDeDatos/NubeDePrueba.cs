@@ -16,9 +16,6 @@ namespace Symphony.Cloud.Tests.BaseDeDatos;
 /// </summary>
 public sealed class NubeDePrueba : IAsyncLifetime
 {
-    /// <summary>Obviamente falsa: es un contenedor que vive lo que dura la prueba.</summary>
-    private const string ContrasenaDeLaAplicacion = "contrasena-de-prueba";
-
     private readonly PostgreSqlContainer _contenedor = new PostgreSqlBuilder("postgres:16-alpine").Build();
 
     public string CadenaDelDueno => _contenedor.GetConnectionString();
@@ -31,6 +28,9 @@ public sealed class NubeDePrueba : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        // Obviamente falsa: es un contenedor que vive lo que dura la prueba.
+        const string contrasenaDeLaAplicacion = "contrasena-de-prueba";
+
         await _contenedor.StartAsync();
 
         await using var conexion = new NpgsqlConnection(CadenaDelDueno);
@@ -40,12 +40,12 @@ public sealed class NubeDePrueba : IAsyncLifetime
 
         // La migración crea el rol sin contraseña a propósito (constitución,
         // punto 7); aquí se le pone una para poder conectarse como él.
-        await Ejecutar(conexion, $"ALTER ROLE symphony_app WITH PASSWORD '{ContrasenaDeLaAplicacion}'");
+        await Ejecutar(conexion, $"ALTER ROLE symphony_app WITH PASSWORD '{contrasenaDeLaAplicacion}'");
 
         CadenaDeLaAplicacion = new NpgsqlConnectionStringBuilder(CadenaDelDueno)
         {
             Username = "symphony_app",
-            Password = ContrasenaDeLaAplicacion,
+            Password = contrasenaDeLaAplicacion,
 
             // Sin pozo: una conexión reciclada podría traer fijada la iglesia
             // de la prueba anterior y hacer pasar una prueba que debería
