@@ -1,3 +1,4 @@
+using Dapper;
 using Npgsql;
 using Symphony.Migraciones;
 using Symphony.Sesiones;
@@ -124,6 +125,18 @@ public sealed class NubeDePrueba : IAsyncLifetime
         return (correo, contrasena);
     }
 
+    /// <summary>
+    /// Consulta con el rol del dueño —se salta la política a propósito—, para
+    /// comprobar en la base lo que un endpoint hizo, sin depender de que
+    /// exista un endpoint de lectura para eso.
+    /// </summary>
+    public async Task<IReadOnlyList<T>> ConsultarComoDueno<T>(string sql, object? parametros = null)
+    {
+        await using var conexion = new NpgsqlConnection(CadenaDelDueno);
+        await conexion.OpenAsync();
+        return (await conexion.QueryAsync<T>(sql, parametros)).ToList();
+    }
+
     private static async Task Sembrar(NpgsqlConnection conexion, IglesiaSembrada iglesia)
     {
         await Ejecutar(
@@ -140,6 +153,9 @@ public sealed class NubeDePrueba : IAsyncLifetime
                 VALUES (@dispositivo, @iglesia, @usuario, 'movil', 'Teléfono de prueba', now());
             INSERT INTO sesion (id, dispositivo_id, iglesia_id, huella_token, emitida_en, expira_en)
                 VALUES (@sesion, @dispositivo, @iglesia, @huella, now(), now() + interval '30 days');
+            INSERT INTO usuario (id, iglesia_id, correo, nombre, hash_contrasena, estado, creado_en)
+                VALUES (@administrador, @iglesia, @correoAdministrador, 'Administrador de prueba', @hashAdministrador, 'activo', now());
+            INSERT INTO usuario_rol (usuario_id, rol) VALUES (@administrador, 'administrador');
             """,
             ("iglesia", iglesia.Id),
             ("nombre", iglesia.Nombre),
@@ -148,7 +164,10 @@ public sealed class NubeDePrueba : IAsyncLifetime
             ("hashContrasena", Contrasenas.Guardar(iglesia.Contrasena)),
             ("dispositivo", iglesia.DispositivoId),
             ("sesion", iglesia.SesionId),
-            ("huella", iglesia.SesionId.ToString()));
+            ("huella", iglesia.SesionId.ToString()),
+            ("administrador", iglesia.AdministradorId),
+            ("correoAdministrador", iglesia.AdministradorCorreo),
+            ("hashAdministrador", Contrasenas.Guardar(iglesia.AdministradorContrasena)));
     }
 
     private static async Task Ejecutar(NpgsqlConnection conexion, string sql, params (string Nombre, object Valor)[] parametros)
@@ -170,9 +189,19 @@ public sealed class NubeDePrueba : IAsyncLifetime
 }
 
 public sealed record IglesiaSembrada(
-    Guid Id, string Nombre, string Correo, string Contrasena, Guid UsuarioId, Guid DispositivoId, Guid SesionId)
+    Guid Id,
+    string Nombre,
+    string Correo,
+    string Contrasena,
+    Guid UsuarioId,
+    Guid DispositivoId,
+    Guid SesionId,
+    Guid AdministradorId,
+    string AdministradorCorreo,
+    string AdministradorContrasena)
 {
     public static IglesiaSembrada Nueva(string nombre, string correo) => new(
         Guid.CreateVersion7(), nombre, correo, "contrasena-de-prueba-" + Guid.NewGuid().ToString("N")[..8],
-        Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7());
+        Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(),
+        Guid.CreateVersion7(), "administrador-" + correo, "contrasena-de-prueba-" + Guid.NewGuid().ToString("N")[..8]);
 }

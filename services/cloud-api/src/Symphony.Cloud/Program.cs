@@ -3,6 +3,7 @@ using Symphony.Cloud.Autenticacion;
 using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 using Symphony.Cloud.Registro;
+using Symphony.Cloud.Usuarios;
 using Symphony.Sesiones;
 using Symphony.Sesiones.Web;
 
@@ -58,6 +59,8 @@ app.Use((contexto, siguiente) => MiddlewareDeErroresNoAtendidos.Invocar(contexto
 app.UsarSesionesFirmadas();
 
 app.MapearAutenticacion();
+app.MapearUsuarios();
+app.MapearInstrumentos();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

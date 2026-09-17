@@ -130,22 +130,22 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Sonnet** — trabajo de altas y bajas sobre un modelo ya decidido. La única trampa es la baja que borra, y la prueba la cubre.
 
-- [ ] T6.1 Alta de usuario dentro de una iglesia, con sus roles.
-- [ ] T6.2 Baja de usuario: **cambia el estado, nunca borra la fila ni su
+- [x] T6.1 Alta de usuario dentro de una iglesia, con sus roles.
+- [x] T6.2 Baja de usuario: **cambia el estado, nunca borra la fila ni su
       trabajo** (constitución, punto 5). Readmitir es volver a cambiarlo.
-- [ ] T6.3 Impedir que una iglesia se quede sin ningún administrador.
-- [ ] T6.4 Asignar y quitar instrumentos a un músico (varios por persona).
+- [x] T6.3 Impedir que una iglesia se quede sin ningún administrador.
+- [x] T6.4 Asignar y quitar instrumentos a un músico (varios por persona).
 - [ ] T6.5 Alta de dispositivo en el primer login, con nombre legible para que
       el músico reconozca cuál es.
 - [ ] T6.6 Listar y revocar dispositivos por separado.
 - [ ] T6.7 Si hay límite de dispositivos activos y se alcanza, responder
       diciendo qué pasa y ofreciendo cerrar uno. **Nunca un rechazo mudo**,
       como el 403 de hoy.
-- [ ] T6.8 Prueba: tras baja y readmisión, el usuario conserva instrumentos y
+- [x] T6.8 Prueba: tras baja y readmisión, el usuario conserva instrumentos y
       dispositivos.
 - [ ] T6.9 Prueba: revocar un dispositivo no afecta a los demás del mismo
       usuario.
-- [ ] T6.10 Prueba: quitar el último administrador de una iglesia se rechaza.
+- [x] T6.10 Prueba: quitar el último administrador de una iglesia se rechaza.
 
 ## Fase 7 — Alta de la primera iglesia sin panel (spec R9)
 

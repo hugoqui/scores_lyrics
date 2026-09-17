@@ -6,14 +6,16 @@ using Symphony.Cloud.Autenticacion;
 using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 using Symphony.Cloud.Tests.BaseDeDatos;
+using Symphony.Cloud.Usuarios;
 using Symphony.Sesiones;
 using Symphony.Sesiones.Web;
 
 namespace Symphony.Cloud.Tests.Autenticacion;
 
 /// <summary>
-/// Un servidor mínimo con solo los endpoints de autenticación, contra el
-/// PostgreSQL ya migrado de <see cref="NubeDePrueba"/>.
+/// Un servidor mínimo con los endpoints de autenticación, usuarios,
+/// instrumentos y dispositivos, contra el PostgreSQL ya migrado de
+/// <see cref="NubeDePrueba"/>.
 ///
 /// <para>
 /// <b>No pasa por <c>Program.cs</c>.</b> El arranque real vuelve a aplicar las
@@ -60,6 +62,8 @@ public sealed class ServidorDeLaNubeDePrueba : IAsyncDisposable
         var app = builder.Build();
         app.UsarSesionesFirmadas();
         app.MapearAutenticacion();
+        app.MapearUsuarios();
+        app.MapearInstrumentos();
 
         await app.StartAsync();
         return new ServidorDeLaNubeDePrueba(app, app.GetTestClient());
