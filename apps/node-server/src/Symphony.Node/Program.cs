@@ -2,6 +2,17 @@ using Serilog;
 using Symphony.Node.BaseDeDatos;
 using Symphony.Node.Configuration;
 using Symphony.Node.Registro;
+using Symphony.Sesiones;
+
+// Antes de leer la configuración: este comando existe justamente para cuando
+// todavía no hay claves que leer. La pública es la que hay que entregarle a la
+// nube para que pueda verificar lo que este nodo emita.
+if (args.Contains("generar-claves"))
+{
+    GeneracionDeClaves.Imprimir(
+        NodeOptions.ClavePrivadaVariable, "SYMPHONY_CLOUD_CLAVE_PUBLICA_DEL_NODO", Console.Out);
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 

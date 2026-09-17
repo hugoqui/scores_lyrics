@@ -1,3 +1,5 @@
+using Symphony.Sesiones;
+
 namespace Symphony.Node.Configuration;
 
 /// <summary>
@@ -10,6 +12,8 @@ public sealed class NodeOptions
     public const string SqlitePathVariable = "SYMPHONY_NODE_SQLITE_PATH";
     public const string CloudUrlVariable = "SYMPHONY_NODE_CLOUD_URL";
     public const string IglesiaIdVariable = "SYMPHONY_NODE_IGLESIA_ID";
+    public const string ClavePrivadaVariable = "SYMPHONY_NODE_CLAVE_PRIVADA";
+    public const string ClavePublicaDeLaNubeVariable = "SYMPHONY_NODE_CLAVE_PUBLICA_NUBE";
 
     /// <summary>Ruta al archivo SQLite del nodo.</summary>
     public required string SqlitePath { get; init; }
@@ -24,6 +28,18 @@ public sealed class NodeOptions
     /// </summary>
     public required Guid IglesiaId { get; init; }
 
+    /// <summary>
+    /// Con esta firma el nodo las sesiones que emite el domingo, sin consultar
+    /// a la nube ([ADR 0016]).
+    /// </summary>
+    public required ParDeClaves ClaveDeFirma { get; init; }
+
+    /// <summary>
+    /// Con esta verifica las sesiones que emitió la nube, sin red. Es media
+    /// clave: no sirve para firmar nada.
+    /// </summary>
+    public required ClavePublicaDeFirma ClavePublicaDeLaNube { get; init; }
+
     /// <summary>Entorno de ejecución (Development/Production), tomado de ASPNETCORE_ENVIRONMENT.</summary>
     public required string Environment { get; init; }
 
@@ -37,6 +53,8 @@ public sealed class NodeOptions
         var sqlitePath = System.Environment.GetEnvironmentVariable(SqlitePathVariable);
         var cloudUrl = System.Environment.GetEnvironmentVariable(CloudUrlVariable);
         var iglesiaId = System.Environment.GetEnvironmentVariable(IglesiaIdVariable);
+        var clavePrivada = System.Environment.GetEnvironmentVariable(ClavePrivadaVariable);
+        var clavePublicaDeLaNube = System.Environment.GetEnvironmentVariable(ClavePublicaDeLaNubeVariable);
 
         var missing = new List<string>();
         if (string.IsNullOrWhiteSpace(sqlitePath))
@@ -51,6 +69,14 @@ public sealed class NodeOptions
         {
             missing.Add(IglesiaIdVariable);
         }
+        if (string.IsNullOrWhiteSpace(clavePrivada))
+        {
+            missing.Add(ClavePrivadaVariable);
+        }
+        if (string.IsNullOrWhiteSpace(clavePublicaDeLaNube))
+        {
+            missing.Add(ClavePublicaDeLaNubeVariable);
+        }
 
         if (missing.Count > 0)
         {
@@ -64,11 +90,29 @@ public sealed class NodeOptions
                 $"{IglesiaIdVariable} no es un identificador válido: '{iglesiaId}'.");
         }
 
+        // Una clave mal copiada tiene que fallar aquí y no el domingo, cuando
+        // alguien intente entrar: se interpreta al arrancar, no al usarla.
+        ParDeClaves claveDeFirma;
+        ClavePublicaDeFirma claveDeLaNube;
+        try
+        {
+            claveDeFirma = ParDeClaves.DesdeBase64(clavePrivada!);
+            claveDeLaNube = ClavePublicaDeFirma.DesdeBase64(clavePublicaDeLaNube!);
+        }
+        catch (ArgumentException excepcion)
+        {
+            throw new InvalidOperationException(
+                $"Las claves de firma del nodo no son válidas ({ClavePrivadaVariable}, " +
+                $"{ClavePublicaDeLaNubeVariable}): {excepcion.Message}", excepcion);
+        }
+
         return new NodeOptions
         {
             SqlitePath = sqlitePath!,
             CloudUrl = cloudUrl!,
             IglesiaId = identificadorDeIglesia,
+            ClaveDeFirma = claveDeFirma,
+            ClavePublicaDeLaNube = claveDeLaNube,
             Environment = environment,
         };
     }

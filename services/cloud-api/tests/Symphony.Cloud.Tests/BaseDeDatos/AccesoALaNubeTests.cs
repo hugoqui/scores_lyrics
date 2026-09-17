@@ -1,6 +1,7 @@
 using Npgsql;
 using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
+using Symphony.Sesiones;
 
 namespace Symphony.Cloud.Tests.BaseDeDatos;
 
@@ -74,6 +75,7 @@ public sealed class AccesoALaNubeTests : IClassFixture<NubeDePrueba>
         var acceso = new AccesoALaNube(new CloudOptions
         {
             PostgresConnectionString = cadena,
+            ClaveDeFirma = ParDeClaves.Generar(),
             Environment = "Development",
         });
 
@@ -98,6 +100,7 @@ public sealed class AccesoALaNubeTests : IClassFixture<NubeDePrueba>
         new(new CloudOptions
         {
             PostgresConnectionString = CadenaDeLaAplicacion(unaSolaConexion),
+            ClaveDeFirma = ParDeClaves.Generar(),
             Environment = "Development",
         });
 
