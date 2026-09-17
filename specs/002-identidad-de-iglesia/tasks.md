@@ -66,16 +66,16 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Opus** — la puerta única es lo que sostiene la fase 1. Si se puede obtener una conexión sin pasar por ella, la RLS deja de proteger nada.
 
-- [ ] T3.1 Añadir Dapper a los dos proyectos.
-- [ ] T3.2 Escribir la **única** puerta a la base de la nube: abre transacción,
+- [x] T3.1 Añadir Dapper a los dos proyectos.
+- [x] T3.2 Escribir la **única** puerta a la base de la nube: abre transacción,
       fija la iglesia de la sesión y recién entonces deja consultar.
-- [ ] T3.3 Garantizar que **no hay otra forma** de obtener una conexión a la
+- [x] T3.3 Garantizar que **no hay otra forma** de obtener una conexión a la
       nube desde el código de dominio. Si nadie fijó iglesia, no se consulta.
-- [ ] T3.4 Prueba: pedir una conexión sin iglesia fijada falla, no devuelve una
+- [x] T3.4 Prueba: pedir una conexión sin iglesia fijada falla, no devuelve una
       conexión sin filtrar.
-- [ ] T3.5 Prueba: dos unidades de trabajo seguidas sobre la misma conexión del
+- [x] T3.5 Prueba: dos unidades de trabajo seguidas sobre la misma conexión del
       pozo no heredan la iglesia de la anterior.
-- [ ] T3.6 Borrar el endpoint `weatherforecast` de la plantilla en los dos
+- [x] T3.6 Borrar el endpoint `weatherforecast` de la plantilla en los dos
       proyectos.
 
 ## Fase 4 — Contraseñas y sesiones ([ADR 0016](../../docs/adr/0016-sesion-firmada-verificable-sin-internet.md))
