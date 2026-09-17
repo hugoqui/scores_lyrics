@@ -18,28 +18,28 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Opus** — es la fase que decide si una iglesia puede ver datos de otra. Una política mal escrita pasa las pruebas ingenuas y falla en la que importa.
 
-- [ ] T1.1 Escribir `services/cloud-api/migrations/0002_identidad.sql` con las
+- [x] T1.1 Escribir `services/cloud-api/migrations/0002_identidad.sql` con las
       tablas de la nube: `iglesia`, `propietario_saas`, `usuario`,
       `usuario_rol`, `instrumento`, `usuario_instrumento`, `dispositivo`,
       `sesion`. Identificadores UUIDv7
       ([ADR 0005](../../docs/adr/0005-identificadores.md)).
-- [ ] T1.2 `usuario`: correo único **dentro de la iglesia**, no global. Dos
+- [x] T1.2 `usuario`: correo único **dentro de la iglesia**, no global. Dos
       iglesias pueden tener el mismo correo como dos personas distintas.
-- [ ] T1.3 Activar `ENABLE` **y `FORCE ROW LEVEL SECURITY`** en toda tabla con
+- [x] T1.3 Activar `ENABLE` **y `FORCE ROW LEVEL SECURITY`** en toda tabla con
       `iglesia_id`, con su política contra la variable de sesión. `FORCE` no es
       opcional: sin él, el dueño de las tablas se salta la política.
-- [ ] T1.4 Crear el rol de aplicación: **`NOBYPASSRLS`**, no dueño de las
+- [x] T1.4 Crear el rol de aplicación: **`NOBYPASSRLS`**, no dueño de las
       tablas, con permiso solo sobre lo que necesita.
-- [ ] T1.5 Crear el rol del propietario del SaaS, que ve todas las iglesias.
+- [x] T1.5 Crear el rol del propietario del SaaS, que ve todas las iglesias.
       Documentar en `docs/operacion/` qué caminos pueden usarlo.
-- [ ] T1.6 Sembrar el catálogo de instrumentos con los diez de hoy y su
+- [x] T1.6 Sembrar el catálogo de instrumentos con los diez de hoy y su
       afinación: `bb` para trompeta y clarinete, `c` para el resto.
-- [ ] T1.7 Prueba: con dos iglesias sembradas, una sesión de la primera no
+- [x] T1.7 Prueba: con dos iglesias sembradas, una sesión de la primera no
       alcanza **ninguna** fila de la segunda, teniendo todos sus
       identificadores a mano.
-- [ ] T1.8 Prueba: una consulta escrita a propósito **sin** filtro de iglesia
+- [x] T1.8 Prueba: una consulta escrita a propósito **sin** filtro de iglesia
       devuelve cero filas, no filas ajenas.
-- [ ] T1.9 Prueba: el rol de aplicación no puede desactivar la política ni
+- [x] T1.9 Prueba: el rol de aplicación no puede desactivar la política ni
       leer sin fijar iglesia.
 
 ## Fase 2 — Esquema del nodo (spec R1, R3)

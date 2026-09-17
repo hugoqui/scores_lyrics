@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Npgsql;
+using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 using Symphony.Migraciones;
 using Testcontainers.PostgreSql;
@@ -54,7 +55,14 @@ public class StartupTests : IAsyncLifetime
         using var client = factory.CreateClient();
         await client.GetAsync("/weatherforecast");
 
-        Assert.Equal(["0001_inicial"], await MigracionesAplicadas());
+        // Se compara contra lo que hay en disco, no contra una lista escrita
+        // aquí: la propiedad que importa es "no queda ninguna pendiente", y una
+        // lista fija obliga a tocar esta prueba en cada migración nueva.
+        var enDisco = new EjecutorDeMigraciones(MigracionesDeLaNube.CarpetaPorDefecto, DialectoSql.PostgreSql)
+            .LeerDeDisco()
+            .Select(m => m.NombreCompleto);
+
+        Assert.Equal(enDisco, await MigracionesAplicadas());
     }
 
     [Fact]
