@@ -4,6 +4,7 @@ using Npgsql;
 using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 using Symphony.Migraciones;
+using Symphony.Sesiones;
 using Testcontainers.PostgreSql;
 
 namespace Symphony.Cloud.Tests;
@@ -30,11 +31,14 @@ public class StartupTests : IAsyncLifetime
         await _postgres.StartAsync();
         Environment.SetEnvironmentVariable(
             CloudOptions.PostgresConnectionStringVariable, _postgres.GetConnectionString());
+        Environment.SetEnvironmentVariable(
+            CloudOptions.ClavePrivadaVariable, ParDeClaves.Generar().PrivadaEnBase64);
     }
 
     public async Task DisposeAsync()
     {
         Environment.SetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable, null);
+        Environment.SetEnvironmentVariable(CloudOptions.ClavePrivadaVariable, null);
         await _postgres.DisposeAsync();
     }
 
@@ -72,18 +76,24 @@ public class StartupTests : IAsyncLifetime
     [Fact]
     public void Falla_con_configuracion_incompleta_y_nombra_la_variable_faltante()
     {
-        var anterior = Environment.GetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable);
+        var conexion = Environment.GetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable);
+        var clave = Environment.GetEnvironmentVariable(CloudOptions.ClavePrivadaVariable);
         Environment.SetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable, null);
+        Environment.SetEnvironmentVariable(CloudOptions.ClavePrivadaVariable, null);
         try
         {
             var excepcion = Assert.Throws<InvalidOperationException>(
                 () => CloudOptions.FromEnvironment("Development"));
 
+            // Las nombra todas de una vez: arrancar tres veces para descubrir
+            // tres variables que faltan es una forma tonta de perder una tarde.
             Assert.Contains(CloudOptions.PostgresConnectionStringVariable, excepcion.Message);
+            Assert.Contains(CloudOptions.ClavePrivadaVariable, excepcion.Message);
         }
         finally
         {
-            Environment.SetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable, anterior);
+            Environment.SetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable, conexion);
+            Environment.SetEnvironmentVariable(CloudOptions.ClavePrivadaVariable, clave);
         }
     }
 

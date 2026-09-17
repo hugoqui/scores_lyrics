@@ -82,27 +82,27 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Opus** — criptografía y caducidad. Aquí un error se descubre el día que alguien falsifica una sesión, no antes.
 
-- [ ] T4.1 Implementar el guardado de contraseñas con Argon2id, con sal por
+- [x] T4.1 Implementar el guardado de contraseñas con Argon2id, con sal por
       usuario y **parámetros versionados junto al hash**, para poder subirlos
       después sin invalidar a nadie.
-- [ ] T4.2 Calibrar los parámetros contra el hardware más débil de las
+- [x] T4.2 Calibrar los parámetros contra el hardware más débil de las
       iglesias, que en una es la misma PC que proyecta. Dejar el criterio
       escrito.
-- [ ] T4.3 Generar los pares de claves de firma (nube y nodo) y leerlos del
+- [x] T4.3 Generar los pares de claves de firma (nube y nodo) y leerlos del
       entorno. Ninguna clave privada entra al repositorio (constitución,
       punto 7).
-- [ ] T4.4 Emitir el token de acceso: usuario, iglesia, roles, dispositivo,
+- [x] T4.4 Emitir el token de acceso: usuario, iglesia, roles, dispositivo,
       emisión, caducidad, emisor e identificador de clave.
-- [ ] T4.5 Verificar un token contra la clave pública, **sin red**.
-- [ ] T4.6 Emitir y verificar el token de renovación, atado a un dispositivo.
+- [x] T4.5 Verificar un token contra la clave pública, **sin red**.
+- [x] T4.6 Emitir y verificar el token de renovación, atado a un dispositivo.
       Se guarda **solo su huella**, nunca el token.
-- [ ] T4.7 Prueba: un token con la firma alterada se rechaza.
-- [ ] T4.8 Prueba: un token caducado se rechaza aunque el cliente afirme otra
+- [x] T4.7 Prueba: un token con la firma alterada se rechaza.
+- [x] T4.8 Prueba: un token caducado se rechaza aunque el cliente afirme otra
       fecha.
-- [ ] T4.9 Prueba: el nodo verifica un token emitido por la nube sin ninguna
+- [x] T4.9 Prueba: el nodo verifica un token emitido por la nube sin ninguna
       llamada de red.
-- [ ] T4.10 Prueba: un token emitido para una iglesia no sirve en otra.
-- [ ] T4.11 Añadir las variables nuevas a `.env.example` con valores
+- [x] T4.10 Prueba: un token emitido para una iglesia no sirve en otra.
+- [x] T4.11 Añadir las variables nuevas a `.env.example` con valores
       obviamente falsos.
 
 ## Fase 5 — Autenticación y autorización (spec R7, R8)

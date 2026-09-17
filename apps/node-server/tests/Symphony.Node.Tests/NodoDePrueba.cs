@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Symphony.Migraciones;
 using Symphony.Node.BaseDeDatos;
 using Symphony.Node.Configuration;
+using Symphony.Sesiones;
 
 namespace Symphony.Node.Tests;
 
@@ -25,17 +26,29 @@ public sealed class NodoDePrueba : IDisposable
         Environment.SetEnvironmentVariable(NodeOptions.SqlitePathVariable, ArchivoSqlite);
         Environment.SetEnvironmentVariable(NodeOptions.CloudUrlVariable, "https://nube.prueba.local");
         Environment.SetEnvironmentVariable(NodeOptions.IglesiaIdVariable, IglesiaId.ToString());
+
+        ClaveDelNodo = ParDeClaves.Generar();
+        ClaveDeLaNube = ParDeClaves.Generar();
+        Environment.SetEnvironmentVariable(NodeOptions.ClavePrivadaVariable, ClaveDelNodo.PrivadaEnBase64);
+        Environment.SetEnvironmentVariable(
+            NodeOptions.ClavePublicaDeLaNubeVariable, ClaveDeLaNube.PublicaEnBase64);
     }
 
     public string ArchivoSqlite { get; }
 
     public Guid IglesiaId { get; }
 
+    public ParDeClaves ClaveDelNodo { get; }
+
+    public ParDeClaves ClaveDeLaNube { get; }
+
     public void OlvidarConfiguracion()
     {
         Environment.SetEnvironmentVariable(NodeOptions.SqlitePathVariable, null);
         Environment.SetEnvironmentVariable(NodeOptions.CloudUrlVariable, null);
         Environment.SetEnvironmentVariable(NodeOptions.IglesiaIdVariable, null);
+        Environment.SetEnvironmentVariable(NodeOptions.ClavePrivadaVariable, null);
+        Environment.SetEnvironmentVariable(NodeOptions.ClavePublicaDeLaNubeVariable, null);
     }
 
     public SqliteConnection Abrir()

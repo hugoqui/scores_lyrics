@@ -2,6 +2,16 @@ using Serilog;
 using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 using Symphony.Cloud.Registro;
+using Symphony.Sesiones;
+
+// Antes de leer la configuración: este comando existe justamente para cuando
+// todavía no hay claves que leer.
+if (args.Contains("generar-claves"))
+{
+    GeneracionDeClaves.Imprimir(
+        CloudOptions.ClavePrivadaVariable, "SYMPHONY_NODE_CLAVE_PUBLICA_NUBE", Console.Out);
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
