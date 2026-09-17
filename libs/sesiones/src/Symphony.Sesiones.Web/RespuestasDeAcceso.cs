@@ -34,4 +34,29 @@ public static class RespuestasDeAcceso
     /// </summary>
     public static IResult NoExiste() =>
         Results.Json(new { error = "no_existe" }, statusCode: StatusCodes.Status404NotFound);
+
+    /// <summary>
+    /// Correo o contraseña incorrectos. La misma respuesta para las dos causas
+    /// (spec R7): decir cuál de las dos falló es decirle a quien lo intenta si
+    /// el correo existe.
+    /// </summary>
+    public static IResult CredencialesInvalidas() =>
+        Results.Json(new { error = "credenciales_invalidas" }, statusCode: StatusCodes.Status401Unauthorized);
+
+    /// <summary>La contraseña era correcta, pero el usuario está dado de baja.</summary>
+    public static IResult UsuarioDadoDeBaja() =>
+        Results.Json(new { error = "usuario_dado_de_baja" }, statusCode: StatusCodes.Status403Forbidden);
+
+    /// <summary>
+    /// El identificador de dispositivo que trajo el cliente no se puede usar
+    /// aquí —ya es de otro usuario, o de otra iglesia—. La respuesta no dice
+    /// cuál de las dos cosas pasó (spec R2: un identificador de otra iglesia
+    /// se responde como si no existiera, no como prohibido).
+    /// </summary>
+    public static IResult DispositivoNoDisponible() =>
+        Results.Json(new { error = "dispositivo_no_disponible" }, statusCode: StatusCodes.Status409Conflict);
+
+    /// <summary>El token de renovación no sirve: caducó, se revocó, o nunca fue uno de renovación.</summary>
+    public static IResult SesionInvalida() =>
+        Results.Json(new { error = "sesion_invalida" }, statusCode: StatusCodes.Status401Unauthorized);
 }

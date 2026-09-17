@@ -1,4 +1,5 @@
 using Serilog;
+using Symphony.Node.Autenticacion;
 using Symphony.Node.BaseDeDatos;
 using Symphony.Node.Configuration;
 using Symphony.Node.Registro;
@@ -44,6 +45,12 @@ builder.Services.AddSingleton(VerificadorDeSesiones.ParaUnNodo(
     nodeOptions.IglesiaId,
     [nodeOptions.ClavePublicaDeLaNube, nodeOptions.ClaveDeFirma.ClavePublica]));
 
+// La única puerta al SQLite del nodo ([ADR 0017]).
+builder.Services.AddSingleton<AccesoAlNodo>();
+
+// Con esta firma el nodo emite el domingo, sin consultar a la nube (spec R8).
+builder.Services.AddSingleton(new EmisorDeSesiones(nodeOptions.ClaveDeFirma, Emisor.Nodo));
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -53,6 +60,8 @@ var app = builder.Build();
 app.Use((contexto, siguiente) => MiddlewareDeErroresNoAtendidos.Invocar(contexto, siguiente, app.Logger));
 
 app.UsarSesionesFirmadas();
+
+app.MapearAutenticacion();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

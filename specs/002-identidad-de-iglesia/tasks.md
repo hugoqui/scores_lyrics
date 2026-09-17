@@ -109,14 +109,14 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Opus** para la autorización, **Sonnet** para los endpoints una vez fijada. La regla de "ningún rol incluye a otro" es fácil de romper sin darse cuenta.
 
-- [ ] T5.1 Endpoint de login en la nube: correo, contraseña y dispositivo →
+- [x] T5.1 Endpoint de login en la nube: correo, contraseña y dispositivo →
       sesión.
-- [ ] T5.2 Endpoint de login en el nodo, que autentica **sin consultar a la
+- [x] T5.2 Endpoint de login en el nodo, que autentica **sin consultar a la
       nube** y emite con su propia clave.
-- [ ] T5.3 Renovación de sesión, y cierre de sesión que revoca la renovación.
+- [x] T5.3 Renovación de sesión, y cierre de sesión que revoca la renovación.
 - [x] T5.4 Comprobación de autorización por operación, en el servidor. Los
       roles **no se heredan entre sí**.
-- [ ] T5.5 Un identificador válido de otra iglesia se responde como
+- [x] T5.5 Un identificador válido de otra iglesia se responde como
       inexistente, no como prohibido.
 - [x] T5.6 Verificar que **ninguna API acepta un identificador de iglesia por
       parámetro**: siempre sale del token.
@@ -124,7 +124,7 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
       rechazo que si no dijera nada.
 - [x] T5.8 Prueba: un administrador **no** puede operar el servicio sin tener
       además el rol de operador.
-- [ ] T5.9 Prueba: el nodo autentica y emite sesión con la nube inalcanzable.
+- [x] T5.9 Prueba: el nodo autentica y emite sesión con la nube inalcanzable.
 
 ## Fase 6 — Usuarios, instrumentos y dispositivos (spec R4–R6)
 

@@ -1,4 +1,5 @@
 using Serilog;
+using Symphony.Cloud.Autenticacion;
 using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 using Symphony.Cloud.Registro;
@@ -32,6 +33,13 @@ builder.Services.AddSingleton(cloudOptions);
 // La única puerta a la base ([ADR 0017]): el dominio no recibe conexiones.
 builder.Services.AddSingleton<AccesoALaNube>();
 
+// El único camino que ve más allá de una iglesia: el login, antes de saber
+// cuál es la suya (docs/operacion/roles-de-base-de-datos.md).
+builder.Services.AddSingleton<AccesoComoPropietario>();
+
+// Quien emite las sesiones que la nube firma con su propia clave (ADR 0016).
+builder.Services.AddSingleton(new EmisorDeSesiones(cloudOptions.ClaveDeFirma, Emisor.Nube));
+
 // Quien traduce el token de cada petición en una sesión firmada (spec R7).
 // De momento solo acepta las que emitió la propia nube: para aceptar además
 // las de un nodo hace falta conocer su clave pública por iglesia, y eso se
@@ -48,6 +56,8 @@ var app = builder.Build();
 app.Use((contexto, siguiente) => MiddlewareDeErroresNoAtendidos.Invocar(contexto, siguiente, app.Logger));
 
 app.UsarSesionesFirmadas();
+
+app.MapearAutenticacion();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

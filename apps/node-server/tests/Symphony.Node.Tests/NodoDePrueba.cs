@@ -77,6 +77,40 @@ public sealed class NodoDePrueba : IDisposable
         comando.ExecuteNonQuery();
     }
 
+    /// <summary>Un usuario con contraseña real, para las pruebas de login (T5.2).</summary>
+    public (Guid Id, string Correo, string Contrasena) SembrarUsuario(
+        string correo, string contrasena, bool activo = true, params string[] roles)
+    {
+        var id = Guid.CreateVersion7();
+        using var conexion = Abrir();
+
+        using (var comando = conexion.CreateCommand())
+        {
+            comando.CommandText =
+                """
+                INSERT INTO usuario (id, iglesia_id, correo, nombre, hash_contrasena, estado, creado_en)
+                VALUES ($id, $iglesia, $correo, 'Persona de prueba', $hash, $estado, '2026-01-01T00:00:00Z')
+                """;
+            comando.Parameters.AddWithValue("$id", id.ToString());
+            comando.Parameters.AddWithValue("$iglesia", IglesiaId.ToString());
+            comando.Parameters.AddWithValue("$correo", correo);
+            comando.Parameters.AddWithValue("$hash", Contrasenas.Guardar(contrasena));
+            comando.Parameters.AddWithValue("$estado", activo ? "activo" : "dado_de_baja");
+            comando.ExecuteNonQuery();
+        }
+
+        foreach (var rol in roles)
+        {
+            using var comando = conexion.CreateCommand();
+            comando.CommandText = "INSERT INTO usuario_rol (usuario_id, rol) VALUES ($id, $rol)";
+            comando.Parameters.AddWithValue("$id", id.ToString());
+            comando.Parameters.AddWithValue("$rol", rol);
+            comando.ExecuteNonQuery();
+        }
+
+        return (id, correo, contrasena);
+    }
+
     public IReadOnlyList<string> MigracionesAplicadas()
     {
         using var conexion = Abrir();

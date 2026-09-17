@@ -14,7 +14,8 @@ public class PuertaUnicaTests
 {
     private static readonly string[] _archivosQuePuedenAbrirConexiones =
     [
-        "AccesoALaNube.cs",      // la puerta
+        "AccesoALaNube.cs",       // la puerta
+        "AccesoComoPropietario.cs", // el único camino que ve más de una iglesia: el login
         "MigracionesDeLaNube.cs", // el arranque, antes de que exista una sesión
     ];
 

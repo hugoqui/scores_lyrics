@@ -75,6 +75,7 @@ public sealed class AccesoALaNubeTests : IClassFixture<NubeDePrueba>
         var acceso = new AccesoALaNube(new CloudOptions
         {
             PostgresConnectionString = cadena,
+            PostgresPropietarioConnectionString = cadena,
             ClaveDeFirma = ParDeClaves.Generar(),
             Environment = "Development",
         });
@@ -100,6 +101,7 @@ public sealed class AccesoALaNubeTests : IClassFixture<NubeDePrueba>
         new(new CloudOptions
         {
             PostgresConnectionString = CadenaDeLaAplicacion(unaSolaConexion),
+            PostgresPropietarioConnectionString = CadenaDeLaAplicacion(unaSolaConexion),
             ClaveDeFirma = ParDeClaves.Generar(),
             Environment = "Development",
         });

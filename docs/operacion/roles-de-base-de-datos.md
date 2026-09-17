@@ -51,8 +51,8 @@ repositorio.
 
 - `SYMPHONY_CLOUD_POSTGRES_CONNECTION_STRING` — **`symphony_app`**. Es la
   conexión con la que la aplicación atiende peticiones.
-- La conexión del propietario del SaaS es una variable aparte, y se usa solo en
-  los caminos marcados.
+- `SYMPHONY_CLOUD_POSTGRES_PROPIETARIO_CONNECTION_STRING` — **`symphony_propietario`**.
+  Se usa solo en los caminos marcados arriba.
 - Las migraciones se aplican con `symphony_cloud`, que es el dueño.
 
 ## Permiso para crear roles
@@ -69,8 +69,15 @@ La alternativa es aplicar las migraciones como `postgres`. Se prefiere
 
 ## Qué caminos pueden usar el rol del propietario
 
-Hoy, ninguno todavía: el comando de alta de la primera iglesia se escribe en la
-fase 7 de [002](../../specs/002-identidad-de-iglesia/tasks.md). Cuando existan,
-se listan aquí, uno por uno. **Un camino que use este rol y no esté en esta
-lista es un defecto**, porque es un camino que ve todas las iglesias sin que
-nadie lo haya revisado.
+**Un camino que use este rol y no esté en esta lista es un defecto**, porque es
+un camino que ve todas las iglesias sin que nadie lo haya revisado.
+
+- `POST /autenticacion/iniciar-sesion` (`AccesoComoPropietario.BuscarPorCorreo`,
+  fase 5 de [002](../../specs/002-identidad-de-iglesia/tasks.md)). El correo es
+  único solo dentro de su iglesia (spec R4), así que el login todavía no sabe
+  cuál es la suya cuando busca al usuario. En cuanto lo sabe, todo lo demás
+  —dispositivo, sesión, roles— pasa por `symphony_app` como cualquier otro
+  camino.
+
+El comando de alta de la primera iglesia (fase 7) es candidato a sumarse
+después.
