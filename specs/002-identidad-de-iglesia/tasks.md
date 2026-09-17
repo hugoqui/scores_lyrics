@@ -46,21 +46,21 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Opus** — la singularidad de la iglesia y la negativa a arrancar son el mecanismo que detecta el respaldo restaurado en el equipo equivocado.
 
-- [ ] T2.1 Escribir `apps/node-server/migrations/0002_identidad.sql`: las
+- [x] T2.1 Escribir `apps/node-server/migrations/0002_identidad.sql`: las
       mismas tablas menos `propietario_saas`.
-- [ ] T2.2 `iglesia` admite **exactamente una fila**, impuesto por el esquema.
+- [x] T2.2 `iglesia` admite **exactamente una fila**, impuesto por el esquema.
       No por convención ni por código: la base rechaza la segunda.
-- [ ] T2.3 Clave foránea de toda tabla de dominio a esa única fila, para que
+- [x] T2.3 Clave foránea de toda tabla de dominio a esa única fila, para que
       insertar algo de otra iglesia falle en el motor.
-- [ ] T2.4 Añadir `SYMPHONY_NODE_IGLESIA_ID` a `NodeOptions`, con la misma
+- [x] T2.4 Añadir `SYMPHONY_NODE_IGLESIA_ID` a `NodeOptions`, con la misma
       regla de 001: si falta, el proceso no arranca y la nombra.
-- [ ] T2.5 Al arrancar, comparar esa variable con la fila de `iglesia`. Si no
+- [x] T2.5 Al arrancar, comparar esa variable con la fila de `iglesia`. Si no
       coincide, **el nodo muere** diciendo qué iglesia esperaba y cuál
       encontró.
-- [ ] T2.6 Prueba: la segunda fila en `iglesia` es rechazada.
-- [ ] T2.7 Prueba: el nodo se niega a arrancar con una base de otra iglesia, y
+- [x] T2.6 Prueba: la segunda fila en `iglesia` es rechazada.
+- [x] T2.7 Prueba: el nodo se niega a arrancar con una base de otra iglesia, y
       el mensaje lo explica.
-- [ ] T2.8 Prueba: insertar una fila de dominio con otra `iglesia_id` falla.
+- [x] T2.8 Prueba: insertar una fila de dominio con otra `iglesia_id` falla.
 
 ## Fase 3 — Acceso a datos ([ADR 0017](../../docs/adr/0017-acceso-a-datos-con-sql-explicito.md))
 

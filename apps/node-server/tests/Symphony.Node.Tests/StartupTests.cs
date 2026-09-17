@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Symphony.Migraciones;
+using Symphony.Node.BaseDeDatos;
 using Symphony.Node.Configuration;
 
 namespace Symphony.Node.Tests;
@@ -10,6 +10,7 @@ namespace Symphony.Node.Tests;
 /// aplica sus migraciones antes de atender nada (spec R1) y falla, nombrando
 /// la variable que falta, con una configuración incompleta.
 /// </summary>
+[Collection(ConfiguracionDelProceso.Nombre)]
 public class StartupTests
 {
     [Fact]
@@ -34,7 +35,14 @@ public class StartupTests
         using var client = factory.CreateClient();
         await client.GetAsync("/weatherforecast");
 
-        Assert.Equal(["0001_inicial"], nodo.MigracionesAplicadas());
+        // Se compara contra lo que hay en disco, no contra una lista escrita
+        // aquí: la propiedad que importa es "no queda ninguna pendiente", y una
+        // lista fija obliga a tocar esta prueba en cada migración nueva.
+        var enDisco = new EjecutorDeMigraciones(MigracionesDelNodo.CarpetaPorDefecto, DialectoSql.Sqlite)
+            .LeerDeDisco()
+            .Select(m => m.NombreCompleto);
+
+        Assert.Equal(enDisco, nodo.MigracionesAplicadas());
     }
 
     [Fact]
@@ -48,67 +56,6 @@ public class StartupTests
 
         Assert.Contains(NodeOptions.SqlitePathVariable, excepcion.Message);
         Assert.Contains(NodeOptions.CloudUrlVariable, excepcion.Message);
-    }
-
-    /// <summary>
-    /// Configuración válida apuntando a un SQLite temporal en carpeta propia
-    /// ([ADR 0011]). Al terminar limpia las variables y borra la carpeta, para
-    /// que ninguna prueba dependa de otra ni del orden.
-    /// </summary>
-    private sealed class NodoDePrueba : IDisposable
-    {
-        private readonly string _raiz;
-
-        public NodoDePrueba()
-        {
-            _raiz = Path.Combine(Path.GetTempPath(), "symphony-nodo", Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(_raiz);
-            ArchivoSqlite = Path.Combine(_raiz, "nodo.sqlite");
-
-            Environment.SetEnvironmentVariable(NodeOptions.SqlitePathVariable, ArchivoSqlite);
-            Environment.SetEnvironmentVariable(NodeOptions.CloudUrlVariable, "https://nube.prueba.local");
-        }
-
-        public string ArchivoSqlite { get; }
-
-        public void OlvidarConfiguracion()
-        {
-            Environment.SetEnvironmentVariable(NodeOptions.SqlitePathVariable, null);
-            Environment.SetEnvironmentVariable(NodeOptions.CloudUrlVariable, null);
-        }
-
-        public IReadOnlyList<string> MigracionesAplicadas()
-        {
-            using var conexion = new SqliteConnection(
-                new SqliteConnectionStringBuilder { DataSource = ArchivoSqlite }.ToString());
-            conexion.Open();
-
-            using var comando = conexion.CreateCommand();
-            comando.CommandText =
-                $"SELECT nombre FROM {EjecutorDeMigraciones.TablaDeControl} ORDER BY numero";
-
-            var nombres = new List<string>();
-            using var lector = comando.ExecuteReader();
-            while (lector.Read())
-            {
-                nombres.Add(lector.GetString(0));
-            }
-
-            return nombres;
-        }
-
-        public void Dispose()
-        {
-            OlvidarConfiguracion();
-            SqliteConnection.ClearAllPools();
-            try
-            {
-                Directory.Delete(_raiz, recursive: true);
-            }
-            catch (IOException)
-            {
-                // Una carpeta temporal que no se pudo borrar no invalida la prueba.
-            }
-        }
+        Assert.Contains(NodeOptions.IglesiaIdVariable, excepcion.Message);
     }
 }
