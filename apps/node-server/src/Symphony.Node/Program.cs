@@ -3,6 +3,7 @@ using Symphony.Node.BaseDeDatos;
 using Symphony.Node.Configuration;
 using Symphony.Node.Registro;
 using Symphony.Sesiones;
+using Symphony.Sesiones.Web;
 
 // Antes de leer la configuración: este comando existe justamente para cuando
 // todavía no hay claves que leer. La pública es la que hay que entregarle a la
@@ -35,6 +36,14 @@ builder.Host.UseSerilog((contexto, configuracion) => configuracion
 var nodeOptions = NodeOptions.FromEnvironment(builder.Environment.EnvironmentName);
 builder.Services.AddSingleton(nodeOptions);
 
+// El nodo acepta las dos firmas y ninguna de las dos consulta a nadie
+// ([ADR 0016]): la de la nube, para las sesiones emitidas desde fuera, y la
+// suya, para las que emitió él mismo el domingo sin internet. Y solo de su
+// iglesia: un token de otra congregación se cae aquí (spec R1).
+builder.Services.AddSingleton(VerificadorDeSesiones.ParaUnNodo(
+    nodeOptions.IglesiaId,
+    [nodeOptions.ClavePublicaDeLaNube, nodeOptions.ClaveDeFirma.ClavePublica]));
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -42,6 +51,8 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 app.Use((contexto, siguiente) => MiddlewareDeErroresNoAtendidos.Invocar(contexto, siguiente, app.Logger));
+
+app.UsarSesionesFirmadas();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

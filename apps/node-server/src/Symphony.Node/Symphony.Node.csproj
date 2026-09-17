@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\libs\migraciones\src\Symphony.Migraciones\Symphony.Migraciones.csproj" />
     <ProjectReference Include="..\..\..\..\libs\sesiones\src\Symphony.Sesiones\Symphony.Sesiones.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\sesiones\src\Symphony.Sesiones.Web\Symphony.Sesiones.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

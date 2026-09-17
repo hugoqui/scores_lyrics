@@ -114,15 +114,15 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 - [ ] T5.2 Endpoint de login en el nodo, que autentica **sin consultar a la
       nube** y emite con su propia clave.
 - [ ] T5.3 Renovación de sesión, y cierre de sesión que revoca la renovación.
-- [ ] T5.4 Comprobación de autorización por operación, en el servidor. Los
+- [x] T5.4 Comprobación de autorización por operación, en el servidor. Los
       roles **no se heredan entre sí**.
 - [ ] T5.5 Un identificador válido de otra iglesia se responde como
       inexistente, no como prohibido.
-- [ ] T5.6 Verificar que **ninguna API acepta un identificador de iglesia por
+- [x] T5.6 Verificar que **ninguna API acepta un identificador de iglesia por
       parámetro**: siempre sale del token.
-- [ ] T5.7 Prueba: un músico que afirma ser administrador recibe el mismo
+- [x] T5.7 Prueba: un músico que afirma ser administrador recibe el mismo
       rechazo que si no dijera nada.
-- [ ] T5.8 Prueba: un administrador **no** puede operar el servicio sin tener
+- [x] T5.8 Prueba: un administrador **no** puede operar el servicio sin tener
       además el rol de operador.
 - [ ] T5.9 Prueba: el nodo autentica y emite sesión con la nube inalcanzable.
 

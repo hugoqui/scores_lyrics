@@ -57,7 +57,39 @@ public static class Tokens
         ClavePublicaDeFirma clave,
         DateTimeOffset ahora,
         Guid iglesiaEsperada,
-        TipoDeToken tipoEsperado = TipoDeToken.Acceso)
+        TipoDeToken tipoEsperado = TipoDeToken.Acceso) =>
+        Comprobar(token, clave, ahora, iglesiaEsperada, tipoEsperado);
+
+    /// <summary>
+    /// Igual que <see cref="Verificar"/> pero sin exigir una iglesia concreta,
+    /// porque la toma del token: <b>es solo para la nube</b>, que sirve a todas
+    /// las iglesias y por tanto no tiene una propia contra la que comparar.
+    ///
+    /// <para>
+    /// El nodo nunca usa esto. El nodo sirve a una sola iglesia (spec R1) y
+    /// tiene su identificador en la configuración, así que dejar de comparar
+    /// allí sería regalar la única comprobación que impide que un token de otra
+    /// congregación abra sus datos.
+    /// </para>
+    /// <para>
+    /// Que la iglesia salga del token y no de la petición es exactamente lo que
+    /// pide spec R3. Quien llame a esto usa <c>sesion.IglesiaId</c> y no acepta
+    /// ningún identificador de iglesia del cliente.
+    /// </para>
+    /// </summary>
+    public static ResultadoDeVerificacion VerificarTomandoLaIglesiaDelToken(
+        string token,
+        ClavePublicaDeFirma clave,
+        DateTimeOffset ahora,
+        TipoDeToken tipoEsperado = TipoDeToken.Acceso) =>
+        Comprobar(token, clave, ahora, iglesiaEsperada: null, tipoEsperado);
+
+    private static ResultadoDeVerificacion Comprobar(
+        string token,
+        ClavePublicaDeFirma clave,
+        DateTimeOffset ahora,
+        Guid? iglesiaEsperada,
+        TipoDeToken tipoEsperado)
     {
         var partes = token.Split('.');
         if (partes.Length != 2)
@@ -100,7 +132,7 @@ public static class Tokens
         // Un token emitido para una iglesia no sirve en otra, aunque su firma
         // sea impecable: la clave del nodo y la de la nube son válidas para
         // todas, y lo que ata la sesión a su congregación es esto.
-        if (sesion.IglesiaId != iglesiaEsperada)
+        if (iglesiaEsperada is not null && sesion.IglesiaId != iglesiaEsperada)
         {
             return new ResultadoDeVerificacion(null, MotivoDeRechazo.OtraIglesia);
         }

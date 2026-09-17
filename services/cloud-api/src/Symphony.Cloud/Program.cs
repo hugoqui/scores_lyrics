@@ -3,6 +3,7 @@ using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 using Symphony.Cloud.Registro;
 using Symphony.Sesiones;
+using Symphony.Sesiones.Web;
 
 // Antes de leer la configuración: este comando existe justamente para cuando
 // todavía no hay claves que leer.
@@ -31,6 +32,13 @@ builder.Services.AddSingleton(cloudOptions);
 // La única puerta a la base ([ADR 0017]): el dominio no recibe conexiones.
 builder.Services.AddSingleton<AccesoALaNube>();
 
+// Quien traduce el token de cada petición en una sesión firmada (spec R7).
+// De momento solo acepta las que emitió la propia nube: para aceptar además
+// las de un nodo hace falta conocer su clave pública por iglesia, y eso se
+// reparte en el módulo 008.
+builder.Services.AddSingleton(
+    VerificadorDeSesiones.ParaLaNube([cloudOptions.ClaveDeFirma.ClavePublica]));
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -38,6 +46,8 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 app.Use((contexto, siguiente) => MiddlewareDeErroresNoAtendidos.Invocar(contexto, siguiente, app.Logger));
+
+app.UsarSesionesFirmadas();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
