@@ -63,10 +63,13 @@ app.MapGet("/weatherforecast", () =>
 try
 {
     MigracionesDelNodo.Aplicar(nodeOptions, app.Logger);
+
+    // Y con el esquema ya al día, que la base sea la de esta iglesia (spec R1).
+    IdentidadDelNodo.Verificar(nodeOptions, app.Logger);
 }
 catch (Exception excepcion)
 {
-    app.Logger.LogCritical(excepcion, "El nodo no pudo aplicar las migraciones al arrancar");
+    app.Logger.LogCritical(excepcion, "El nodo no pudo arrancar contra su base de datos");
     throw;
 }
 
