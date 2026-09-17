@@ -64,6 +64,7 @@ public sealed class ServidorDeLaNubeDePrueba : IAsyncDisposable
         app.MapearAutenticacion();
         app.MapearUsuarios();
         app.MapearInstrumentos();
+        app.MapearDispositivos();
 
         await app.StartAsync();
         return new ServidorDeLaNubeDePrueba(app, app.GetTestClient());

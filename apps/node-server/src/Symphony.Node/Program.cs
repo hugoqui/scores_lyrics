@@ -62,6 +62,7 @@ app.Use((contexto, siguiente) => MiddlewareDeErroresNoAtendidos.Invocar(contexto
 app.UsarSesionesFirmadas();
 
 app.MapearAutenticacion();
+app.MapearDispositivos();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

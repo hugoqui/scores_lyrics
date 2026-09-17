@@ -135,15 +135,15 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
       trabajo** (constitución, punto 5). Readmitir es volver a cambiarlo.
 - [x] T6.3 Impedir que una iglesia se quede sin ningún administrador.
 - [x] T6.4 Asignar y quitar instrumentos a un músico (varios por persona).
-- [ ] T6.5 Alta de dispositivo en el primer login, con nombre legible para que
+- [x] T6.5 Alta de dispositivo en el primer login, con nombre legible para que
       el músico reconozca cuál es.
-- [ ] T6.6 Listar y revocar dispositivos por separado.
-- [ ] T6.7 Si hay límite de dispositivos activos y se alcanza, responder
+- [x] T6.6 Listar y revocar dispositivos por separado.
+- [x] T6.7 Si hay límite de dispositivos activos y se alcanza, responder
       diciendo qué pasa y ofreciendo cerrar uno. **Nunca un rechazo mudo**,
       como el 403 de hoy.
 - [x] T6.8 Prueba: tras baja y readmisión, el usuario conserva instrumentos y
       dispositivos.
-- [ ] T6.9 Prueba: revocar un dispositivo no afecta a los demás del mismo
+- [x] T6.9 Prueba: revocar un dispositivo no afecta a los demás del mismo
       usuario.
 - [x] T6.10 Prueba: quitar el último administrador de una iglesia se rechaza.
 

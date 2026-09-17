@@ -91,7 +91,7 @@ public sealed class AutenticacionEndpointsTests : IClassFixture<NubeDePrueba>
     public async Task Renovar_con_un_token_de_acceso_no_funciona()
     {
         await using var servidor = await Levantar();
-        var sesion = await IniciarSesion(servidor, _nube.Primera);
+        var sesion = await IniciarSesionConUsuarioDesechable(servidor);
 
         var respuesta = await servidor.Cliente.PostAsJsonAsync(
             "/autenticacion/renovar", new SolicitudDeRenovacion(sesion.TokenDeAcceso));
@@ -103,7 +103,7 @@ public sealed class AutenticacionEndpointsTests : IClassFixture<NubeDePrueba>
     public async Task Renovar_con_el_token_de_renovacion_da_un_acceso_nuevo()
     {
         await using var servidor = await Levantar();
-        var sesion = await IniciarSesion(servidor, _nube.Primera);
+        var sesion = await IniciarSesionConUsuarioDesechable(servidor);
 
         var respuesta = await servidor.Cliente.PostAsJsonAsync(
             "/autenticacion/renovar", new SolicitudDeRenovacion(sesion.TokenDeRenovacion));
@@ -118,7 +118,7 @@ public sealed class AutenticacionEndpointsTests : IClassFixture<NubeDePrueba>
     public async Task Cerrar_sesion_impide_renovar_despues()
     {
         await using var servidor = await Levantar();
-        var sesion = await IniciarSesion(servidor, _nube.Primera);
+        var sesion = await IniciarSesionConUsuarioDesechable(servidor);
 
         var cierre = await servidor.Cliente.PostAsJsonAsync(
             "/autenticacion/cerrar-sesion", new SolicitudDeCierre(sesion.TokenDeRenovacion));
@@ -135,7 +135,7 @@ public sealed class AutenticacionEndpointsTests : IClassFixture<NubeDePrueba>
     public async Task Cerrar_sesion_dos_veces_no_falla()
     {
         await using var servidor = await Levantar();
-        var sesion = await IniciarSesion(servidor, _nube.Primera);
+        var sesion = await IniciarSesionConUsuarioDesechable(servidor);
         var solicitud = new SolicitudDeCierre(sesion.TokenDeRenovacion);
 
         await servidor.Cliente.PostAsJsonAsync("/autenticacion/cerrar-sesion", solicitud);
@@ -173,6 +173,25 @@ public sealed class AutenticacionEndpointsTests : IClassFixture<NubeDePrueba>
     private static async Task<RespuestaDeSesion> IniciarSesion(ServidorDeLaNubeDePrueba servidor, IglesiaSembrada iglesia)
     {
         var respuesta = await servidor.Cliente.PostAsJsonAsync("/autenticacion/iniciar-sesion", Solicitud(iglesia));
+        respuesta.EnsureSuccessStatusCode();
+        return (await respuesta.Content.ReadFromJsonAsync<RespuestaDeSesion>())!;
+    }
+
+    /// <summary>
+    /// Un usuario desechable, propio de la prueba que lo pide. <c>_nube.Primera</c>
+    /// es compartido por toda la clase (<c>IClassFixture</c>), y el límite de
+    /// dispositivos (T6.7) es por usuario: repetir login sobre el mismo
+    /// usuario en cada prueba lo agotaría sin que ninguna prueba individual
+    /// esté probando el límite.
+    /// </summary>
+    private async Task<RespuestaDeSesion> IniciarSesionConUsuarioDesechable(ServidorDeLaNubeDePrueba servidor)
+    {
+        var (correo, contrasena) = await _nube.SembrarUsuarioAdicional(
+            _nube.Primera.Id, $"desechable-{Guid.NewGuid():N}@ejemplo.invalid", "contraseña-de-prueba");
+
+        var respuesta = await servidor.Cliente.PostAsJsonAsync(
+            "/autenticacion/iniciar-sesion",
+            new SolicitudDeLogin(correo, contrasena, Guid.CreateVersion7(), "Teléfono de prueba", TiposDeDispositivo.Movil));
         respuesta.EnsureSuccessStatusCode();
         return (await respuesta.Content.ReadFromJsonAsync<RespuestaDeSesion>())!;
     }

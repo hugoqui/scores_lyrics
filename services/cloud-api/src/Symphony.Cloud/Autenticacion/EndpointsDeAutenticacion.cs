@@ -62,9 +62,14 @@ public static class EndpointsDeAutenticacion
         AccesoALaNube nube, EmisorDeSesiones emisor, UsuarioParaAutenticar usuario, SolicitudDeLogin solicitud) =>
         await nube.EnLaIglesia(usuario.IglesiaId, async unidad =>
         {
-            if (!await FijarDispositivo(unidad, usuario.Id, solicitud))
+            var resultado = await FijarDispositivo(unidad, usuario.Id, solicitud);
+            if (resultado == ResultadoDeDispositivo.NoDisponible)
             {
                 return RespuestasDeAcceso.DispositivoNoDisponible();
+            }
+            if (resultado == ResultadoDeDispositivo.LimiteAlcanzado)
+            {
+                return RespuestasDeAcceso.LimiteDeDispositivosAlcanzado(await DispositivosActivos(unidad, usuario.Id));
             }
 
             var (tokenAcceso, sesionAcceso) = emisor.Acceso(usuario.Id, usuario.IglesiaId, usuario.Roles, solicitud.DispositivoId);
@@ -90,14 +95,23 @@ public static class EndpointsDeAutenticacion
                 tokenAcceso, tokenRenovacion, usuario.Id, usuario.IglesiaId, usuario.Roles, solicitud.DispositivoId));
         });
 
+    private enum ResultadoDeDispositivo
+    {
+        Fijado,
+        NoDisponible,
+        LimiteAlcanzado,
+    }
+
     /// <summary>
     /// Deja listo el dispositivo de este login: lo reutiliza si ya es suyo, lo
     /// crea si es nuevo, y rechaza el identificador si no se puede usar —sea
     /// porque ya es de otro usuario de esta iglesia, sea porque ya existe en
     /// otra iglesia y por eso la política ni lo dejó ver (spec R2: se
-    /// responde igual en los dos casos, nunca como "prohibido").
+    /// responde igual en los dos casos, nunca como "prohibido"). Si es nuevo y
+    /// ya se alcanzó el límite de activos, tampoco se crea (spec R6, T6.7).
     /// </summary>
-    private static async Task<bool> FijarDispositivo(UnidadDeTrabajo unidad, Guid usuarioId, SolicitudDeLogin solicitud)
+    private static async Task<ResultadoDeDispositivo> FijarDispositivo(
+        UnidadDeTrabajo unidad, Guid usuarioId, SolicitudDeLogin solicitud)
     {
         var existente = await unidad.ConsultarUno<DispositivoFila>(
             "SELECT usuario_id AS UsuarioId, revocado_en AS RevocadoEn FROM dispositivo WHERE id = @id",
@@ -107,13 +121,21 @@ public static class EndpointsDeAutenticacion
         {
             if (existente.UsuarioId != usuarioId || existente.RevocadoEn is not null)
             {
-                return false;
+                return ResultadoDeDispositivo.NoDisponible;
             }
 
             await unidad.Ejecutar(
                 "UPDATE dispositivo SET ultimo_visto_en = now() WHERE id = @id",
                 new { id = solicitud.DispositivoId });
-            return true;
+            return ResultadoDeDispositivo.Fijado;
+        }
+
+        var activos = await unidad.ConsultarUno<int>(
+            "SELECT count(*) FROM dispositivo WHERE usuario_id = @usuarioId AND revocado_en IS NULL",
+            new { usuarioId });
+        if (activos >= LimiteDeDispositivos.Maximo)
+        {
+            return ResultadoDeDispositivo.LimiteAlcanzado;
         }
 
         try
@@ -136,11 +158,31 @@ public static class EndpointsDeAutenticacion
         {
             // Existe, pero en otra iglesia: la RLS lo hizo invisible al SELECT
             // de arriba, y solo se descubre al chocar con la clave primaria.
-            return false;
+            return ResultadoDeDispositivo.NoDisponible;
         }
 
-        return true;
+        return ResultadoDeDispositivo.Fijado;
     }
+
+    private static async Task<IReadOnlyList<DispositivoActivo>> DispositivosActivos(UnidadDeTrabajo unidad, Guid usuarioId)
+    {
+        var filas = await unidad.Consultar<DispositivoActivoFila>(
+            """
+            SELECT id AS Id, nombre AS Nombre, tipo AS Tipo, ultimo_visto_en AS UltimoVistoEn
+            FROM dispositivo
+            WHERE usuario_id = @usuarioId AND revocado_en IS NULL
+            ORDER BY ultimo_visto_en
+            """,
+            new { usuarioId });
+
+        return filas
+            .Select(fila => new DispositivoActivo(
+                fila.Id, fila.Nombre, fila.Tipo,
+                fila.UltimoVistoEn is { } valor ? new DateTimeOffset(valor, TimeSpan.Zero) : null))
+            .ToList();
+    }
+
+    private sealed record DispositivoActivoFila(Guid Id, string Nombre, string Tipo, DateTime? UltimoVistoEn);
 
     private static async Task<IResult> Renovar(
         SolicitudDeRenovacion solicitud, VerificadorDeSesiones verificador, AccesoALaNube nube, EmisorDeSesiones emisor)

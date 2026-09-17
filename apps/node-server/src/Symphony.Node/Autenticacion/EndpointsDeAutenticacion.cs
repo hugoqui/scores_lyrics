@@ -63,9 +63,14 @@ public static class EndpointsDeAutenticacion
     private static async Task<IResult> AbrirSesion(
         UnidadDeTrabajoDelNodo unidad, EmisorDeSesiones emisor, UsuarioParaAutenticar usuario, SolicitudDeLogin solicitud)
     {
-        if (!await FijarDispositivo(unidad, usuario, solicitud))
+        var resultado = await FijarDispositivo(unidad, usuario, solicitud);
+        if (resultado == ResultadoDeDispositivo.NoDisponible)
         {
             return RespuestasDeAcceso.DispositivoNoDisponible();
+        }
+        if (resultado == ResultadoDeDispositivo.LimiteAlcanzado)
+        {
+            return RespuestasDeAcceso.LimiteDeDispositivosAlcanzado(await DispositivosActivos(unidad, usuario.Id));
         }
 
         var (tokenAcceso, _) = emisor.Acceso(usuario.Id, usuario.IglesiaId, usuario.Roles, solicitud.DispositivoId);
@@ -91,12 +96,20 @@ public static class EndpointsDeAutenticacion
             tokenAcceso, tokenRenovacion, usuario.Id, usuario.IglesiaId, usuario.Roles, solicitud.DispositivoId));
     }
 
+    private enum ResultadoDeDispositivo
+    {
+        Fijado,
+        NoDisponible,
+        LimiteAlcanzado,
+    }
+
     /// <summary>
     /// Igual que en la nube, pero sin el caso de "existe en otra iglesia": en
     /// este archivo no hay otra (ADR 0015). Solo queda el choque entre dos
-    /// usuarios de la misma iglesia con el mismo identificador de dispositivo.
+    /// usuarios de la misma iglesia con el mismo identificador de dispositivo,
+    /// y el límite de dispositivos activos (spec R6, T6.7).
     /// </summary>
-    private static async Task<bool> FijarDispositivo(
+    private static async Task<ResultadoDeDispositivo> FijarDispositivo(
         UnidadDeTrabajoDelNodo unidad, UsuarioParaAutenticar usuario, SolicitudDeLogin solicitud)
     {
         var id = solicitud.DispositivoId.ToString();
@@ -108,12 +121,21 @@ public static class EndpointsDeAutenticacion
         {
             if (existente.UsuarioId != usuario.Id.ToString() || existente.RevocadoEn is not null)
             {
-                return false;
+                return ResultadoDeDispositivo.NoDisponible;
             }
 
             await unidad.Ejecutar("UPDATE dispositivo SET ultimo_visto_en = @ahora WHERE id = @id",
                 new { id, ahora = DateTimeOffset.UtcNow.ToString("O") });
-            return true;
+            return ResultadoDeDispositivo.Fijado;
+        }
+
+        var usuarioId = usuario.Id.ToString();
+        var activos = await unidad.ConsultarUno<int>(
+            "SELECT count(*) FROM dispositivo WHERE usuario_id = @usuarioId AND revocado_en IS NULL",
+            new { usuarioId });
+        if (activos >= LimiteDeDispositivos.Maximo)
+        {
+            return ResultadoDeDispositivo.LimiteAlcanzado;
         }
 
         await unidad.Ejecutar(
@@ -131,7 +153,26 @@ public static class EndpointsDeAutenticacion
                 ahora = DateTimeOffset.UtcNow.ToString("O"),
             });
 
-        return true;
+        return ResultadoDeDispositivo.Fijado;
+    }
+
+    private static async Task<IReadOnlyList<DispositivoActivo>> DispositivosActivos(UnidadDeTrabajoDelNodo unidad, Guid usuarioId)
+    {
+        var id = usuarioId.ToString();
+        var filas = await unidad.Consultar<DispositivoActivoFila>(
+            """
+            SELECT id AS Id, nombre AS Nombre, tipo AS Tipo, ultimo_visto_en AS UltimoVistoEn
+            FROM dispositivo
+            WHERE usuario_id = @id AND revocado_en IS NULL
+            ORDER BY ultimo_visto_en
+            """,
+            new { id });
+
+        return filas
+            .Select(fila => new DispositivoActivo(
+                Guid.Parse(fila.Id), fila.Nombre, fila.Tipo,
+                fila.UltimoVistoEn is { } valor ? DateTimeOffset.Parse(valor) : null))
+            .ToList();
     }
 
     private static async Task<IResult> Renovar(
@@ -214,4 +255,6 @@ public static class EndpointsDeAutenticacion
     private sealed record SesionFila(string? RevocadaEn);
 
     private sealed record EstadoYRoles(string Estado, IReadOnlyList<string> Roles);
+
+    private sealed record DispositivoActivoFila(string Id, string Nombre, string Tipo, string? UltimoVistoEn);
 }

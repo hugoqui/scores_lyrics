@@ -65,3 +65,16 @@ public sealed record SolicitudDeRenovacion(string TokenDeRenovacion);
 public sealed record RespuestaDeRenovacion(string TokenDeAcceso);
 
 public sealed record SolicitudDeCierre(string TokenDeRenovacion);
+
+/// <summary>
+/// Cuántos dispositivos activos puede tener un usuario a la vez (spec R6).
+/// Alcanzarlo no es un rechazo mudo: la respuesta dice qué pasa y ofrece
+/// cerrar uno (T6.7), nunca un 403 sin explicación como el de hoy.
+/// </summary>
+public static class LimiteDeDispositivos
+{
+    public const int Maximo = 5;
+}
+
+/// <summary>Un dispositivo activo, tal como se le muestra a quien tiene que elegir cuál cerrar.</summary>
+public sealed record DispositivoActivo(Guid Id, string Nombre, string Tipo, DateTimeOffset? UltimoVistoEn);

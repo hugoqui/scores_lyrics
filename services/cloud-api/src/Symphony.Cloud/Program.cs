@@ -61,6 +61,7 @@ app.UsarSesionesFirmadas();
 app.MapearAutenticacion();
 app.MapearUsuarios();
 app.MapearInstrumentos();
+app.MapearDispositivos();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

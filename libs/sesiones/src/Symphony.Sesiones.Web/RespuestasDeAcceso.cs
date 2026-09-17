@@ -59,4 +59,14 @@ public static class RespuestasDeAcceso
     /// <summary>El token de renovación no sirve: caducó, se revocó, o nunca fue uno de renovación.</summary>
     public static IResult SesionInvalida() =>
         Results.Json(new { error = "sesion_invalida" }, statusCode: StatusCodes.Status401Unauthorized);
+
+    /// <summary>
+    /// Alcanzó el límite de dispositivos activos (spec R6, T6.7). Nunca es un
+    /// rechazo mudo: trae los dispositivos activos para que el propio cliente
+    /// ofrezca cerrar uno.
+    /// </summary>
+    public static IResult LimiteDeDispositivosAlcanzado(IReadOnlyList<DispositivoActivo> dispositivos) =>
+        Results.Json(
+            new { error = "limite_de_dispositivos", dispositivos },
+            statusCode: StatusCodes.Status409Conflict);
 }
