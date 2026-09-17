@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Symphony.Migraciones;
 using Symphony.Node.BaseDeDatos;
@@ -21,9 +22,12 @@ public class StartupTests
         await using var factory = new WebApplicationFactory<Program>();
         using var client = factory.CreateClient();
 
-        var response = await client.GetAsync("/weatherforecast");
+        // Todavía no hay endpoints propios —el `weatherforecast` de la
+        // plantilla se borró en 002 T3.6—, así que lo que se comprueba es que
+        // la aplicación levanta y responde: un 404 ya es una respuesta suya.
+        var response = await client.GetAsync("/");
 
-        Assert.True(response.IsSuccessStatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -33,7 +37,7 @@ public class StartupTests
 
         await using var factory = new WebApplicationFactory<Program>();
         using var client = factory.CreateClient();
-        await client.GetAsync("/weatherforecast");
+        await client.GetAsync("/");
 
         // Se compara contra lo que hay en disco, no contra una lista escrita
         // aquí: la propiedad que importa es "no queda ninguna pendiente", y una
