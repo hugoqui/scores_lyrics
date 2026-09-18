@@ -174,13 +174,13 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 ## Cierre del módulo
 
-- [ ] C1 `dotnet test` en verde, incluidas las pruebas de cruce de iglesias.
-- [ ] C2 Los nueve puntos de la estrategia de verificación de
+- [x] C1 `dotnet test` en verde, incluidas las pruebas de cruce de iglesias.
+- [x] C2 Los nueve puntos de la estrategia de verificación de
       [`plan.md`](plan.md) tienen prueba automática, no revisión a ojo.
-- [ ] C3 Ninguna clave privada ni contraseña entró al repositorio;
+- [x] C3 Ninguna clave privada ni contraseña entró al repositorio;
       `.env.example` tiene los nombres nuevos.
-- [ ] C4 `docs/arquitectura/estado-actual.md` actualizado: el hallazgo "No
+- [x] C4 `docs/arquitectura/estado-actual.md` actualizado: el hallazgo "No
       existe el concepto de iglesia" queda resuelto y se dice cómo.
-- [ ] C5 `specs/README.md` marca 002 como ✅ y nombra el módulo siguiente.
-- [ ] C6 Las notas para 006 —bases por afinación, el archivo en Do duplicado
+- [x] C5 `specs/README.md` marca 002 como ✅ y nombra el módulo siguiente.
+- [x] C6 Las notas para 006 —bases por afinación, el archivo en Do duplicado
       cinco veces— quedan recogidas donde ese módulo las encuentre.
