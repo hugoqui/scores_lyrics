@@ -1,12 +1,12 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Symphony.Cloud.Autenticacion;
 using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
 using Symphony.Cloud.Tests.BaseDeDatos;
-using Symphony.Cloud.Usuarios;
 using Symphony.Sesiones;
 using Symphony.Sesiones.Web;
 
@@ -41,6 +41,20 @@ public sealed class ServidorDeLaNubeDePrueba : IAsyncDisposable
 
     public HttpClient Cliente { get; }
 
+    /// <summary>
+    /// Las rutas que este servidor atiende, leídas de la tabla de rutas y no de
+    /// una lista escrita a mano. La guardia de cruces (T8.2) compara contra
+    /// esto: un endpoint nuevo sin intento de cruce tiene que romper la prueba.
+    /// </summary>
+    public IReadOnlyList<string> Rutas =>
+        ((IEndpointRouteBuilder)_app).DataSources
+            .SelectMany(fuente => fuente.Endpoints)
+            .OfType<RouteEndpoint>()
+            .Select(Describir)
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(ruta => ruta, StringComparer.Ordinal)
+            .ToList();
+
     public static async Task<ServidorDeLaNubeDePrueba> Levantar(NubeDePrueba nube, ParDeClaves claves)
     {
         var opciones = new CloudOptions
@@ -61,13 +75,43 @@ public sealed class ServidorDeLaNubeDePrueba : IAsyncDisposable
 
         var app = builder.Build();
         app.UsarSesionesFirmadas();
-        app.MapearAutenticacion();
-        app.MapearUsuarios();
-        app.MapearInstrumentos();
-        app.MapearDispositivos();
+
+        // Los grupos de endpoints se mapean por reflexión, no uno a uno a mano:
+        // si alguien añade uno nuevo en Program.cs y se olvida de añadirlo
+        // aquí, la guardia de cruces (T8.2) no lo vería y ese grupo quedaría
+        // sin ningún intento de cruzarse de iglesia. Así no se puede quedar
+        // fuera: lo que exista en el ensamblado, se mapea.
+        foreach (var mapear in MetodosDeMapeo())
+        {
+            mapear.Invoke(null, [app]);
+        }
 
         await app.StartAsync();
         return new ServidorDeLaNubeDePrueba(app, app.GetTestClient());
+    }
+
+    /// <summary>
+    /// Todo método <c>Mapear…(this IEndpointRouteBuilder)</c> que declare el
+    /// ensamblado de la nube, sea público o interno: <c>Program.cs</c> vive en
+    /// ese mismo ensamblado y puede llamar a los internos igual, así que
+    /// mirar solo los públicos dejaría un grupo de endpoints fuera de la
+    /// guardia sin que nadie lo notara.
+    /// </summary>
+    internal static IReadOnlyList<MethodInfo> MetodosDeMapeo() =>
+        typeof(AccesoALaNube).Assembly.GetTypes()
+            .Where(tipo => tipo is { IsAbstract: true, IsSealed: true })
+            .SelectMany(tipo => tipo.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+            .Where(metodo =>
+                metodo.Name.StartsWith("Mapear", StringComparison.Ordinal)
+                && metodo.GetParameters() is [{ ParameterType: var primero }]
+                && primero == typeof(IEndpointRouteBuilder))
+            .OrderBy(metodo => metodo.Name, StringComparer.Ordinal)
+            .ToList();
+
+    private static string Describir(RouteEndpoint endpoint)
+    {
+        var metodos = endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods ?? [];
+        return $"{string.Join(',', metodos)} {endpoint.RoutePattern.RawText}";
     }
 
     public async ValueTask DisposeAsync()

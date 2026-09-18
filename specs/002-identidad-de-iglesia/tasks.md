@@ -163,13 +163,13 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Opus** — estas pruebas tienen que estar escritas para *intentar* romper el aislamiento. Una prueba complaciente aquí es peor que ninguna.
 
-- [ ] T8.1 Semilla de dos iglesias ficticias con datos completos y evidentes
+- [x] T8.1 Semilla de dos iglesias ficticias con datos completos y evidentes
       (001 R5: nada real).
-- [ ] T8.2 Recorrer **todas** las operaciones del módulo intentando cruzarse de
+- [x] T8.2 Recorrer **todas** las operaciones del módulo intentando cruzarse de
       iglesia con identificadores válidos. Ninguna lo consigue.
-- [ ] T8.3 Prueba de que las tablas nuevas tienen su política activa: que nadie
+- [x] T8.3 Prueba de que las tablas nuevas tienen su política activa: que nadie
       pueda añadir una tabla de dominio sin RLS y que las pruebas sigan verdes.
-- [ ] T8.4 Verificar que estas pruebas corren en la tubería de 001 y bloquean
+- [x] T8.4 Verificar que estas pruebas corren en la tubería de 001 y bloquean
       la fusión.
 
 ## Cierre del módulo

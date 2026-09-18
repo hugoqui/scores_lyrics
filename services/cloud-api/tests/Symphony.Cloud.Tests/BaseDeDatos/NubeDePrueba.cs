@@ -15,9 +15,24 @@ namespace Symphony.Cloud.Tests.BaseDeDatos;
 /// justamente lo que se prueba: la del dueño siembra —es superusuario y se
 /// salta la política— y la de la aplicación es la que tiene que quedar
 /// encerrada en su iglesia.
+///
+/// <para>
+/// <b>T8.1: la semilla es completa a propósito.</b> Las dos iglesias tienen
+/// fila en cada tabla de dominio y en cada variante que cambia el camino del
+/// código —los tres roles, un músico con dos instrumentos, un dispositivo de
+/// persona, una pantalla sin dueño y uno ya revocado—, porque un intento de
+/// cruce contra una tabla vacía pasa sin probar nada. Todo es inventado y se
+/// nota: nombres «de prueba» y correos en <c>.invalid</c>, que es un dominio
+/// que no existe (001 R5, constitución punto 3).
+/// </para>
 /// </summary>
 public sealed class NubeDePrueba : IAsyncLifetime
 {
+    /// <summary>Del catálogo que siembra <c>0002_identidad.sql</c>, con sus identificadores fijos.</summary>
+    public static readonly Guid Piano = Guid.Parse("01999c1e-0000-7000-8000-000000000001");
+
+    public static readonly Guid Flauta1 = Guid.Parse("01999c1e-0000-7000-8000-000000000005");
+
     private readonly PostgreSqlContainer _contenedor = new PostgreSqlBuilder("postgres:16-alpine").Build();
 
     public string CadenaDelDueno => _contenedor.GetConnectionString();
@@ -147,15 +162,37 @@ public sealed class NubeDePrueba : IAsyncLifetime
             INSERT INTO usuario (id, iglesia_id, correo, nombre, hash_contrasena, estado, creado_en)
                 VALUES (@usuario, @iglesia, @correo, 'Persona de prueba', @hashContrasena, 'activo', now());
             INSERT INTO usuario_rol (usuario_id, rol) VALUES (@usuario, 'musico');
+
+            -- Dos, no uno: un músico toca varios instrumentos (spec R5), y con
+            -- uno solo nunca se vería un borrado que se lleva de más.
             INSERT INTO usuario_instrumento (usuario_id, instrumento_id)
-                SELECT @usuario, id FROM instrumento WHERE codigo = 'piano';
+                SELECT @usuario, id FROM instrumento WHERE codigo IN ('piano', 'flauta1');
+
             INSERT INTO dispositivo (id, iglesia_id, usuario_id, tipo, nombre, creado_en)
                 VALUES (@dispositivo, @iglesia, @usuario, 'movil', 'Teléfono de prueba', now());
+
+            -- Una pantalla de proyección: pertenece a la iglesia y a ninguna
+            -- persona (spec R7), así que es la fila que descubre a quien filtre
+            -- por usuario creyendo que filtra por iglesia.
+            INSERT INTO dispositivo (id, iglesia_id, usuario_id, tipo, nombre, creado_en)
+                VALUES (@pantalla, @iglesia, NULL, 'pantalla', 'Pantalla del templo de prueba', now());
+
+            -- Y uno ya revocado, para que revocar de nuevo y listar tengan que
+            -- distinguir el estado además de la iglesia.
+            INSERT INTO dispositivo (id, iglesia_id, usuario_id, tipo, nombre, creado_en, revocado_en)
+                VALUES (@revocado, @iglesia, @usuario, 'tableta', 'Tableta perdida de prueba', now(), now());
+
             INSERT INTO sesion (id, dispositivo_id, iglesia_id, huella_token, emitida_en, expira_en)
                 VALUES (@sesion, @dispositivo, @iglesia, @huella, now(), now() + interval '30 days');
             INSERT INTO usuario (id, iglesia_id, correo, nombre, hash_contrasena, estado, creado_en)
                 VALUES (@administrador, @iglesia, @correoAdministrador, 'Administrador de prueba', @hashAdministrador, 'activo', now());
             INSERT INTO usuario_rol (usuario_id, rol) VALUES (@administrador, 'administrador');
+
+            -- El tercer rol de la lista cerrada (spec R7). Ninguno incluye a
+            -- otro, así que hace falta alguien que solo sea operador.
+            INSERT INTO usuario (id, iglesia_id, correo, nombre, hash_contrasena, estado, creado_en)
+                VALUES (@operador, @iglesia, @correoOperador, 'Operador de prueba', @hashOperador, 'activo', now());
+            INSERT INTO usuario_rol (usuario_id, rol) VALUES (@operador, 'operador');
             """,
             ("iglesia", iglesia.Id),
             ("nombre", iglesia.Nombre),
@@ -163,11 +200,16 @@ public sealed class NubeDePrueba : IAsyncLifetime
             ("correo", iglesia.Correo),
             ("hashContrasena", Contrasenas.Guardar(iglesia.Contrasena)),
             ("dispositivo", iglesia.DispositivoId),
+            ("pantalla", iglesia.PantallaId),
+            ("revocado", iglesia.DispositivoRevocadoId),
             ("sesion", iglesia.SesionId),
             ("huella", iglesia.SesionId.ToString()),
             ("administrador", iglesia.AdministradorId),
             ("correoAdministrador", iglesia.AdministradorCorreo),
-            ("hashAdministrador", Contrasenas.Guardar(iglesia.AdministradorContrasena)));
+            ("hashAdministrador", Contrasenas.Guardar(iglesia.AdministradorContrasena)),
+            ("operador", iglesia.OperadorId),
+            ("correoOperador", iglesia.OperadorCorreo),
+            ("hashOperador", Contrasenas.Guardar(iglesia.OperadorContrasena)));
     }
 
     private static async Task Ejecutar(NpgsqlConnection conexion, string sql, params (string Nombre, object Valor)[] parametros)
@@ -188,6 +230,11 @@ public sealed class NubeDePrueba : IAsyncLifetime
     private static string CarpetaDeMigraciones() => Path.Combine(AppContext.BaseDirectory, "migrations");
 }
 
+/// <summary>
+/// Todo lo que una iglesia sembrada tiene a mano. Las pruebas de cruce (T8.2)
+/// usan estos identificadores <b>de la iglesia ajena</b> a propósito: el
+/// aislamiento se prueba con los datos correctos en la mano, no adivinando.
+/// </summary>
 public sealed record IglesiaSembrada(
     Guid Id,
     string Nombre,
@@ -198,10 +245,29 @@ public sealed record IglesiaSembrada(
     Guid SesionId,
     Guid AdministradorId,
     string AdministradorCorreo,
-    string AdministradorContrasena)
+    string AdministradorContrasena,
+    Guid OperadorId,
+    string OperadorCorreo,
+    string OperadorContrasena,
+    Guid PantallaId,
+    Guid DispositivoRevocadoId)
 {
     public static IglesiaSembrada Nueva(string nombre, string correo) => new(
-        Guid.CreateVersion7(), nombre, correo, "contrasena-de-prueba-" + Guid.NewGuid().ToString("N")[..8],
-        Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(),
-        Guid.CreateVersion7(), "administrador-" + correo, "contrasena-de-prueba-" + Guid.NewGuid().ToString("N")[..8]);
+        Id: Guid.CreateVersion7(),
+        Nombre: nombre,
+        Correo: correo,
+        Contrasena: ContrasenaInventada(),
+        UsuarioId: Guid.CreateVersion7(),
+        DispositivoId: Guid.CreateVersion7(),
+        SesionId: Guid.CreateVersion7(),
+        AdministradorId: Guid.CreateVersion7(),
+        AdministradorCorreo: "administrador-" + correo,
+        AdministradorContrasena: ContrasenaInventada(),
+        OperadorId: Guid.CreateVersion7(),
+        OperadorCorreo: "operador-" + correo,
+        OperadorContrasena: ContrasenaInventada(),
+        PantallaId: Guid.CreateVersion7(),
+        DispositivoRevocadoId: Guid.CreateVersion7());
+
+    private static string ContrasenaInventada() => "contrasena-de-prueba-" + Guid.NewGuid().ToString("N")[..8];
 }
