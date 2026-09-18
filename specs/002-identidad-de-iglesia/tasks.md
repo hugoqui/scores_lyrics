@@ -109,78 +109,78 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Opus** para la autorización, **Sonnet** para los endpoints una vez fijada. La regla de "ningún rol incluye a otro" es fácil de romper sin darse cuenta.
 
-- [ ] T5.1 Endpoint de login en la nube: correo, contraseña y dispositivo →
+- [x] T5.1 Endpoint de login en la nube: correo, contraseña y dispositivo →
       sesión.
-- [ ] T5.2 Endpoint de login en el nodo, que autentica **sin consultar a la
+- [x] T5.2 Endpoint de login en el nodo, que autentica **sin consultar a la
       nube** y emite con su propia clave.
-- [ ] T5.3 Renovación de sesión, y cierre de sesión que revoca la renovación.
-- [ ] T5.4 Comprobación de autorización por operación, en el servidor. Los
+- [x] T5.3 Renovación de sesión, y cierre de sesión que revoca la renovación.
+- [x] T5.4 Comprobación de autorización por operación, en el servidor. Los
       roles **no se heredan entre sí**.
-- [ ] T5.5 Un identificador válido de otra iglesia se responde como
+- [x] T5.5 Un identificador válido de otra iglesia se responde como
       inexistente, no como prohibido.
-- [ ] T5.6 Verificar que **ninguna API acepta un identificador de iglesia por
+- [x] T5.6 Verificar que **ninguna API acepta un identificador de iglesia por
       parámetro**: siempre sale del token.
-- [ ] T5.7 Prueba: un músico que afirma ser administrador recibe el mismo
+- [x] T5.7 Prueba: un músico que afirma ser administrador recibe el mismo
       rechazo que si no dijera nada.
-- [ ] T5.8 Prueba: un administrador **no** puede operar el servicio sin tener
+- [x] T5.8 Prueba: un administrador **no** puede operar el servicio sin tener
       además el rol de operador.
-- [ ] T5.9 Prueba: el nodo autentica y emite sesión con la nube inalcanzable.
+- [x] T5.9 Prueba: el nodo autentica y emite sesión con la nube inalcanzable.
 
 ## Fase 6 — Usuarios, instrumentos y dispositivos (spec R4–R6)
 
 > **Modelo sugerido: Sonnet** — trabajo de altas y bajas sobre un modelo ya decidido. La única trampa es la baja que borra, y la prueba la cubre.
 
-- [ ] T6.1 Alta de usuario dentro de una iglesia, con sus roles.
-- [ ] T6.2 Baja de usuario: **cambia el estado, nunca borra la fila ni su
+- [x] T6.1 Alta de usuario dentro de una iglesia, con sus roles.
+- [x] T6.2 Baja de usuario: **cambia el estado, nunca borra la fila ni su
       trabajo** (constitución, punto 5). Readmitir es volver a cambiarlo.
-- [ ] T6.3 Impedir que una iglesia se quede sin ningún administrador.
-- [ ] T6.4 Asignar y quitar instrumentos a un músico (varios por persona).
-- [ ] T6.5 Alta de dispositivo en el primer login, con nombre legible para que
+- [x] T6.3 Impedir que una iglesia se quede sin ningún administrador.
+- [x] T6.4 Asignar y quitar instrumentos a un músico (varios por persona).
+- [x] T6.5 Alta de dispositivo en el primer login, con nombre legible para que
       el músico reconozca cuál es.
-- [ ] T6.6 Listar y revocar dispositivos por separado.
-- [ ] T6.7 Si hay límite de dispositivos activos y se alcanza, responder
+- [x] T6.6 Listar y revocar dispositivos por separado.
+- [x] T6.7 Si hay límite de dispositivos activos y se alcanza, responder
       diciendo qué pasa y ofreciendo cerrar uno. **Nunca un rechazo mudo**,
       como el 403 de hoy.
-- [ ] T6.8 Prueba: tras baja y readmisión, el usuario conserva instrumentos y
+- [x] T6.8 Prueba: tras baja y readmisión, el usuario conserva instrumentos y
       dispositivos.
-- [ ] T6.9 Prueba: revocar un dispositivo no afecta a los demás del mismo
+- [x] T6.9 Prueba: revocar un dispositivo no afecta a los demás del mismo
       usuario.
-- [ ] T6.10 Prueba: quitar el último administrador de una iglesia se rechaza.
+- [x] T6.10 Prueba: quitar el último administrador de una iglesia se rechaza.
 
 ## Fase 7 — Alta de la primera iglesia sin panel (spec R9)
 
 > **Modelo sugerido: Sonnet** — un comando, al estilo del `-- migrar` que ya existe en el nodo.
 
-- [ ] T7.1 Comando en la nube que crea una iglesia y su primer administrador.
-- [ ] T7.2 La credencial inicial se fija en el momento del alta. **Sin
+- [x] T7.1 Comando en la nube que crea una iglesia y su primer administrador.
+- [x] T7.2 La credencial inicial se fija en el momento del alta. **Sin
       contraseña por defecto ni cuenta de fábrica.**
-- [ ] T7.3 El comando devuelve lo que el nodo necesita para configurarse.
-- [ ] T7.4 Documentar el procedimiento en `docs/operacion/`, sin secretos.
-- [ ] T7.5 Prueba: el comando deja una iglesia utilizable, con administrador y
+- [x] T7.3 El comando devuelve lo que el nodo necesita para configurarse.
+- [x] T7.4 Documentar el procedimiento en `docs/operacion/`, sin secretos.
+- [x] T7.5 Prueba: el comando deja una iglesia utilizable, con administrador y
       sin credenciales adivinables.
 
 ## Fase 8 — Verificación del aislamiento (spec R10)
 
 > **Modelo sugerido: Opus** — estas pruebas tienen que estar escritas para *intentar* romper el aislamiento. Una prueba complaciente aquí es peor que ninguna.
 
-- [ ] T8.1 Semilla de dos iglesias ficticias con datos completos y evidentes
+- [x] T8.1 Semilla de dos iglesias ficticias con datos completos y evidentes
       (001 R5: nada real).
-- [ ] T8.2 Recorrer **todas** las operaciones del módulo intentando cruzarse de
+- [x] T8.2 Recorrer **todas** las operaciones del módulo intentando cruzarse de
       iglesia con identificadores válidos. Ninguna lo consigue.
-- [ ] T8.3 Prueba de que las tablas nuevas tienen su política activa: que nadie
+- [x] T8.3 Prueba de que las tablas nuevas tienen su política activa: que nadie
       pueda añadir una tabla de dominio sin RLS y que las pruebas sigan verdes.
-- [ ] T8.4 Verificar que estas pruebas corren en la tubería de 001 y bloquean
+- [x] T8.4 Verificar que estas pruebas corren en la tubería de 001 y bloquean
       la fusión.
 
 ## Cierre del módulo
 
-- [ ] C1 `dotnet test` en verde, incluidas las pruebas de cruce de iglesias.
-- [ ] C2 Los nueve puntos de la estrategia de verificación de
+- [x] C1 `dotnet test` en verde, incluidas las pruebas de cruce de iglesias.
+- [x] C2 Los nueve puntos de la estrategia de verificación de
       [`plan.md`](plan.md) tienen prueba automática, no revisión a ojo.
-- [ ] C3 Ninguna clave privada ni contraseña entró al repositorio;
+- [x] C3 Ninguna clave privada ni contraseña entró al repositorio;
       `.env.example` tiene los nombres nuevos.
-- [ ] C4 `docs/arquitectura/estado-actual.md` actualizado: el hallazgo "No
+- [x] C4 `docs/arquitectura/estado-actual.md` actualizado: el hallazgo "No
       existe el concepto de iglesia" queda resuelto y se dice cómo.
-- [ ] C5 `specs/README.md` marca 002 como ✅ y nombra el módulo siguiente.
-- [ ] C6 Las notas para 006 —bases por afinación, el archivo en Do duplicado
+- [x] C5 `specs/README.md` marca 002 como ✅ y nombra el módulo siguiente.
+- [x] C6 Las notas para 006 —bases por afinación, el archivo en Do duplicado
       cinco veces— quedan recogidas donde ese módulo las encuentre.

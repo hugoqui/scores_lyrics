@@ -10,10 +10,21 @@ namespace Symphony.Cloud.Configuration;
 public sealed class CloudOptions
 {
     public const string PostgresConnectionStringVariable = "SYMPHONY_CLOUD_POSTGRES_CONNECTION_STRING";
+    public const string PostgresPropietarioConnectionStringVariable =
+        "SYMPHONY_CLOUD_POSTGRES_PROPIETARIO_CONNECTION_STRING";
     public const string ClavePrivadaVariable = "SYMPHONY_CLOUD_CLAVE_PRIVADA";
 
-    /// <summary>Cadena de conexión a PostgreSQL.</summary>
+    /// <summary>Cadena de conexión a PostgreSQL con el rol de la aplicación (<c>symphony_app</c>).</summary>
     public required string PostgresConnectionString { get; init; }
+
+    /// <summary>
+    /// Cadena de conexión con el rol <c>symphony_propietario</c>
+    /// (<c>BYPASSRLS</c>). Solo la usan los caminos marcados uno a uno en
+    /// <c>docs/operacion/roles-de-base-de-datos.md</c>: hoy, el login, que
+    /// tiene que encontrar un correo sin saber todavía a qué iglesia
+    /// pertenece (spec R4).
+    /// </summary>
+    public required string PostgresPropietarioConnectionString { get; init; }
 
     /// <summary>
     /// Con esta firma la nube las sesiones que emite. Los nodos solo conocen su
@@ -33,12 +44,18 @@ public sealed class CloudOptions
     public static CloudOptions FromEnvironment(string environment)
     {
         var postgresConnectionString = System.Environment.GetEnvironmentVariable(PostgresConnectionStringVariable);
+        var postgresPropietarioConnectionString =
+            System.Environment.GetEnvironmentVariable(PostgresPropietarioConnectionStringVariable);
         var clavePrivada = System.Environment.GetEnvironmentVariable(ClavePrivadaVariable);
 
         var missing = new List<string>();
         if (string.IsNullOrWhiteSpace(postgresConnectionString))
         {
             missing.Add(PostgresConnectionStringVariable);
+        }
+        if (string.IsNullOrWhiteSpace(postgresPropietarioConnectionString))
+        {
+            missing.Add(PostgresPropietarioConnectionStringVariable);
         }
         if (string.IsNullOrWhiteSpace(clavePrivada))
         {
@@ -68,6 +85,7 @@ public sealed class CloudOptions
         return new CloudOptions
         {
             PostgresConnectionString = postgresConnectionString!,
+            PostgresPropietarioConnectionString = postgresPropietarioConnectionString!,
             ClaveDeFirma = claveDeFirma,
             Environment = environment,
         };

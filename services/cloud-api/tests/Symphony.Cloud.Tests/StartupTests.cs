@@ -18,6 +18,7 @@ namespace Symphony.Cloud.Tests;
 /// ([ADR 0011]): se crea al empezar y se destruye al terminar. Hace falta
 /// Docker corriendo; sin él, estas pruebas no pueden correr.
 /// </summary>
+[Collection(ConfiguracionDelProceso.Nombre)]
 public class StartupTests : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17-alpine")
@@ -32,12 +33,15 @@ public class StartupTests : IAsyncLifetime
         Environment.SetEnvironmentVariable(
             CloudOptions.PostgresConnectionStringVariable, _postgres.GetConnectionString());
         Environment.SetEnvironmentVariable(
+            CloudOptions.PostgresPropietarioConnectionStringVariable, _postgres.GetConnectionString());
+        Environment.SetEnvironmentVariable(
             CloudOptions.ClavePrivadaVariable, ParDeClaves.Generar().PrivadaEnBase64);
     }
 
     public async Task DisposeAsync()
     {
         Environment.SetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable, null);
+        Environment.SetEnvironmentVariable(CloudOptions.PostgresPropietarioConnectionStringVariable, null);
         Environment.SetEnvironmentVariable(CloudOptions.ClavePrivadaVariable, null);
         await _postgres.DisposeAsync();
     }
@@ -77,8 +81,11 @@ public class StartupTests : IAsyncLifetime
     public void Falla_con_configuracion_incompleta_y_nombra_la_variable_faltante()
     {
         var conexion = Environment.GetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable);
+        var conexionPropietario =
+            Environment.GetEnvironmentVariable(CloudOptions.PostgresPropietarioConnectionStringVariable);
         var clave = Environment.GetEnvironmentVariable(CloudOptions.ClavePrivadaVariable);
         Environment.SetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable, null);
+        Environment.SetEnvironmentVariable(CloudOptions.PostgresPropietarioConnectionStringVariable, null);
         Environment.SetEnvironmentVariable(CloudOptions.ClavePrivadaVariable, null);
         try
         {
@@ -88,11 +95,14 @@ public class StartupTests : IAsyncLifetime
             // Las nombra todas de una vez: arrancar tres veces para descubrir
             // tres variables que faltan es una forma tonta de perder una tarde.
             Assert.Contains(CloudOptions.PostgresConnectionStringVariable, excepcion.Message);
+            Assert.Contains(CloudOptions.PostgresPropietarioConnectionStringVariable, excepcion.Message);
             Assert.Contains(CloudOptions.ClavePrivadaVariable, excepcion.Message);
         }
         finally
         {
             Environment.SetEnvironmentVariable(CloudOptions.PostgresConnectionStringVariable, conexion);
+            Environment.SetEnvironmentVariable(
+                CloudOptions.PostgresPropietarioConnectionStringVariable, conexionPropietario);
             Environment.SetEnvironmentVariable(CloudOptions.ClavePrivadaVariable, clave);
         }
     }

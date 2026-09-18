@@ -36,6 +36,13 @@ public sealed class ParDeClaves
     /// </summary>
     public string Id => IdDe(Publica);
 
+    /// <summary>
+    /// La mitad con la que se verifica lo que este par firma. Quien emite
+    /// también verifica lo suyo —la nube acepta sus propias sesiones— y sin
+    /// esto tendría que pasearse la privada hasta el verificador.
+    /// </summary>
+    public ClavePublicaDeFirma ClavePublica => ClavePublicaDeFirma.DesdeBytes(Publica);
+
     internal static string IdDe(byte[] publica) =>
         Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(publica))[..8];
 
@@ -90,6 +97,11 @@ public sealed class ClavePublicaDeFirma
 
     public static ClavePublicaDeFirma DesdeBase64(string publica) =>
         new(ParDeClaves.Leer(publica, Ed25519PublicKeyParameters.KeySize, "pública"));
+
+    internal static ClavePublicaDeFirma DesdeBytes(byte[] publica) => new(publica);
+
+    /// <summary>El mismo identificador que expone <see cref="ParDeClaves.Id"/> para su par.</summary>
+    public string Id => ParDeClaves.IdDe(_bytes);
 
     internal ICipherParameters ParaVerificar() => new Ed25519PublicKeyParameters(_bytes);
 }

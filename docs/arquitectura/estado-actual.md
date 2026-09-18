@@ -85,11 +85,38 @@ integración continua en GitHub Actions que bloquea la fusión sin tubería verd
 estructurados con filtrado de secretos en ambos procesos (spec R7). Ya se sabe
 qué esquema tiene cada base y hay forma de auditar qué pasó un domingo.
 
-### No existe el concepto de iglesia → [`002-identidad-de-iglesia`](../../specs/002-identidad-de-iglesia/)
+### No existe el concepto de iglesia → [`002-identidad-de-iglesia`](../../specs/002-identidad-de-iglesia/) ✅ resuelto
 
-No está mal modelado: **no existe**. La base de datos se llama `belen`, el
-socket emite en difusión global sin salas, y el único rastro de la iglesia es el
-título de una ventana. Cada iglesia es una instalación manual del mismo código.
+Resuelto por el módulo 002 en el sistema nuevo: la iglesia es una fila con
+identidad propia (UUIDv7, [ADR 0005](../adr/0005-identificadores.md)) y **el
+aislamiento lo impone el motor, no la consulta**
+([ADR 0015](../adr/0015-aislamiento-por-rls-y-nodo-atado-a-su-iglesia.md)). En
+la nube, row-level security activada y forzada contra la iglesia de la sesión,
+con un rol de aplicación `NOBYPASSRLS` que no es dueño de las tablas: olvidar
+un filtro da cero filas, no filas de otra congregación. En el nodo el
+aislamiento es físico: una sola fila en `iglesia` impuesta por el esquema, todo
+lo demás colgando de ella por clave foránea, y un proceso que se niega a
+arrancar contra la base de otra iglesia. La iglesia de cada petición sale del
+token firmado y de ningún otro sitio
+([ADR 0016](../adr/0016-sesion-firmada-verificable-sin-internet.md)): ninguna
+API la acepta por parámetro.
+
+Sobre eso: un usuario pertenece a una iglesia y su correo es único dentro de
+ella; darlo de baja cambia su estado y no borra su trabajo; los instrumentos
+son datos con su afinación y un músico puede tener varios; los dispositivos son
+varios por persona y revocables por separado; y los roles son una lista cerrada
+que decide el servidor, en la que ninguno incluye a otro. La primera iglesia se
+crea por comando, sin panel. Las pruebas están escritas para **intentar**
+cruzarse de iglesia con identificadores válidos de la otra, y dos guardias
+impiden añadir una tabla de dominio sin su política o un endpoint que atienda
+sin sesión firmada.
+
+Lo que sigue así en el legado hasta que se retire
+([ADR 0009](../adr/0009-no-se-parchea-el-legado.md)):
+
+La base de datos se llama `belen`, el socket emite en difusión global sin salas,
+y el único rastro de la iglesia es el título de una ventana. Cada iglesia es una
+instalación manual del mismo código.
 
 Los músicos tampoco pertenecen a ninguna iglesia: un usuario es un email con un
 `deviceId` atado, en una base compartida por todos. Si cambia de teléfono,

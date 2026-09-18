@@ -98,10 +98,15 @@ public sealed class AislamientoEntreIglesiasTests : IClassFixture<NubeDePrueba>
         // resultado siempre, las de arriba pasarían sin probar nada.
         await using var conexion = await _nube.AbrirComoAplicacion(_nube.Primera.Id);
 
+        // Lo que siembra cada iglesia de prueba (T8.1): músico, administrador y
+        // operador; el teléfono del músico, la pantalla del templo y la tableta
+        // revocada; y los dos instrumentos del músico.
         Assert.Equal(1L, await Escalar(conexion, "SELECT count(*) FROM iglesia"));
-        Assert.Equal(1L, await Escalar(conexion, "SELECT count(*) FROM usuario"));
-        Assert.Equal(1L, await Escalar(conexion, "SELECT count(*) FROM usuario_rol"));
-        Assert.Equal(1L, await Escalar(conexion, "SELECT count(*) FROM dispositivo"));
+        Assert.Equal(3L, await Escalar(conexion, "SELECT count(*) FROM usuario"));
+        Assert.Equal(3L, await Escalar(conexion, "SELECT count(*) FROM usuario_rol"));
+        Assert.Equal(2L, await Escalar(conexion, "SELECT count(*) FROM usuario_instrumento"));
+        Assert.Equal(3L, await Escalar(conexion, "SELECT count(*) FROM dispositivo"));
+        Assert.Equal(1L, await Escalar(conexion, "SELECT count(*) FROM sesion"));
     }
 
     [Theory]
