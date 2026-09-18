@@ -78,6 +78,8 @@ un camino que ve todas las iglesias sin que nadie lo haya revisado.
   cuál es la suya cuando busca al usuario. En cuanto lo sabe, todo lo demás
   —dispositivo, sesión, roles— pasa por `symphony_app` como cualquier otro
   camino.
-
-El comando de alta de la primera iglesia (fase 7) es candidato a sumarse
-después.
+- `dotnet run -- crear-iglesia` (`AccesoComoPropietario.CrearIglesiaConAdministrador`,
+  fase 7 de [002](../../specs/002-identidad-de-iglesia/tasks.md),
+  [procedimiento](alta-de-iglesia.md)). Crea la fila de `iglesia`, y
+  `symphony_app` solo tiene permiso de lectura sobre esa tabla: dar de alta una
+  no puede pasar por el camino de todos los días.

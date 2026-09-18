@@ -1,6 +1,7 @@
 using Dapper;
 using Npgsql;
 using Symphony.Cloud.Configuration;
+using Symphony.Sesiones;
 using Symphony.Sesiones.Web;
 
 namespace Symphony.Cloud.BaseDeDatos;
@@ -58,5 +59,59 @@ public sealed class AccesoComoPropietario
         return resultado;
     }
 
+    /// <summary>
+    /// Crea una iglesia y su primer administrador en una sola transacción
+    /// (spec R9, fase 7): el comando que la levanta sin panel. No hay
+    /// sobrecarga sin contraseña — quien llama siempre tiene que traer una, sin
+    /// valor por defecto ni cuenta de fábrica.
+    /// </summary>
+    public async Task<AltaDeIglesia> CrearIglesiaConAdministrador(
+        string nombreIglesia, string correoAdministrador, string nombreAdministrador, string contrasena)
+    {
+        if (string.IsNullOrWhiteSpace(contrasena))
+        {
+            throw new ArgumentException(
+                "La contraseña del primer administrador es obligatoria.", nameof(contrasena));
+        }
+
+        await using var conexion = new NpgsqlConnection(_cadenaDeConexion);
+        await conexion.OpenAsync();
+        await using var transaccion = await conexion.BeginTransactionAsync();
+
+        var iglesiaId = Guid.CreateVersion7();
+        await conexion.ExecuteAsync(
+            "INSERT INTO iglesia (id, nombre, estado, creada_en) VALUES (@id, @nombre, 'activa', now())",
+            new { id = iglesiaId, nombre = nombreIglesia },
+            transaccion);
+
+        var administradorId = Guid.CreateVersion7();
+        await conexion.ExecuteAsync(
+            """
+            INSERT INTO usuario (id, iglesia_id, correo, nombre, hash_contrasena, estado, creado_en)
+            VALUES (@id, @iglesiaId, @correo, @nombre, @hash, 'activo', now())
+            """,
+            new
+            {
+                id = administradorId,
+                iglesiaId,
+                correo = correoAdministrador,
+                nombre = nombreAdministrador,
+                hash = Contrasenas.Guardar(contrasena),
+            },
+            transaccion);
+
+        await conexion.ExecuteAsync(
+            "INSERT INTO usuario_rol (usuario_id, rol) VALUES (@id, @rol)",
+            new { id = administradorId, rol = Roles.Administrador },
+            transaccion);
+
+        await transaccion.CommitAsync();
+
+        return new AltaDeIglesia(iglesiaId, administradorId);
+    }
+
     private sealed record FilaDeUsuario(Guid Id, Guid IglesiaId, string HashContrasena, string Estado);
 }
+
+/// <summary>Lo que deja <see cref="AccesoComoPropietario.CrearIglesiaConAdministrador"/>.</summary>
+public sealed record AltaDeIglesia(Guid IglesiaId, Guid AdministradorId);

@@ -2,6 +2,7 @@ using Serilog;
 using Symphony.Cloud.Autenticacion;
 using Symphony.Cloud.BaseDeDatos;
 using Symphony.Cloud.Configuration;
+using Symphony.Cloud.Iglesias;
 using Symphony.Cloud.Registro;
 using Symphony.Cloud.Usuarios;
 using Symphony.Sesiones;
@@ -86,6 +87,17 @@ catch (Exception excepcion)
 if (args.Contains("migrar"))
 {
     return;
+}
+
+// `dotnet run -- crear-iglesia ...` (spec R9, fase 7): la primera iglesia sin
+// panel. Va después de aplicar migraciones porque necesita el esquema, y usa
+// symphony_propietario (docs/operacion/roles-de-base-de-datos.md) porque crea
+// la fila de iglesia, que symphony_app solo puede leer.
+if (args.Contains(ComandoCrearIglesia.Nombre))
+{
+    var codigoDeSalida = await ComandoCrearIglesia.Ejecutar(
+        args, app.Services.GetRequiredService<AccesoComoPropietario>(), Console.In, Console.Out);
+    System.Environment.Exit(codigoDeSalida);
 }
 
 app.Run();

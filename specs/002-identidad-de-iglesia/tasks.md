@@ -151,12 +151,12 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 
 > **Modelo sugerido: Sonnet** — un comando, al estilo del `-- migrar` que ya existe en el nodo.
 
-- [ ] T7.1 Comando en la nube que crea una iglesia y su primer administrador.
-- [ ] T7.2 La credencial inicial se fija en el momento del alta. **Sin
+- [x] T7.1 Comando en la nube que crea una iglesia y su primer administrador.
+- [x] T7.2 La credencial inicial se fija en el momento del alta. **Sin
       contraseña por defecto ni cuenta de fábrica.**
-- [ ] T7.3 El comando devuelve lo que el nodo necesita para configurarse.
-- [ ] T7.4 Documentar el procedimiento en `docs/operacion/`, sin secretos.
-- [ ] T7.5 Prueba: el comando deja una iglesia utilizable, con administrador y
+- [x] T7.3 El comando devuelve lo que el nodo necesita para configurarse.
+- [x] T7.4 Documentar el procedimiento en `docs/operacion/`, sin secretos.
+- [x] T7.5 Prueba: el comando deja una iglesia utilizable, con administrador y
       sin credenciales adivinables.
 
 ## Fase 8 — Verificación del aislamiento (spec R10)
