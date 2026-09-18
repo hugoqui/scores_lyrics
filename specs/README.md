@@ -35,7 +35,7 @@ Leyenda: ⬜ sin especificar · 📝 especificado · 🔨 en implementación · 
 | 000 | [seguridad](000-seguridad/) | 📝 | Fijar las reglas de seguridad que cumple el sistema nuevo. Sin código propio: se implementan en los módulos que le siguen. | Opus |
 | 001 | [andamiaje-y-tests](001-andamiaje-y-tests/) | ✅ | Migraciones versionadas, armazón de pruebas e integración continua, para que lo demás sea reversible. | mixto |
 | 002 | [identidad-de-iglesia](002-identidad-de-iglesia/) | ✅ | Crear la entidad iglesia y propagarla a datos, usuarios y permisos. | **Opus** |
-| 003 | [panel-saas](003-panel-saas/) | ⬜ | Alta de iglesias, licencias, administrador por iglesia e invitaciones por QR. | mixto |
+| 003 | [panel-saas](003-panel-saas/) | 📝 | Alta de iglesias, licencias, administrador por iglesia e invitaciones por QR. Primera interfaz del sistema. | mixto |
 | 004 | [estado-en-vivo](004-estado-en-vivo/) | ⬜ | Persistir lista de alabanza y canto actual por iglesia; matar `songid.txt` y el array en memoria. | mixto |
 | 005 | [tiempo-real](005-tiempo-real/) | ⬜ | Protocolo nuevo con salas por iglesia y autorización por rol en los eventos de control. | **Opus** |
 | 006 | [catalogo-y-partituras](006-catalogo-y-partituras/) | ⬜ | Modelo melodía/arreglo, deduplicación por hash y acceso autenticado a los archivos. | **Opus** |
