@@ -18,6 +18,13 @@ Implementar tareas ya especificadas suele ser trabajo de Sonnet; cada fase de
 Reglas:
 
 - No se escribe código de un módulo sin su `spec.md` aprobado.
+- **Ninguna pantalla se implementa sin su prototipo aprobado por el
+  propietario.** El orden es inventario de pantallas → wireframe → prototipo.
+  El wireframe es obligatorio donde hay interacción nueva y omitible cuando la
+  pantalla es una lista o un formulario. Los prototipos aprobados quedan en
+  [`docs/diseno/prototipos/`](../docs/diseno/prototipos/) y las reglas de UX
+  que valen para todos, en [`docs/diseno/`](../docs/diseno/). Vale para el
+  panel del SaaS, la app móvil y la de escritorio.
 - Antes de empezar, comparar el modelo en uso con el sugerido. Si no coincide,
   avisar y esperar; el cambio de modelo lo hace el propietario.
 - Un módulo no se cierra sin pruebas unitarias (constitución, punto 4).

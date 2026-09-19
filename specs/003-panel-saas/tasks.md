@@ -28,23 +28,23 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 - [x] T0.2 Escribir `docs/adr/0020-licencia-anual-por-iglesia.md`: anual por
       iglesia, tope de dispositivos que **avisa y no bloquea**, y qué degrada
       exactamente una licencia vencida (constitución, punto 1).
-- [ ] T0.3 Comprobar qué *skills* y plantillas hay disponibles para Blazor y
+- [x] T0.3 Comprobar qué *skills* y plantillas hay disponibles para Blazor y
       para diseño antes de empezar, y dejar anotado cuáles se usan. No se
       descarga nada a mitad de la fase 4.
-- [ ] T0.4 Inventario de pantallas de las dos zonas, con quién entra a cada una
+- [x] T0.4 Inventario de pantallas de las dos zonas, con quién entra a cada una
       y qué puede hacer. Es la lista contra la que se revisa que no falta nada.
 - [ ] T0.5 Wireframes de los dos flujos: **alta de iglesia** y **emisión y
       canje de invitación**. Las pantallas de lista y formulario sin
       interacción nueva pasan directo a prototipo (spec R6).
 - [ ] T0.6 Prototipo de cada pantalla del inventario, en Claude Design.
       **Aprobado por el propietario antes de escribir código de interfaz.**
-- [ ] T0.7 Escribir las reglas de UX en `docs/diseno/`: qué se confirma, qué se
+- [x] T0.7 Escribir las reglas de UX en `docs/diseno/`: qué se confirma, qué se
       puede deshacer, cómo se enuncia un error, qué se ve mientras algo carga,
       cómo se muestra una advertencia que no bloquea. Valen para todas las
       pantallas y para 007 y 010.
 - [ ] T0.8 Crear el archivo de traducciones, español e inglés, y el mecanismo
       que lo lee. **Ningún texto visible en el código** (constitución, punto 9).
-- [ ] T0.9 Añadir a [`specs/README.md`](../README.md) la regla de proceso:
+- [x] T0.9 Añadir a [`specs/README.md`](../README.md) la regla de proceso:
       ninguna pantalla se implementa sin prototipo aprobado, en este módulo y
       en los siguientes.
 
