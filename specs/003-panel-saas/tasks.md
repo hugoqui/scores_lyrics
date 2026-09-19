@@ -20,12 +20,12 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
 > separación de zonas. Un ADR no se reescribe (constitución, punto 6), y una
 > convención de interfaz mal puesta se hereda tres veces.
 
-- [ ] T0.1 Escribir `docs/adr/0019-panel-web-servido-por-la-nube.md`: Blazor
+- [x] T0.1 Escribir `docs/adr/0019-panel-web-servido-por-la-nube.md`: Blazor
       Server dentro de `Symphony.Cloud`, dos zonas por rol, con el costo
       aceptado y las alternativas descartadas. Decir explícitamente que **no
       contradice** a [ADR 0013](../../docs/adr/0013-app-de-escritorio-en-vez-de-panel-web.md),
       que retira el panel *del templo*.
-- [ ] T0.2 Escribir `docs/adr/0020-licencia-anual-por-iglesia.md`: anual por
+- [x] T0.2 Escribir `docs/adr/0020-licencia-anual-por-iglesia.md`: anual por
       iglesia, tope de dispositivos que **avisa y no bloquea**, y qué degrada
       exactamente una licencia vencida (constitución, punto 1).
 - [ ] T0.3 Comprobar qué *skills* y plantillas hay disponibles para Blazor y

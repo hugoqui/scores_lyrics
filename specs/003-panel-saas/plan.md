@@ -8,8 +8,8 @@ primeras tareas de [`tasks.md`](tasks.md):
 
 | | Decisión | ADR |
 |---|---|---|
-| 1 | Con qué se construye el panel y cómo se separan sus dos zonas | `0019-panel-web-servido-por-la-nube.md` |
-| 2 | Qué es una licencia y qué hace al vencer | `0020-licencia-anual-por-iglesia.md` |
+| 1 | Con qué se construye el panel y cómo se separan sus dos zonas | [0019](../../docs/adr/0019-panel-web-servido-por-la-nube.md) ✅ |
+| 2 | Qué es una licencia y qué hace al vencer | [0020](../../docs/adr/0020-licencia-anual-por-iglesia.md) ✅ |
 
 ## Punto de partida verificado
 
@@ -245,8 +245,8 @@ Todas corren en la integración continua de 001 y bloquean la fusión
 
 | Decisión | Elegida | Alternativa descartada | ADR |
 |---|---|---|---|
-| Con qué se construye el panel | Blazor Server en `Symphony.Cloud`, dos zonas por rol | SPA contra la API; dos aplicaciones separadas | `0019` (se escribe en T0.1) |
-| Qué es una licencia | Anual por iglesia, tope de dispositivos que avisa | Cobro por dispositivo; licencia que bloquea al vencer | `0020` (se escribe en T0.2) |
+| Con qué se construye el panel | Blazor Server en `Symphony.Cloud`, dos zonas por rol | SPA contra la API; dos aplicaciones separadas | [0019](../../docs/adr/0019-panel-web-servido-por-la-nube.md) |
+| Qué es una licencia | Anual por iglesia, tope de dispositivos que avisa | Cobro por dispositivo; licencia que bloquea al vencer | [0020](../../docs/adr/0020-licencia-anual-por-iglesia.md) |
 
 ## Fuera de este plan
 
