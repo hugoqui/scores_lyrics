@@ -33,7 +33,7 @@ hay que avisar y esperar antes de empezar, no decidirlo por cuenta propia.
       descarga nada a mitad de la fase 4.
 - [x] T0.4 Inventario de pantallas de las dos zonas, con quién entra a cada una
       y qué puede hacer. Es la lista contra la que se revisa que no falta nada.
-- [ ] T0.5 Wireframes de los dos flujos: **alta de iglesia** y **emisión y
+- [x] T0.5 Wireframes de los dos flujos: **alta de iglesia** y **emisión y
       canje de invitación**. Las pantallas de lista y formulario sin
       interacción nueva pasan directo a prototipo (spec R6).
 - [ ] T0.6 Prototipo de cada pantalla del inventario, en Claude Design.

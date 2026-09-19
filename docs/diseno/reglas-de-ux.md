@@ -132,3 +132,73 @@ apagando algo (ADR 0020, constitución punto 1).
 - **Que un botón no esté no es autorización.** La interfaz esconde lo que no
   corresponde, y el servidor lo comprueba igual. Nada de lo de arriba sustituye
   a `ExigirOperacion`.
+
+## 8. Dónde aparece algo: página, panel lateral o diálogo
+
+Tres contenedores y tres usos. No se elige por tamaño del contenido, sino por
+lo que hay que conservar detrás.
+
+**Página completa** — cuando el resultado importa fuera del momento: hay que
+poder recargarlo, guardarlo, imprimirlo o mandárselo a alguien. También cuando
+no hay nada detrás que conservar.
+
+> El alta de iglesia y lo que entrega al terminar —la invitación del primer
+> administrador y la configuración del nodo— son página. El canje de
+> invitación también: es público, no hay lista detrás.
+
+**Panel lateral** (*drawer*) — ver o editar un registro **sin perder la lista**.
+Es el contenedor por defecto del panel: casi siempre se quiere seguir viendo la
+tabla para pasar a la fila siguiente o comparar.
+
+> Ficha de usuario, instrumentos de un músico, dispositivos, emitir invitación
+> y mostrar su QR, ficha de iglesia.
+
+**Diálogo** (*modal*) — confirmar algo destructivo, y nada más. Poca
+información, una decisión de dos salidas. Aquí interrumpir es el objetivo.
+
+> Revocar una licencia, revocar un dispositivo, dar de baja a un usuario.
+
+Reglas que hacen que esto funcione:
+
+- **El panel lateral tiene su propia URL.** Si no, recargar devuelve a la lista
+  pelada y no se le puede pasar a nadie el enlace de una ficha. Se decide al
+  construir el primero, no en la pantalla doce.
+- **No se anidan.** Nunca un diálogo sobre un panel lateral: si dentro de una
+  ficha hay que confirmar algo destructivo, se cierra el panel y se confirma
+  sobre la lista. Dos capas encima de otra y ya nadie sabe qué cierra qué.
+- **Un diálogo que necesita desplazamiento está mal elegido.** Si el contenido
+  no cabe, era un panel lateral o una página.
+- **Nada importante vive solo dentro de un panel lateral.** Lo que hay que
+  conservar —un código de invitación, la configuración de un nodo— se entrega
+  en una página.
+
+## 9. Accesibilidad, que sí se verifica
+
+No es una lista de buenas intenciones: cada punto se puede comprobar, y por eso
+está aquí.
+
+- **Contraste mínimo 4.5:1** para texto normal y 3:1 para texto grande y para
+  los bordes de los controles. Vale en los **dos temas**, claro y oscuro. El
+  dorado de la marca no pasa sobre fondo claro: ahí se oscurece o se usa en
+  fondos y bordes, nunca en texto pequeño.
+- **Nada se entiende solo por el color.** «Vigente», «por vencer» y «vencida»
+  llevan texto o icono además del verde, el ámbar y el rojo. Quien no
+  distingue esos colores es más común que quien usa un lector de pantalla.
+- **Todo se alcanza con el teclado**, en un orden que sigue a la lectura. Nada
+  que se pueda pulsar con el ratón queda fuera.
+- **El foco se ve siempre**, con un contorno propio y no solo un cambio de
+  color de fondo. No se desactiva nunca «porque afea».
+- **`Esc` cierra el panel lateral y el diálogo**, y al cerrarse **el foco
+  vuelve a donde estaba** —a la fila que se abrió—, no al principio de la
+  página.
+- **Mientras un diálogo está abierto, el foco no se escapa detrás de él.**
+- **Cada campo tiene su etiqueta visible**, asociada de verdad al campo. Un
+  texto de ejemplo dentro del campo no es una etiqueta: desaparece al escribir.
+- **El error se anuncia, no solo se pinta**: queda asociado a su campo para que
+  un lector de pantalla lo lea al llegar.
+- **Nada depende de pasar el ratón por encima.** En una tabla densa es
+  tentador esconder las acciones de una fila hasta el *hover*; con teclado y en
+  táctil eso no existe.
+- **Ningún texto se sustituye por una imagen**, y todo icono que actúa solo
+  lleva nombre accesible. Sale del archivo de traducciones como cualquier otro
+  texto (regla 6).
